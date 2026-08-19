@@ -166,7 +166,7 @@
                                         <th class="p-4 font-medium">行政區 / 施工地點</th>
                                         <th class="p-4 font-medium">交辦事項</th>
                                         <th class="p-4 font-medium">狀態</th>
-                                        <th class="p-4 font-medium">照片連結</th>
+                                        <th class="p-4 font-medium">附件 (派工單/照片)</th>
                                         <th class="p-4 font-medium text-right action-col">操作</th>
                                     </tr>
                                 </thead>
@@ -270,6 +270,7 @@
             <div class="p-5 overflow-y-auto flex-1">
                 <form id="wo-form" class="space-y-4 text-sm" onsubmit="event.preventDefault(); window.saveWorkOrder();">
                     <input type="hidden" id="wo-id">
+                    <input type="hidden" id="wo-view-only" value="false">
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -325,19 +326,21 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded border">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1"><i class="fa-solid fa-cloud"></i> 施工前照片 (雲端連結)</label>
-                            <input type="url" id="wo-photo-before" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://drive.google.com/...">
+                            <label class="block font-medium text-gray-700 mb-1"><i class="fa-solid fa-file-contract text-blue-500"></i> 派工單 (雲端連結)</label>
+                            <textarea id="wo-photo-before" rows="2" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="可貼多個連結 (每行一個，或用空格分開)"></textarea>
+                            <div id="wo-photo-before-links" class="hidden flex-wrap pt-1"></div>
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1"><i class="fa-solid fa-cloud"></i> 施工後照片 (雲端連結)</label>
-                            <input type="url" id="wo-photo-after" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://drive.google.com/...">
+                            <label class="block font-medium text-gray-700 mb-1"><i class="fa-solid fa-camera text-green-500"></i> 完工照片 (雲端連結)</label>
+                            <textarea id="wo-photo-after" rows="2" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="可貼多個連結 (每行一個，或用空格分開)"></textarea>
+                            <div id="wo-photo-after-links" class="hidden flex-wrap pt-1"></div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="p-4 border-t flex justify-end space-x-3 bg-gray-50 rounded-b-xl">
-                <button type="button" onclick="window.closeModal('work-order-modal')" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">取消</button>
-                <button type="button" onclick="window.saveWorkOrder()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">儲存派工單</button>
+            <div class="p-4 border-t flex justify-end space-x-3 bg-gray-50 rounded-b-xl" id="wo-modal-actions">
+                <button type="button" onclick="window.closeModal('work-order-modal')" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100" id="btn-cancel">取消</button>
+                <button type="button" onclick="window.saveWorkOrder()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium" id="btn-save">儲存派工單</button>
             </div>
         </div>
     </div>
@@ -717,20 +720,34 @@
                 if (order.status === '已完工') statusColor = 'bg-blue-100 text-blue-800';
                 if (order.status === '驗收完成') statusColor = 'bg-green-100 text-green-800';
 
-                // 照片按鈕
+                // 解析雲端連結 (支援多個)
+                const getLinks = (text) => (text || '').split(/[\n, ]+/).filter(l => l.trim().startsWith('http'));
+                const beforeLinks = getLinks(order.photoBefore);
+                const afterLinks = getLinks(order.photoAfter);
+
                 let photoHtml = '<span class="text-gray-300 text-xs">-</span>';
-                if (order.photoBefore || order.photoAfter) {
-                    photoHtml = '<div class="flex space-x-2">';
-                    if (order.photoBefore) photoHtml += `<a href="${order.photoBefore}" target="_blank" class="text-blue-500 hover:text-blue-700 tooltip" title="施工前"><i class="fa-solid fa-image"></i> 前</a>`;
-                    if (order.photoAfter) photoHtml += `<a href="${order.photoAfter}" target="_blank" class="text-green-500 hover:text-green-700 tooltip" title="施工後"><i class="fa-solid fa-image"></i> 後</a>`;
+                if (beforeLinks.length > 0 || afterLinks.length > 0) {
+                    photoHtml = '<div class="flex space-x-2 items-center">';
+                    if (beforeLinks.length > 0) {
+                        photoHtml += `<a href="${beforeLinks[0]}" target="_blank" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1.5 rounded" title="開啟派工單"><i class="fa-solid fa-file-contract"></i></a>`;
+                        if(beforeLinks.length > 1) photoHtml += `<span class="text-xs text-blue-500 font-bold -ml-1">+${beforeLinks.length-1}</span>`;
+                    }
+                    if (afterLinks.length > 0) {
+                        photoHtml += `<a href="${afterLinks[0]}" target="_blank" class="text-green-500 hover:text-green-700 bg-green-50 p-1.5 rounded" title="開啟完工照片"><i class="fa-solid fa-camera"></i></a>`;
+                        if(afterLinks.length > 1) photoHtml += `<span class="text-xs text-green-500 font-bold -ml-1">+${afterLinks.length-1}</span>`;
+                    }
                     photoHtml += '</div>';
                 }
 
-                // 業主隱藏操作按鈕
-                const actionHtml = isOwner ? '' : `
+                // 業主保留預覽按鈕，其他身分僅留編輯與刪除
+                const actionHtml = isOwner ? `
                     <td class="p-4 text-right space-x-2 action-col">
-                        <button onclick="window.openWorkOrderModal('${order.id}')" class="text-blue-600 hover:bg-blue-50 p-2 rounded transition"><i class="fa-solid fa-edit"></i></button>
-                        <button onclick="window.deleteWorkOrder('${order.id}')" class="text-red-600 hover:bg-red-50 p-2 rounded transition"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="window.openWorkOrderModal('${order.id}', true)" class="text-purple-600 hover:bg-purple-50 p-2 rounded transition" title="預覽"><i class="fa-solid fa-eye"></i></button>
+                    </td>
+                ` : `
+                    <td class="p-4 text-right space-x-2 action-col">
+                        <button onclick="window.openWorkOrderModal('${order.id}')" class="text-blue-600 hover:bg-blue-50 p-2 rounded transition" title="編輯"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="window.deleteWorkOrder('${order.id}')" class="text-red-600 hover:bg-red-50 p-2 rounded transition" title="刪除"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
 
@@ -766,8 +783,8 @@
             }
         };
 
-        window.openWorkOrderModal = (id = null) => {
-            if (window.currentUser.role === 'owner') return alert('業主帳號僅能瀏覽，無法編輯');
+        window.openWorkOrderModal = (id = null, isViewOnly = false) => {
+            if (window.currentUser.role === 'owner' && !isViewOnly) return alert('業主帳號僅能瀏覽，無法編輯');
             
             document.getElementById('wo-form').reset();
 
@@ -776,7 +793,35 @@
             const zSelect = document.getElementById('wo-zone');
             const serialInput = document.getElementById('wo-serial');
             const hint = document.getElementById('wo-zone-hint');
+            const viewOnlyInput = document.getElementById('wo-view-only');
+            
+            // UI 控制項
+            const allInputs = document.querySelectorAll('#wo-form input, #wo-form select, #wo-form textarea');
+            const btnSave = document.getElementById('btn-save');
+            const btnCancel = document.getElementById('btn-cancel');
+            
+            // 負責渲染多個連結按鈕的輔助函數
+            const renderLinks = (text, containerId, icon, label) => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                const links = (text || '').split(/[\n, ]+/).filter(l => l.trim().startsWith('http'));
+                if (links.length === 0) {
+                    container.classList.add('hidden');
+                    return;
+                }
+                container.classList.remove('hidden');
+                links.forEach((url, index) => {
+                    const a = document.createElement('a');
+                    a.href = url.trim();
+                    a.target = '_blank';
+                    a.className = 'mt-2 mb-1 inline-block text-blue-600 hover:text-blue-800 text-xs mr-2 bg-white border border-blue-200 px-3 py-1.5 rounded-lg shadow-sm transition hover:bg-blue-50';
+                    a.innerHTML = `<i class="fa-solid ${icon} mr-1"></i> ${label} ${links.length > 1 ? index + 1 : ''}`;
+                    container.appendChild(a);
+                });
+            };
 
+            viewOnlyInput.value = isViewOnly;
+            
             if (id) {
                 const order = window.db.workOrders.find(o => o.id === id);
                 if (order) {
@@ -790,9 +835,28 @@
                     document.getElementById('wo-location').value = order.location;
                     document.getElementById('wo-description').value = order.description;
                     document.getElementById('wo-status').value = order.status;
-                    document.getElementById('wo-photo-before').value = order.photoBefore || '';
-                    document.getElementById('wo-photo-after').value = order.photoAfter || '';
-                    document.getElementById('wo-modal-title').innerText = '編輯派工單';
+                    
+                    const pBefore = document.getElementById('wo-photo-before');
+                    pBefore.value = order.photoBefore || '';
+                    if (isViewOnly) {
+                        pBefore.classList.add('hidden');
+                        renderLinks(order.photoBefore, 'wo-photo-before-links', 'fa-file-contract', '查看派工單');
+                    } else {
+                        pBefore.classList.remove('hidden');
+                        document.getElementById('wo-photo-before-links').classList.add('hidden');
+                    }
+
+                    const pAfter = document.getElementById('wo-photo-after');
+                    pAfter.value = order.photoAfter || '';
+                    if (isViewOnly) {
+                        pAfter.classList.add('hidden');
+                        renderLinks(order.photoAfter, 'wo-photo-after-links', 'fa-camera', '查看完工照片');
+                    } else {
+                        pAfter.classList.remove('hidden');
+                        document.getElementById('wo-photo-after-links').classList.add('hidden');
+                    }
+
+                    document.getElementById('wo-modal-title').innerText = isViewOnly ? '檢視派工單' : '編輯派工單';
                 }
             } else {
                 document.getElementById('wo-id').value = '';
@@ -800,6 +864,12 @@
                 document.getElementById('wo-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('wo-modal-title').innerText = '新增派工單';
                 
+                // 新增時隱藏連結容器，顯示輸入框
+                document.getElementById('wo-photo-before').classList.remove('hidden');
+                document.getElementById('wo-photo-after').classList.remove('hidden');
+                document.getElementById('wo-photo-before-links').classList.add('hidden');
+                document.getElementById('wo-photo-after-links').classList.add('hidden');
+
                 // 若為廠商，強制預選
                 if (isVendor) {
                     ySelect.value = window.currentUser.assignedYear;
@@ -808,38 +878,70 @@
                 window.updateVendorByZone(); // 載入並更新對應的廠商與行政區
             }
 
-            // 權限防呆鎖定控制
-            if (isVendor) {
-                // 廠商：鎖定年度、分區
-                ySelect.style.pointerEvents = 'none';
-                ySelect.style.backgroundColor = '#f3f4f6';
-                zSelect.style.pointerEvents = 'none';
-                zSelect.style.backgroundColor = '#f3f4f6';
-                hint.classList.remove('hidden');
+            // --- 視圖模式 (唯讀) 控制 ---
+            if (isViewOnly) {
+                // 將所有輸入框鎖定
+                allInputs.forEach(input => {
+                    input.disabled = true;
+                    input.classList.add('bg-gray-50', 'text-gray-600', 'cursor-not-allowed');
+                });
                 
-                // 廠商：允許編輯流水號
-                serialInput.readOnly = false;
-                serialInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                serialInput.placeholder = "請輸入流水號";
-            } else {
-                // 管理員/監造：允許自由更換年度與分區
-                ySelect.style.pointerEvents = 'auto';
-                ySelect.style.backgroundColor = '';
-                zSelect.style.pointerEvents = 'auto';
-                zSelect.style.backgroundColor = '';
+                // 隱藏儲存按鈕，將取消改為關閉
+                btnSave.classList.add('hidden');
+                btnCancel.innerText = '關閉視窗';
+                btnCancel.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                btnCancel.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
                 hint.classList.add('hidden');
                 
-                // 管理員/監造：禁止編輯流水號 (保留給廠商)
-                serialInput.readOnly = true;
-                serialInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-                serialInput.placeholder = "僅對應廠商可編輯流水號";
+            } else {
+                // --- 編輯模式 (依權限解鎖) ---
+                allInputs.forEach(input => {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-50', 'text-gray-600', 'cursor-not-allowed');
+                });
+                
+                btnSave.classList.remove('hidden');
+                btnCancel.innerText = '取消';
+                btnCancel.classList.add('text-gray-600', 'hover:bg-gray-100');
+                btnCancel.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+
+                // 權限防呆鎖定控制
+                if (isVendor) {
+                    // 廠商：鎖定年度、分區
+                    ySelect.style.pointerEvents = 'none';
+                    ySelect.style.backgroundColor = '#f3f4f6';
+                    ySelect.disabled = true; // 雙重鎖定
+                    zSelect.style.pointerEvents = 'none';
+                    zSelect.style.backgroundColor = '#f3f4f6';
+                    zSelect.disabled = true; // 雙重鎖定
+                    hint.classList.remove('hidden');
+                    
+                    // 廠商：允許編輯流水號
+                    serialInput.readOnly = false;
+                    serialInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    serialInput.placeholder = "請輸入流水號";
+                } else {
+                    // 管理員/監造：允許自由更換年度與分區
+                    ySelect.style.pointerEvents = 'auto';
+                    ySelect.style.backgroundColor = '';
+                    ySelect.disabled = false;
+                    zSelect.style.pointerEvents = 'auto';
+                    zSelect.style.backgroundColor = '';
+                    zSelect.disabled = false;
+                    hint.classList.add('hidden');
+                    
+                    // 管理員/監造：禁止編輯流水號 (保留給廠商)
+                    serialInput.readOnly = true;
+                    serialInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    serialInput.placeholder = "僅對應廠商可編輯流水號";
+                }
             }
 
             document.getElementById('work-order-modal').classList.remove('hidden');
         };
 
         window.saveWorkOrder = async () => {
-            if (window.currentUser.role === 'owner') return;
+            if (window.currentUser.role === 'owner' || document.getElementById('wo-view-only').value === 'true') return;
 
             const id = document.getElementById('wo-id').value || window.generateId();
             const data = {
