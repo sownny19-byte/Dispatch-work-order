@@ -19,7 +19,6 @@
 </head>
 <body class="text-slate-800 antialiased overflow-hidden">
 
-    <!-- 自訂提示框 (取代 alert / confirm) -->
     <div id="custom-dialog" class="modal fixed inset-0 bg-slate-900/40 backdrop-blur-sm items-center justify-center z-[100]">
         <div class="bg-white rounded-xl shadow-2xl w-96 max-w-[90%] transform transition-all p-6">
             <h3 id="dialog-title" class="text-lg font-bold text-slate-800 mb-2">提示</h3>
@@ -31,7 +30,6 @@
         </div>
     </div>
 
-    <!-- 登入介面 -->
     <div id="login-screen" class="fixed inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center z-50">
         <div class="bg-white/95 backdrop-blur-md p-10 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
             <div class="text-center mb-8">
@@ -39,14 +37,14 @@
                     <i class="fa-solid fa-hard-hat text-3xl"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800 tracking-wide">派工單控管系統</h2>
-                <p class="text-slate-500 text-sm mt-2">請登入以繼續操作</p>
+                <p class="text-slate-500 text-sm mt-2">請登入以繼續操作 (雲端即時同步)</p>
             </div>
             
             <div class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">選擇帳號</label>
                     <select id="login-user" class="w-full border border-slate-300 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow bg-white text-sm cursor-pointer">
-                        <!-- 由 JS 動態載入帳號選項 -->
+                        <option value="">載入帳號中...</option>
                     </select>
                 </div>
                 <div>
@@ -60,9 +58,8 @@
         </div>
     </div>
 
-    <!-- 系統主畫面 -->
     <div id="dashboard" class="hidden h-screen flex flex-col md:flex-row w-full bg-slate-50">
-        <!-- 左側選單 -->
+        <!-- Sidebar -->
         <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-2xl z-20 flex-shrink-0">
             <div class="h-16 flex items-center px-6 bg-slate-950/50 border-b border-slate-800">
                 <i class="fa-solid fa-hard-hat text-indigo-400 mr-3 text-lg"></i>
@@ -90,23 +87,22 @@
             </nav>
 
             <div class="p-4 border-t border-slate-800">
+                <div class="text-xs text-emerald-400 mb-2 flex items-center"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> 雲端即時同步中</div>
                 <button onclick="window.logout()" class="w-full flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-colors">
                     <i class="fa-solid fa-power-off mr-2"></i> 登出
                 </button>
             </div>
         </aside>
 
-        <!-- 右側內容區 -->
+        <!-- Main Content Area -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
             
-            <!-- 派工單總表區 -->
+            <!-- Work Orders Section -->
             <div id="section-work-orders" class="flex-1 flex flex-col overflow-hidden p-4 md:p-8">
-                <!-- 頭部控制區 -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h1 class="text-2xl font-bold text-slate-800">派工單總表</h1>
                     
                     <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 w-full md:w-auto">
-                        <!-- 搜尋與篩選 -->
                         <div class="flex bg-white rounded-lg shadow-sm border border-slate-200 p-1">
                             <div class="relative">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -134,7 +130,6 @@
                     </div>
                 </div>
 
-                <!-- 列表顯示區 -->
                 <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div class="overflow-x-auto flex-1">
                         <table class="w-full text-left border-collapse whitespace-nowrap">
@@ -148,18 +143,16 @@
                                 </tr>
                             </thead>
                             <tbody id="wo-table-body" class="divide-y divide-slate-100 text-sm">
-                                <!-- JS 動態生成內容 -->
                             </tbody>
                         </table>
                     </div>
-                    <!-- 分頁或底部資訊示意 -->
                     <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
                         <span id="wo-count">共 0 筆資料</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 系統設定區 (僅管理員) -->
+            <!-- Settings Section -->
             <div id="section-settings" class="hidden flex-1 flex flex-col overflow-hidden p-4 md:p-8">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-slate-800">系統與帳號設定</h1>
@@ -181,7 +174,6 @@
                                 </tr>
                             </thead>
                             <tbody id="user-table-body" class="divide-y divide-slate-100 text-sm">
-                                <!-- JS 生成使用者列表 -->
                             </tbody>
                         </table>
                     </div>
@@ -191,10 +183,8 @@
         </main>
     </div>
 
-    <!-- 新增/編輯 派工單彈窗 -->
     <div id="wo-modal" class="modal fixed inset-0 bg-slate-900/50 backdrop-blur-sm items-center justify-center z-[60] p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col max-h-full overflow-hidden transform transition-all">
-            <!-- Modal Header -->
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
                 <h2 id="modal-title" class="text-xl font-bold text-slate-800 flex items-center">
                     <i class="fa-solid fa-file-signature text-indigo-600 mr-3"></i>新增派工單
@@ -204,11 +194,10 @@
                 </button>
             </div>
             
-            <!-- Modal Body (Scrollable) -->
             <div class="p-6 overflow-y-auto flex-1 bg-white custom-scrollbar">
                 <form id="wo-form" onsubmit="event.preventDefault(); window.saveWorkOrder();" class="space-y-8">
+                    <input type="hidden" id="f-edit-id">
                     
-                    <!-- 區塊 1: 基本派工設定 -->
                     <div>
                         <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-indigo-100 pb-2">基本資訊與編號</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -232,7 +221,6 @@
                                 <input type="text" id="f-vendor" class="w-full border border-slate-200 p-2.5 rounded-lg bg-slate-100 text-slate-500 text-sm cursor-not-allowed" readonly placeholder="系統自動帶入">
                             </div>
 
-                            <!-- 動態編號區 -->
                             <div class="col-span-1 md:col-span-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-indigo-700 mb-1.5">派工單位</label>
@@ -259,7 +247,6 @@
                         </div>
                     </div>
 
-                    <!-- 區塊 2: 時程資訊 -->
                     <div>
                         <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-indigo-100 pb-2">時程資訊</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
@@ -275,7 +262,6 @@
                         </div>
                     </div>
 
-                    <!-- 區塊 3: 派工細節 -->
                     <div>
                         <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-indigo-100 pb-2">派工細節</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -322,7 +308,6 @@
                         </div>
                     </div>
 
-                    <!-- 區塊 4: 金額與附件 -->
                     <div>
                         <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-4 border-b border-indigo-100 pb-2">金額、備註與附件</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -351,7 +336,6 @@
                 </form>
             </div>
             
-            <!-- Modal Footer -->
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3 rounded-b-2xl">
                 <button type="button" onclick="window.closeModal()" class="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-600 border border-slate-300 hover:bg-slate-100 transition-colors">取消</button>
                 <button type="submit" form="wo-form" id="btn-save" class="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors flex items-center">
@@ -361,7 +345,6 @@
         </div>
     </div>
 
-    <!-- 使用者管理彈窗 -->
     <div id="user-modal" class="modal fixed inset-0 bg-slate-900/50 backdrop-blur-sm items-center justify-center z-[60] p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
@@ -392,7 +375,6 @@
                         </select>
                     </div>
                     
-                    <!-- 廠商專屬設定區 -->
                     <div id="div-vendor-details" class="hidden grid-cols-2 gap-4 bg-amber-50 p-4 rounded-xl border border-amber-100 mt-2">
                         <div class="col-span-2"><p class="text-xs text-amber-600 font-semibold mb-2"><i class="fa-solid fa-circle-info mr-1"></i>廠商專屬設定</p></div>
                         <div>
@@ -422,8 +404,26 @@
         </div>
     </div>
 
-    <script>
-        // === 自訂提示框邏輯 ===
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88",
+            authDomain: "dispatch-work-order.firebaseapp.com",
+            projectId: "dispatch-work-order",
+            storageBucket: "dispatch-work-order.firebasestorage.app",
+            messagingSenderId: "904528914560",
+            appId: "1:904528914560:web:5ff342161da80c54ac5e65"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispatch-work-system-main';
+
         window.showDialog = (mode, title, message, onConfirm = null) => {
             const dialog = document.getElementById('custom-dialog');
             document.getElementById('dialog-title').innerText = title;
@@ -458,13 +458,12 @@
         window.customAlert = (msg) => window.showDialog('alert', '系統提示', msg);
         window.customConfirm = (msg, callback) => window.showDialog('confirm', '請確認', msg, callback);
 
-        // === 全域資料區 ===
         window.currentRole = '';
         window.currentUser = null;
         window.workOrders = [];
-        
-        // 預設系統使用者資料
-        window.users = [
+        window.users = [];
+
+        const defaultUsers = [
             { id: 'u1', account: 'admin', pwd: '095219', name: '交通局系統管理員', role: 'admin', status: 'active' },
             { id: 'u2', account: 'owner', pwd: '1234', name: '交工科科長', role: 'owner', status: 'active' },
             { id: 'u3', account: 'super1', pwd: '1234', name: 'OO工程顧問監造', role: 'super1', status: 'active' },
@@ -479,13 +478,74 @@
             'vendor1': { text: '施工廠商', bg: 'bg-amber-100', textc: 'text-amber-700' }
         };
 
-        // === 登入相關邏輯 ===
+        async function initAuthAndData() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (tokenErr) {
+                        console.warn("Custom token sign in failed, falling back to anonymous auth:", tokenErr);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
+                setupFirestoreListeners();
+            } catch (err) {
+                console.error("Auth error:", err);
+                window.customAlert("雲端驗證失敗，請重新整理頁面。");
+            }
+        }
+
+        function setupFirestoreListeners() {
+            // Listen to users collection
+            const usersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+            onSnapshot(usersColRef, (snapshot) => {
+                window.users = [];
+                snapshot.forEach(docSnap => {
+                    window.users.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if(window.users.length === 0) {
+                    // Seed initial users
+                    defaultUsers.forEach(u => {
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', u.id), u);
+                    });
+                    window.users = defaultUsers;
+                }
+                window.populateLoginDropdown();
+                if(document.getElementById('section-settings') && !document.getElementById('section-settings').classList.contains('hidden')) {
+                    window.renderUserTable();
+                }
+            }, (error) => {
+                console.error("Users listener error:", error);
+            });
+
+            // Listen to work orders collection
+            const woColRef = collection(db, 'artifacts', appId, 'public', 'data', 'work_orders');
+            onSnapshot(woColRef, (snapshot) => {
+                window.workOrders = [];
+                snapshot.forEach(docSnap => {
+                    window.workOrders.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if(window.workOrders.length === 0) {
+                    const sample = { year: '113', zone: '一區', location: '桃園區中正路1號', content: '標線重劃', prefix: '工01-桃', serial: '001', receiveDate: '2024-05-01', personnel: '陳承辦', source: '一般派工', docLinks:'', photoLinks:'', amountAssign: 50000, amountFinish: 48000 };
+                    addDoc(woColRef, sample);
+                }
+                window.renderTable();
+            }, (error) => {
+                console.error("Work orders listener error:", error);
+            });
+        }
+
         window.populateLoginDropdown = () => {
             const select = document.getElementById('login-user');
+            if(!select) return;
+            const currentVal = select.value;
             select.innerHTML = '<option value="">請選擇帳號</option>';
             window.users.filter(u => u.status === 'active').forEach(u => {
                 select.innerHTML += `<option value="${u.account}">${u.name} (${u.account})</option>`;
             });
+            if(currentVal) select.value = currentVal;
         };
 
         window.login = () => {
@@ -504,9 +564,8 @@
                 document.getElementById('dashboard').classList.remove('hidden');
                 document.getElementById('login-pwd').value = '';
                 
-                // UI 控制
                 document.getElementById('current-name').innerText = user.name;
-                document.getElementById('current-role').innerText = roleLabels[user.role].text;
+                document.getElementById('current-role').innerText = roleLabels[user.role]?.text || user.role;
                 document.getElementById('user-avatar').innerText = user.name.charAt(0);
                 
                 if(user.role === 'admin') {
@@ -530,7 +589,7 @@
                 }
                 
                 window.showSection('work-orders');
-                fetchData();
+                window.renderTable();
             } else {
                 window.customAlert("密碼錯誤，請重試。");
             }
@@ -551,19 +610,9 @@
             if(sectionId === 'settings') window.renderUserTable();
         };
 
-        // === 派工單資料邏輯 ===
-        function fetchData() {
-            if(window.workOrders.length === 0) {
-                window.workOrders = [
-                    { id: '1', year: '113', zone: '一區', location: '桃園區中正路1號', content: '標線重劃', prefix: '工01-桃', serial: '001', receiveDate: '2024-05-01', personnel: '陳承辦', source: '一般派工', docLinks:'', photoLinks:'' },
-                    { id: '2', year: '114', zone: '二區', location: '龜山區萬壽路段', content: '新設號誌', prefix: '工02-龜', serial: '002', receiveDate: '2024-06-15', personnel: '林工程師', source: '議員', councilor: '王議員服務處', docLinks:'', photoLinks:'' }
-                ];
-            }
-            window.renderTable();
-        }
-
         window.renderTable = () => {
             const tbody = document.getElementById('wo-table-body');
+            if(!tbody) return;
             tbody.innerHTML = '';
             
             const searchTerm = (document.getElementById('search-wo-input')?.value || '').toLowerCase().trim();
@@ -602,17 +651,17 @@
                     <td class="p-4 pl-6">
                         <div class="font-bold text-indigo-700 flex items-center">
                             <i class="fa-solid fa-file-lines text-indigo-300 mr-2"></i>
-                            ${wo.prefix}-${wo.serial || '尚未填寫'}
+                            ${wo.prefix || ''}-${wo.serial || '尚未填寫'}
                         </div>
                     </td>
                     <td class="p-4">
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                            ${wo.year}年 / ${wo.zone}
+                            ${wo.year || ''}年 / ${wo.zone || ''}
                         </span>
                     </td>
                     <td class="p-4">
-                        <div class="text-slate-800 font-medium truncate max-w-[200px]" title="${wo.content}">${wo.content}</div>
-                        <div class="text-xs text-slate-500 truncate max-w-[200px]" title="${wo.location}">${wo.location}</div>
+                        <div class="text-slate-800 font-medium truncate max-w-[200px]" title="${wo.content || ''}">${wo.content || ''}</div>
+                        <div class="text-xs text-slate-500 truncate max-w-[200px]" title="${wo.location || ''}">${wo.location || ''}</div>
                     </td>
                     <td class="p-4 text-slate-600">
                         <div class="flex items-center"><i class="fa-regular fa-calendar text-slate-400 mr-1.5 w-3"></i>收: ${wo.receiveDate || '無'}</div>
@@ -623,7 +672,6 @@
             });
         };
 
-        // === 表單連動與邏輯 ===
         const districtMap = {
             '一區': ['桃園區', '蘆竹區'],
             '二區': ['八德區', '龜山區'],
@@ -640,6 +688,7 @@
         window.updateDistrict = () => {
             const zone = document.getElementById('f-zone').value;
             const distSelect = document.getElementById('f-district');
+            if(!distSelect) return;
             distSelect.innerHTML = '';
             (districtMap[zone] || []).forEach(d => {
                 distSelect.innerHTML += `<option value="${d}">${d}</option>`;
@@ -653,7 +702,8 @@
             num = num.padStart(2, '0');
             const dist = document.getElementById('f-district').value;
             const code = distCodeMap[dist] || '未知';
-            document.getElementById('f-prefix').value = `${unit}${num}-${code}`;
+            const prefixInput = document.getElementById('f-prefix');
+            if(prefixInput) prefixInput.value = `${unit}${num}-${code}`;
         };
 
         window.toggleSourceDetails = () => {
@@ -667,7 +717,6 @@
             document.getElementById('div-school-name').classList.toggle('hidden', isSchool !== '是');
         };
 
-        // === Modal 彈窗控制 ===
         window.openModal = (mode, id = null) => {
             document.getElementById('wo-modal').classList.add('active');
             window.updateDistrict(); 
@@ -687,6 +736,47 @@
             } else {
                 document.getElementById('f-year').removeAttribute('disabled');
                 document.getElementById('f-zone').removeAttribute('disabled');
+            }
+
+            if (mode === 'edit' || mode === 'view') {
+                const wo = window.workOrders.find(w => w.id === id);
+                if(wo) {
+                    document.getElementById('f-edit-id').value = wo.id;
+                    document.getElementById('f-year').value = wo.year || '113';
+                    document.getElementById('f-zone').value = wo.zone || '一區';
+                    window.updateDistrict();
+                    document.getElementById('f-unit').value = wo.unit || '工';
+                    document.getElementById('f-dispatch-num').value = wo.dispatchNum || '1';
+                    window.generatePrefix();
+                    document.getElementById('f-serial').value = wo.serial || '';
+                    document.getElementById('f-receive-date').value = wo.receiveDate || '';
+                    document.getElementById('f-assign-finish-date').value = wo.assignFinishDate || '';
+                    document.getElementById('f-est-finish-date').value = wo.estFinishDate || '';
+                    document.getElementById('f-work-date').value = wo.workDate || '';
+                    document.getElementById('f-actual-finish-date').value = wo.actualFinishDate || '';
+                    document.getElementById('f-personnel').value = wo.personnel || '';
+                    document.getElementById('f-source').value = wo.source || '一般派工';
+                    window.toggleSourceDetails();
+                    document.getElementById('f-councilor').value = wo.councilor || '';
+                    document.getElementById('f-village').value = wo.village || '';
+                    document.getElementById('f-location').value = wo.location || '';
+                    document.getElementById('f-content').value = wo.content || '';
+                    document.getElementById('f-feature').value = wo.feature || '無';
+                    document.getElementById('f-is-school').value = wo.isSchool || '否';
+                    window.toggleSchoolDetails();
+                    document.getElementById('f-school-name').value = wo.schoolName || '';
+                    document.getElementById('f-amount-assign').value = wo.amountAssign || '';
+                    document.getElementById('f-amount-finish').value = wo.amountFinish || '';
+                    document.getElementById('f-notes').value = wo.notes || '';
+                    document.getElementById('f-doc-links').value = wo.docLinks || '';
+                    document.getElementById('f-photo-links').value = wo.photoLinks || '';
+                }
+            } else {
+                document.getElementById('wo-form').reset();
+                document.getElementById('f-edit-id').value = '';
+                window.toggleSourceDetails();
+                window.toggleSchoolDetails();
+                window.generatePrefix();
             }
 
             const formEls = document.getElementById('wo-form').elements;
@@ -712,22 +802,67 @@
             window.toggleSchoolDetails();
         };
 
-        window.saveWorkOrder = () => {
-            window.customAlert("派工單已成功儲存！");
-            window.closeModal();
-            fetchData();
+        window.saveWorkOrder = async () => {
+            const id = document.getElementById('f-edit-id').value;
+            const data = {
+                year: document.getElementById('f-year').value,
+                zone: document.getElementById('f-zone').value,
+                unit: document.getElementById('f-unit').value,
+                dispatchNum: document.getElementById('f-dispatch-num').value,
+                district: document.getElementById('f-district').value,
+                prefix: document.getElementById('f-prefix').value,
+                serial: document.getElementById('f-serial').value,
+                receiveDate: document.getElementById('f-receive-date').value,
+                assignFinishDate: document.getElementById('f-assign-finish-date').value,
+                estFinishDate: document.getElementById('f-est-finish-date').value,
+                workDate: document.getElementById('f-work-date').value,
+                actualFinishDate: document.getElementById('f-actual-finish-date').value,
+                personnel: document.getElementById('f-personnel').value,
+                source: document.getElementById('f-source').value,
+                councilor: document.getElementById('f-councilor').value,
+                village: document.getElementById('f-village').value,
+                location: document.getElementById('f-location').value,
+                content: document.getElementById('f-content').value,
+                feature: document.getElementById('f-feature').value,
+                isSchool: document.getElementById('f-is-school').value,
+                schoolName: document.getElementById('f-school-name').value,
+                amountAssign: document.getElementById('f-amount-assign').value,
+                amountFinish: document.getElementById('f-amount-finish').value,
+                notes: document.getElementById('f-notes').value,
+                docLinks: document.getElementById('f-doc-links').value,
+                photoLinks: document.getElementById('f-photo-links').value
+            };
+
+            try {
+                const woColRef = collection(db, 'artifacts', appId, 'public', 'data', 'work_orders');
+                if(id) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'work_orders', id), data, { merge: true });
+                } else {
+                    await addDoc(woColRef, data);
+                }
+                window.customAlert("派工單已成功儲存至雲端！");
+                window.closeModal();
+            } catch (err) {
+                console.error("Save error:", err);
+                window.customAlert("儲存失敗，請檢查網路連線。");
+            }
         };
 
         window.deleteWorkOrder = (id) => {
-            window.customConfirm("確定要刪除這筆派工單嗎？此動作無法復原。", () => {
-                window.customAlert("派工單已刪除。");
-                fetchData();
+            window.customConfirm("確定要刪除這筆派工單嗎？此動作無法復原。", async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'work_orders', id));
+                    window.customAlert("派工單已自雲端刪除。");
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    window.customAlert("刪除失敗。");
+                }
             });
         };
 
-        // === 帳號管理邏輯 ===
         window.renderUserTable = () => {
             const tbody = document.getElementById('user-table-body');
+            if(!tbody) return;
             tbody.innerHTML = '';
             window.users.forEach(u => {
                 const tr = document.createElement('tr');
@@ -746,7 +881,7 @@
                     <td class="p-4 pl-6 font-medium text-slate-800">${u.name}</td>
                     <td class="p-4 text-slate-600 font-mono text-sm">${u.account}</td>
                     <td class="p-4">
-                        <span class="px-2.5 py-1 rounded-md text-xs font-medium ${roleLabels[u.role].bg} ${roleLabels[u.role].textc}">${roleInfo}</span>
+                        <span class="px-2.5 py-1 rounded-md text-xs font-medium ${roleLabels[u.role]?.bg || 'bg-slate-100'} ${roleLabels[u.role]?.textc || 'text-slate-700'}">${roleInfo}</span>
                     </td>
                     <td class="p-4">${statusHtml}</td>
                     <td class="p-4 text-right pr-6">
@@ -763,6 +898,7 @@
         window.toggleVendorFields = () => {
             const role = document.getElementById('u-role').value;
             const vendorDiv = document.getElementById('div-vendor-details');
+            if(!vendorDiv) return;
             if (role === 'vendor1') {
                 vendorDiv.classList.remove('hidden');
                 vendorDiv.classList.add('grid');
@@ -802,10 +938,10 @@
             document.getElementById('user-modal').classList.remove('active');
         };
 
-        window.saveUser = () => {
+        window.saveUser = async () => {
             const id = document.getElementById('u-id').value;
+            const docId = id || 'u' + Date.now();
             const userData = {
-                id: id || 'u' + Date.now(),
                 name: document.getElementById('u-name').value,
                 account: document.getElementById('u-account').value,
                 pwd: document.getElementById('u-pwd').value,
@@ -818,32 +954,30 @@
                 userData.vendorZone = document.getElementById('u-vendor-zone').value;
             }
             
-            if(id) {
-                const idx = window.users.findIndex(u => u.id === id);
-                userData.status = window.users[idx].status;
-                window.users[idx] = userData;
-            } else {
-                window.users.push(userData);
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', docId), userData, { merge: true });
+                window.customAlert("帳號已成功儲存至雲端！");
+                window.closeUserModal();
+            } catch (err) {
+                console.error("Save user error:", err);
+                window.customAlert("儲存帳號失敗。");
             }
-            
-            window.customAlert("帳號儲存成功！");
-            window.closeUserModal();
-            window.renderUserTable();
-            window.populateLoginDropdown(); 
         };
 
-        window.toggleUserStatus = (id) => {
+        window.toggleUserStatus = async (id) => {
             const user = window.users.find(u => u.id === id);
             if(user) {
-                user.status = user.status === 'active' ? 'inactive' : 'active';
-                window.renderUserTable();
-                window.populateLoginDropdown();
+                const newStatus = user.status === 'active' ? 'inactive' : 'active';
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id), { status: newStatus }, { merge: true });
+                } catch (err) {
+                    console.error("Status update error:", err);
+                }
             }
         };
 
-        // 初始化
         document.addEventListener('DOMContentLoaded', () => {
-            window.populateLoginDropdown();
+            initAuthAndData();
         });
 
     </script>
