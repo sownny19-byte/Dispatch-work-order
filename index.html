@@ -33,8 +33,10 @@
             </div>
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">帳號 (使用者名稱)</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" id="username" type="text" placeholder="例: admin" required>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">帳號 (選擇使用者)</label>
+                    <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" id="username" required>
+                        <option value="">正在連接雲端載入帳號...</option>
+                    </select>
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="password">密碼</label>
@@ -73,6 +75,9 @@
                 </a>
             </nav>
             <div class="p-4 border-t border-slate-700">
+                <div class="sync-status-display text-xs mb-3 text-gray-400 flex items-center">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i> 雲端連線中...
+                </div>
                 <div class="text-sm mb-2 text-gray-400">目前登入：<span id="current-user-display" class="text-white font-medium"></span> (<span id="current-role-display"></span>)</div>
                 <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm transition duration-200">
                     <i class="fa-solid fa-right-from-bracket mr-1"></i> 登出
@@ -85,9 +90,14 @@
             <!-- Mobile Header -->
             <header class="md:hidden bg-slate-800 text-white p-4 flex justify-between items-center h-16">
                 <div class="font-bold"><i class="fa-solid fa-road text-blue-400 mr-2"></i> 派工系統</div>
-                <button onclick="document.querySelector('aside').classList.toggle('hidden')" class="text-gray-300 hover:text-white focus:outline-none">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
+                <div class="flex items-center gap-4">
+                    <div class="sync-status-display text-xs text-gray-400 hidden sm:flex items-center">
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> 連線中
+                    </div>
+                    <button onclick="document.querySelector('aside').classList.toggle('hidden')" class="text-gray-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
             </header>
 
             <!-- Tab Content: Work Orders -->
@@ -208,7 +218,7 @@
                             <thead class="bg-gray-50 sticky top-0">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用者名稱(帳號)</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">顯示名稱</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">顯示名稱/負責分區</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">身分權限</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">登入密碼</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
@@ -320,13 +330,17 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">身分權限 *</label>
-                        <select id="user-role" class="w-full border border-gray-300 rounded p-2 focus:ring-blue-500" required>
+                        <select id="user-role" class="w-full border border-gray-300 rounded p-2 focus:ring-blue-500" required onchange="toggleUserZone()">
                             <option value="admin">後台管理員 (全權限)</option>
                             <option value="supervisor">監造 (可編輯)</option>
-                            <option value="vendor">廠商 (可編輯)</option>
+                            <option value="vendor">廠商 (僅所屬分區可操作)</option>
                             <option value="owner">業主 (僅瀏覽)</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-1">※ 除業主外，其餘身分皆可編輯派工單與上傳照片。</p>
+                    </div>
+                    <div id="user-zone-container" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">所屬分區 (廠商專用) *</label>
+                        <select id="user-assigned-zone" class="w-full border border-gray-300 rounded p-2 focus:ring-blue-500"></select>
                     </div>
                 </form>
             </div>
@@ -394,7 +408,7 @@
                 { username: 'admin', password: '095219', role: 'admin', name: '系統預設管理員' },
                 { username: 'owner', password: '123', role: 'owner', name: '業主長官' },
                 { username: 'super1', password: '123', role: 'supervisor', name: '監造單位A' },
-                { username: 'vendor1', password: '123', role: 'vendor', name: '第一區廠商' }
+                { username: 'vendor1', password: '123', role: 'vendor', name: '第一區廠商', assignedZone: '第一區' }
             ],
             settings: {
                 years: ['112年度', '113年度', '114年度'],
@@ -407,6 +421,26 @@
         // 全域變數供前端介面讀取
         window.db = { users: [], settings: { years: [], zones: [], vendors: [] }, workOrders: [] };
         window.currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
+
+        function updateSyncStatus() {
+            document.querySelectorAll('.sync-status-display').forEach(el => {
+                el.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-green-400 mr-1"></i> <span class="text-green-300">雲端已同步</span>';
+            });
+        }
+
+        function renderLoginDropdown() {
+            const select = document.getElementById('username');
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">請選擇登入帳號...</option>';
+            window.db.users.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.textContent = `${u.name} (${u.username})`;
+                select.appendChild(opt);
+            });
+            if (currentVal && window.db.users.some(u => u.username === currentVal)) select.value = currentVal;
+        }
 
         // Firebase 匿名登入與初始化
         async function initFirebaseAuth() {
@@ -432,8 +466,10 @@
                     DEFAULT_DB.users.forEach(u => setDoc(doc(colUsers, u.username), u));
                 } else {
                     window.db.users = snapshot.docs.map(doc => doc.data());
+                    renderLoginDropdown();
                     if (!document.getElementById('app-screen').classList.contains('hidden')) renderUsers();
                 }
+                updateSyncStatus();
             }, console.error);
 
             // 2. 監聽系統設定 (年度/分區/廠商)
@@ -471,6 +507,11 @@
             '已完工': 'bg-green-100 text-green-800 border-green-200'
         };
 
+        window.toggleUserZone = function() {
+            const role = document.getElementById('user-role').value;
+            document.getElementById('user-zone-container').style.display = role === 'vendor' ? 'block' : 'none';
+        };
+
         window.handleLogin = function(e) {
             e.preventDefault();
             const userIn = document.getElementById('username').value.trim();
@@ -481,7 +522,7 @@
             
             if (user) {
                 errorMsg.classList.add('hidden');
-                window.currentUser = { username: user.username, role: user.role, name: user.name };
+                window.currentUser = { username: user.username, role: user.role, name: user.name, assignedZone: user.assignedZone };
                 sessionStorage.setItem('currentUser', JSON.stringify(window.currentUser));
                 initApp();
             } else {
@@ -552,25 +593,41 @@
         };
 
         window.populateDropdowns = function() {
-            const populate = (id, data, defaultText) => {
+            const populate = (id, data, defaultText, restrictValue = null) => {
                 const select = document.getElementById(id);
                 if(!select || !data) return;
-                const currentValue = select.value;
-                select.innerHTML = defaultText ? `<option value="">${defaultText}</option>` : '';
-                data.forEach(item => {
+                
+                select.innerHTML = '';
+                
+                if (restrictValue) {
                     const option = document.createElement('option');
-                    option.value = item;
-                    option.textContent = item;
+                    option.value = restrictValue;
+                    option.textContent = restrictValue;
                     select.appendChild(option);
-                });
-                if(currentValue && data.includes(currentValue)) select.value = currentValue;
+                    select.value = restrictValue;
+                } else {
+                    if (defaultText) select.innerHTML = `<option value="">${defaultText}</option>`;
+                    const currentValue = select.value;
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        select.appendChild(option);
+                    });
+                    if(currentValue && data.includes(currentValue)) select.value = currentValue;
+                }
             };
 
+            const isVendor = window.currentUser && window.currentUser.role === 'vendor';
+            const assignedZone = isVendor ? window.currentUser.assignedZone : null;
+
             populate('filter-year', window.db.settings.years, '全部年度');
-            populate('filter-zone', window.db.settings.zones, '全部分區');
+            populate('filter-zone', window.db.settings.zones, '全部分區', assignedZone);
             populate('wo-year', window.db.settings.years, '');
-            populate('wo-zone', window.db.settings.zones, '');
+            populate('wo-zone', window.db.settings.zones, '', assignedZone);
             populate('wo-vendor', window.db.settings.vendors, '');
+            
+            populate('user-assigned-zone', window.db.settings.zones, '請選擇負責分區');
         };
 
         window.renderWorkOrders = function() {
@@ -578,9 +635,14 @@
             tbody.innerHTML = '';
 
             const filterYear = document.getElementById('filter-year').value;
-            const filterZone = document.getElementById('filter-zone').value;
+            let filterZone = document.getElementById('filter-zone').value;
             const filterStatus = document.getElementById('filter-status').value;
             const filterSearch = document.getElementById('filter-search').value.toLowerCase();
+
+            // 強制廠商只能看自己分區的資料
+            if (window.currentUser && window.currentUser.role === 'vendor' && window.currentUser.assignedZone) {
+                filterZone = window.currentUser.assignedZone;
+            }
 
             let filtered = window.db.workOrders.filter(wo => {
                 const matchYear = filterYear ? wo.year === filterYear : true;
@@ -695,6 +757,8 @@
         window.viewWorkOrder = function(id) { window.openWorkOrderModal(id, true); };
 
         window.saveWorkOrder = async function() {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             const form = document.getElementById('form-work-order');
             if (!form.checkValidity()) {
                 form.reportValidity();
@@ -752,6 +816,8 @@
         }
 
         window.addSetting = async function(type, inputId) {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             const input = document.getElementById(inputId);
             const val = input.value.trim();
             if (val && !window.db.settings[type].includes(val)) {
@@ -764,6 +830,8 @@
         };
 
         window.deleteSetting = async function(type, index) {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             window.db.settings[type].splice(index, 1);
             if (!auth.currentUser) return;
             await setDoc(docSettings, window.db.settings); // 同步雲端設定
@@ -778,6 +846,8 @@
                 const tr = document.createElement('tr');
                 const roleInfo = ROLE_MAP[user.role] || {label: '未知', color: 'bg-gray-100'};
                 
+                const zoneText = user.role === 'vendor' ? `<div class="text-xs text-blue-600 mt-1"><i class="fa-solid fa-map-location-dot"></i> ${user.assignedZone || '未指派分區'}</div>` : '';
+
                 const isDefaultAdmin = user.username === 'admin';
                 let actions = `
                     <button onclick="editUser('${user.username}')" class="text-indigo-600 hover:text-indigo-900 mr-3"><i class="fa-solid fa-pen-to-square"></i> 編輯</button>
@@ -788,7 +858,10 @@
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.username}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${user.name}
+                        ${zoneText}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${roleInfo.color}">
                             ${roleInfo.label}
@@ -818,6 +891,7 @@
                     document.getElementById('user-name').value = user.name;
                     document.getElementById('user-password').value = user.password;
                     document.getElementById('user-role').value = user.role;
+                    document.getElementById('user-assigned-zone').value = user.assignedZone || '';
                     
                     if(user.username === 'admin') {
                         document.getElementById('user-username').readOnly = true;
@@ -832,12 +906,15 @@
                 document.getElementById('user-role').disabled = false;
             }
 
+            window.toggleUserZone();
             document.getElementById('modal-user').classList.remove('hidden');
         };
 
         window.editUser = function(username) { window.openUserModal(username); };
 
         window.saveUser = async function() {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             const form = document.getElementById('form-user');
             if (!form.checkValidity()) {
                 form.reportValidity();
@@ -850,7 +927,8 @@
                 username: newUsername,
                 name: document.getElementById('user-name').value.trim(),
                 password: document.getElementById('user-password').value.trim(),
-                role: document.getElementById('user-role').value
+                role: document.getElementById('user-role').value,
+                assignedZone: document.getElementById('user-role').value === 'vendor' ? document.getElementById('user-assigned-zone').value : null
             };
 
             if (originalId !== newUsername && window.db.users.find(u => u.username === newUsername)) {
@@ -918,6 +996,8 @@
         };
 
         window.deleteWorkOrder = function(id) {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             window.showConfirm("確定要刪除這筆派工單嗎？", async () => {
                 if (!auth.currentUser) return;
                 await deleteDoc(doc(colWorkOrders, id)); // 雲端刪除
@@ -926,6 +1006,8 @@
         };
 
         window.deleteUser = function(username) {
+            if (window.currentUser && window.currentUser.role === 'owner') return window.showToast('權限不足：業主僅能瀏覽');
+
             window.showConfirm(`確定要刪除帳號 [${username}] 嗎？`, async () => {
                 if (!auth.currentUser) return;
                 await deleteDoc(doc(colUsers, username)); // 雲端刪除
