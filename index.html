@@ -161,9 +161,9 @@
                             <table class="w-full text-left text-sm whitespace-nowrap">
                                 <thead class="bg-gray-50 text-gray-600 border-b">
                                     <tr>
-                                        <th class="p-4 font-medium">交辦日期</th>
+                                        <th class="p-4 font-medium">流水號 / 交辦日期</th>
                                         <th class="p-4 font-medium">年度/分區/廠商</th>
-                                        <th class="p-4 font-medium">施工地點</th>
+                                        <th class="p-4 font-medium">行政區 / 施工地點</th>
                                         <th class="p-4 font-medium">交辦事項</th>
                                         <th class="p-4 font-medium">狀態</th>
                                         <th class="p-4 font-medium">照片連結</th>
@@ -217,7 +217,7 @@
 
                 <div id="view-settings" class="section-view hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">系統設定 (擴充選項)</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- 年度設定 -->
                         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                             <h3 class="font-bold text-lg border-b pb-2 mb-4 flex items-center"><i class="fa-regular fa-calendar mr-2 text-indigo-500"></i> 年度設定</h3>
@@ -245,6 +245,16 @@
                             </div>
                             <ul id="list-settings-vendors" class="space-y-2 max-h-60 overflow-y-auto"></ul>
                         </div>
+                        <!-- 行政區設定 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                            <h3 class="font-bold text-lg border-b pb-2 mb-4 flex items-center"><i class="fa-solid fa-map-pin mr-2 text-blue-500"></i> 行政區設定</h3>
+                            <select id="setting-district-zone" class="w-full p-2 border rounded mb-2 select-zone bg-gray-50" onchange="window.renderDistrictSettings()"></select>
+                            <div class="flex gap-2 mb-4">
+                                <input type="text" id="input-new-district" placeholder="如: 桃園區" class="flex-1 p-2 border rounded text-sm">
+                                <button onclick="window.addDistrictSetting()" class="bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            <ul id="list-settings-districts" class="space-y-2 max-h-60 overflow-y-auto"></ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -261,7 +271,11 @@
                 <form id="wo-form" class="space-y-4 text-sm" onsubmit="event.preventDefault(); window.saveWorkOrder();">
                     <input type="hidden" id="wo-id">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-medium mb-1">流水號</label>
+                            <input type="text" id="wo-serial" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="僅對應廠商可填寫">
+                        </div>
                         <div>
                             <label class="block font-medium mb-1">交辦日期 <span class="text-red-500">*</span></label>
                             <input type="date" id="wo-date" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
@@ -280,23 +294,30 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-medium mb-1">年度 <span class="text-red-500">*</span></label>
-                            <select id="wo-year" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none select-year"></select>
+                            <select id="wo-year" required onchange="window.updateVendorByZone()" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none select-year"></select>
                         </div>
                         <div>
                             <label class="block font-medium mb-1">分區 <span class="text-red-500">*</span></label>
-                            <select id="wo-zone" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none select-zone"></select>
+                            <select id="wo-zone" required onchange="window.updateVendorByZone()" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none select-zone"></select>
                             <div id="wo-zone-hint" class="text-xs text-red-500 mt-1 hidden">廠商僅能管理所屬年度與分區</div>
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">施工廠商 <span class="text-red-500">*</span></label>
-                            <select id="wo-vendor" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none select-vendor"></select>
+                            <label class="block font-medium mb-1">施工廠商 <span class="text-gray-400 text-xs">(自動對應鎖定)</span></label>
+                            <input type="text" id="wo-vendor" readonly class="w-full p-2 border rounded bg-gray-100 outline-none text-gray-700 font-bold">
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block font-medium mb-1">施工地點 <span class="text-red-500">*</span></label>
-                        <input type="text" id="wo-location" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="如: 中正路與三民路口">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-medium mb-1">行政區 <span class="text-red-500">*</span></label>
+                            <select id="wo-district" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">施工地點 <span class="text-red-500">*</span></label>
+                            <input type="text" id="wo-location" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="如: 中正路與三民路口">
+                        </div>
                     </div>
+                    
                     <div>
                         <label class="block font-medium mb-1">交辦事項 <span class="text-red-500">*</span></label>
                         <textarea id="wo-description" required rows="3" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="詳細交辦內容..."></textarea>
@@ -504,9 +525,29 @@
             // 監聽設定檔
             onSnapshot(docSettings, (snapshot) => {
                 if (!snapshot.exists()) {
-                    setDoc(docSettings, DEFAULT_DB.settings);
+                    // 加入包含預設行政區的設定
+                    const defaultSettings = { ...DEFAULT_DB.settings };
+                    defaultSettings.zoneDistricts = {
+                        '第一區': ['桃園區', '蘆竹區'],
+                        '第二區': ['八德區', '龜山區'],
+                        '第三區': ['中壢區', '大溪區', '大園區', '復興區'],
+                        '第四區': ['平鎮區', '觀音區', '新屋區', '龍潭區', '楊梅區']
+                    };
+                    setDoc(docSettings, defaultSettings);
                 } else {
                     window.db.settings = snapshot.data();
+                    
+                    // 相容性檢查：如果舊資料庫沒有 zoneDistricts 結構，自動補上
+                    if (!window.db.settings.zoneDistricts) {
+                        window.db.settings.zoneDistricts = {
+                            '第一區': ['桃園區', '蘆竹區'],
+                            '第二區': ['八德區', '龜山區'],
+                            '第三區': ['中壢區', '大溪區', '大園區', '復興區'],
+                            '第四區': ['平鎮區', '觀音區', '新屋區', '龍潭區', '楊梅區']
+                        };
+                        setDoc(docSettings, window.db.settings);
+                    }
+
                     window.populateDropdowns();
                     if (window.currentUser && window.currentUser.role === 'admin') window.renderSettings();
                 }
@@ -626,6 +667,11 @@
             populate('.select-zone', settings.zones);
             populate('.select-vendor', settings.vendors);
             
+            // 確保設定頁面的下拉選單更新後，連帶重繪行政區列表
+            if (window.currentUser && window.currentUser.role === 'admin') {
+                window.renderDistrictSettings(); 
+            }
+
             if (window.currentUser && window.currentUser.role !== 'vendor') {
                 populate('#filter-year', settings.years, true);
                 populate('#filter-zone', settings.zones, true);
@@ -691,12 +737,18 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-blue-50 transition duration-150';
                 tr.innerHTML = `
-                    <td class="p-4">${order.date}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-blue-600">${order.serial || '<span class="text-gray-400 font-normal text-xs">未填寫</span>'}</div>
+                        <div class="text-sm text-gray-500">${order.date}</div>
+                    </td>
                     <td class="p-4">
                         <div class="font-medium text-gray-800">${order.year}</div>
                         <div class="text-xs text-gray-500">${order.zone} / ${order.vendor}</div>
                     </td>
-                    <td class="p-4 font-medium">${order.location}</td>
+                    <td class="p-4">
+                        <div class="font-medium text-gray-800">${order.district || '-'}</div>
+                        <div class="text-sm text-gray-600">${order.location}</div>
+                    </td>
                     <td class="p-4 max-w-xs truncate" title="${order.description}">${order.description}</td>
                     <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${statusColor}">${order.status}</span></td>
                     <td class="p-4">${photoHtml}</td>
@@ -719,14 +771,22 @@
             
             document.getElementById('wo-form').reset();
 
+            const isVendor = window.currentUser.role === 'vendor';
+            const ySelect = document.getElementById('wo-year');
+            const zSelect = document.getElementById('wo-zone');
+            const serialInput = document.getElementById('wo-serial');
+            const hint = document.getElementById('wo-zone-hint');
+
             if (id) {
                 const order = window.db.workOrders.find(o => o.id === id);
                 if (order) {
                     document.getElementById('wo-id').value = order.id;
+                    document.getElementById('wo-serial').value = order.serial || '';
                     document.getElementById('wo-date').value = order.date;
                     document.getElementById('wo-year').value = order.year;
                     document.getElementById('wo-zone').value = order.zone;
-                    document.getElementById('wo-vendor').value = order.vendor;
+                    window.updateVendorByZone(order.vendor); // 載入並更新對應的廠商與行政區
+                    document.getElementById('wo-district').value = order.district || '';
                     document.getElementById('wo-location').value = order.location;
                     document.getElementById('wo-description').value = order.description;
                     document.getElementById('wo-status').value = order.status;
@@ -736,33 +796,43 @@
                 }
             } else {
                 document.getElementById('wo-id').value = '';
+                document.getElementById('wo-serial').value = '';
                 document.getElementById('wo-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('wo-modal-title').innerText = '新增派工單';
+                
+                // 若為廠商，強制預選
+                if (isVendor) {
+                    ySelect.value = window.currentUser.assignedYear;
+                    zSelect.value = window.currentUser.assignedZone;
+                }
+                window.updateVendorByZone(); // 載入並更新對應的廠商與行政區
             }
 
-            // 廠商鎖定防呆
-            const ySelect = document.getElementById('wo-year');
-            const zSelect = document.getElementById('wo-zone');
-            const hint = document.getElementById('wo-zone-hint');
-
-            if (window.currentUser.role === 'vendor') {
-                ySelect.value = window.currentUser.assignedYear;
+            // 權限防呆鎖定控制
+            if (isVendor) {
+                // 廠商：鎖定年度、分區
                 ySelect.style.pointerEvents = 'none';
                 ySelect.style.backgroundColor = '#f3f4f6';
-                
-                zSelect.value = window.currentUser.assignedZone;
                 zSelect.style.pointerEvents = 'none';
                 zSelect.style.backgroundColor = '#f3f4f6';
-                
                 hint.classList.remove('hidden');
+                
+                // 廠商：允許編輯流水號
+                serialInput.readOnly = false;
+                serialInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                serialInput.placeholder = "請輸入流水號";
             } else {
+                // 管理員/監造：允許自由更換年度與分區
                 ySelect.style.pointerEvents = 'auto';
                 ySelect.style.backgroundColor = '';
-                
                 zSelect.style.pointerEvents = 'auto';
                 zSelect.style.backgroundColor = '';
-                
                 hint.classList.add('hidden');
+                
+                // 管理員/監造：禁止編輯流水號 (保留給廠商)
+                serialInput.readOnly = true;
+                serialInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                serialInput.placeholder = "僅對應廠商可編輯流水號";
             }
 
             document.getElementById('work-order-modal').classList.remove('hidden');
@@ -774,10 +844,12 @@
             const id = document.getElementById('wo-id').value || window.generateId();
             const data = {
                 id: id,
+                serial: document.getElementById('wo-serial').value,
                 date: document.getElementById('wo-date').value,
                 year: document.getElementById('wo-year').value,
                 zone: document.getElementById('wo-zone').value,
                 vendor: document.getElementById('wo-vendor').value,
+                district: document.getElementById('wo-district').value,
                 location: document.getElementById('wo-location').value,
                 description: document.getElementById('wo-description').value,
                 status: document.getElementById('wo-status').value,
@@ -804,6 +876,31 @@
                 } catch (e) {
                     alert('刪除失敗: ' + e.message);
                 }
+            }
+        };
+
+        // 自動匹配廠商與更新行政區下拉選單
+        window.updateVendorByZone = (historicalVendor = null) => {
+            const y = document.getElementById('wo-year').value;
+            const z = document.getElementById('wo-zone').value;
+            const vInput = document.getElementById('wo-vendor');
+            const dSelect = document.getElementById('wo-district');
+
+            // 1. 自動尋找對應的廠商
+            const vendor = window.db.users.find(u => u.role === 'vendor' && u.assignedYear === y && u.assignedZone === z);
+            if (vendor) {
+                vInput.value = vendor.name;
+            } else {
+                vInput.value = historicalVendor || '該區目前尚未建立廠商帳號';
+            }
+
+            // 2. 更新該區專屬的行政區下拉清單
+            const districts = window.db.settings.zoneDistricts?.[z] || [];
+            const currentDistrict = dSelect.value; // 保留原本選的值 (編輯時使用)
+            dSelect.innerHTML = districts.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+            if (currentDistrict && districts.includes(currentDistrict)) {
+                dSelect.value = currentDistrict;
             }
         };
 
@@ -930,6 +1027,61 @@
             if(settings.years) renderList('list-settings-years', settings.years, 'years');
             if(settings.zones) renderList('list-settings-zones', settings.zones, 'zones');
             if(settings.vendors) renderList('list-settings-vendors', settings.vendors, 'vendors');
+            
+            // 渲染行政區設定
+            window.renderDistrictSettings();
+        };
+
+        window.renderDistrictSettings = () => {
+            const z = document.getElementById('setting-district-zone').value;
+            const ul = document.getElementById('list-settings-districts');
+            if (!ul) return;
+            ul.innerHTML = '';
+            
+            if (!z || !window.db.settings.zoneDistricts || !window.db.settings.zoneDistricts[z]) return;
+
+            window.db.settings.zoneDistricts[z].forEach((dist, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 hover:bg-gray-50 border-b text-sm';
+                li.innerHTML = `
+                    <span>${dist}</span>
+                    <button onclick="window.removeDistrictSetting('${z}', ${index})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash-alt"></i></button>
+                `;
+                ul.appendChild(li);
+            });
+        };
+
+        window.addDistrictSetting = async () => {
+            const z = document.getElementById('setting-district-zone').value;
+            const input = document.getElementById('input-new-district');
+            const val = input.value.trim();
+            if (!z) return alert('請先選擇要設定的分區');
+            if (!val) return;
+            
+            const newSettings = JSON.parse(JSON.stringify(window.db.settings));
+            if (!newSettings.zoneDistricts) newSettings.zoneDistricts = {};
+            if (!newSettings.zoneDistricts[z]) newSettings.zoneDistricts[z] = [];
+            
+            if (newSettings.zoneDistricts[z].includes(val)) return alert('該行政區已存在於此分區！');
+            
+            newSettings.zoneDistricts[z].push(val);
+            try {
+                await setDoc(docSettings, newSettings);
+                input.value = '';
+            } catch(e) {
+                alert('更新設定失敗: ' + e.message);
+            }
+        };
+
+        window.removeDistrictSetting = async (z, index) => {
+            if (!confirm('確定要從此分區刪除該行政區嗎？')) return;
+            const newSettings = JSON.parse(JSON.stringify(window.db.settings));
+            newSettings.zoneDistricts[z].splice(index, 1);
+            try {
+                await setDoc(docSettings, newSettings);
+            } catch(e) {
+                alert('刪除設定失敗: ' + e.message);
+            }
         };
 
         window.addSettingItem = async (key, inputId) => {
