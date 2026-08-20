@@ -180,9 +180,11 @@
                                     <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
                                         <th class="p-4 font-semibold">編號</th>
                                         <th class="p-4 font-semibold">年度/分區</th>
+                                        <th class="p-4 font-semibold">案件來源</th>
                                         <th class="p-4 font-semibold">派工地點</th>
                                         <th class="p-4 font-semibold">派工內容</th>
                                         <th class="p-4 font-semibold">收單日期</th>
+                                        <th class="p-4 font-semibold">實際完工日期</th>
                                         <th class="p-4 font-semibold">指派廠商</th>
                                         <th class="p-4 font-semibold text-right">操作</th>
                                     </tr>
@@ -909,8 +911,15 @@
                 if (filterYear && wo.year !== filterYear) return;
                 if (filterZone && wo.zone !== filterZone) return;
 
-                // 3. 關鍵字搜尋過濾
-                const searchStr = `${wo.prefix}-${wo.serial} ${wo.location} ${wo.content} ${wo.vendor} ${wo.personnel} ${wo.remarks}`.toLowerCase();
+                // 3. 關鍵字搜尋過濾 (排除日期欄位，涵蓋其餘所有詳細內容)
+                const searchStr = [
+                    wo.prefix, wo.serial, wo.year, wo.zone, wo.unit, wo.district,
+                    wo.location, wo.content, wo.vendor, wo.personnel,
+                    wo.source, wo.councilor, wo.village, wo.feature,
+                    wo.schoolNearby, wo.schoolName, wo.remarks,
+                    wo.dispatchAmount, wo.finishAmount, wo.docLinks, wo.photoLinks
+                ].filter(Boolean).join(' ').toLowerCase();
+
                 if (searchTerm && !searchStr.includes(searchTerm)) return;
 
                 count++;
@@ -931,12 +940,27 @@
                 const serialDisplay = wo.serial ? wo.serial : '<span class="text-slate-300">待填</span>';
                 const fVendorDisplay = wo.vendor || '<span class="text-red-400 text-xs">未指派</span>';
 
+                // 處理案件來源顯示邏輯
+                let sourceDisplay = wo.source || '-';
+                if (wo.source === '議員' && wo.councilor) {
+                    sourceDisplay = `<span class="text-amber-600 font-medium" title="議員服務處: ${wo.councilor}">${wo.councilor}</span>`;
+                } else if (wo.source === '里長' && wo.village) {
+                    sourceDisplay = `<span class="text-emerald-600 font-medium" title="里辦公處: ${wo.village}">${wo.village}</span>`;
+                } else {
+                    sourceDisplay = `<span class="text-slate-600 font-medium">${sourceDisplay}</span>`;
+                }
+
+                // 處理完工日期顯示
+                let actualFinishDisplay = wo.actualFinishDate ? `<span class="text-slate-700">${wo.actualFinishDate}</span>` : `<span class="text-slate-300 text-xs">未完工</span>`;
+
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-800 font-mono text-base"><span class="text-indigo-500">${wo.prefix}</span>-${serialDisplay}</td>
                     <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${wo.year}</span> <span class="text-slate-500 text-xs">${wo.zone}</span></td>
+                    <td class="p-4 text-sm">${sourceDisplay}</td>
                     <td class="p-4 font-medium text-slate-700 truncate max-w-[200px]" title="${wo.location}">${wo.location}</td>
                     <td class="p-4 text-slate-600 truncate max-w-[200px]" title="${wo.content}">${wo.content}</td>
                     <td class="p-4 text-slate-500">${wo.receiveDate || '-'}</td>
+                    <td class="p-4">${actualFinishDisplay}</td>
                     <td class="p-4">${fVendorDisplay}</td>
                     <td class="p-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">${actionBtns}</td>
                 `;
