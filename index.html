@@ -1032,16 +1032,6 @@
                     }
                 }
             }
-            
-            // 廠商特定欄位鎖定 (廠商只能改流水號、完工相關與照片)
-            if(window.currentRole === 'vendor' && !isViewOnly) {
-                for(let el of formEls) {
-                    if(!['f-serial', 'f-est-finish-date', 'f-work-date', 'f-actual-finish-date', 'f-finish-amount', 'f-photo-links', 'btn-save', 'f-remarks'].includes(el.id) && el.tagName !== 'BUTTON') {
-                         el.setAttribute('disabled', 'true');
-                         el.classList.add('bg-slate-50');
-                    }
-                }
-            }
         };
 
         window.closeModal = () => {
