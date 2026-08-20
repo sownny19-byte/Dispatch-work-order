@@ -579,6 +579,33 @@
             unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
                 if (docSnap.exists()) {
                     window.sysSettings = docSnap.data();
+                    
+                    // 【自動修復機制】強制確保一到四區包含正確的行政區
+                    const correctZones = {
+                        '一區': ['桃園區', '蘆竹區'],
+                        '二區': ['八德區', '龜山區'],
+                        '三區': ['中壢區', '大溪區', '大園區', '復興區'],
+                        '四區': ['平鎮區', '觀音區', '新屋區', '龍潭區', '楊梅區']
+                    };
+                    
+                    let needFix = false;
+                    if (!window.sysSettings.zones) window.sysSettings.zones = {};
+                    
+                    // 檢查並修復每一區
+                    for (const [zone, dists] of Object.entries(correctZones)) {
+                        const current = window.sysSettings.zones[zone];
+                        // 如果沒有這個區，或是陣列內容不正確，就強制覆寫修復
+                        if (!current || JSON.stringify(current) !== JSON.stringify(dists)) {
+                            window.sysSettings.zones[zone] = dists;
+                            needFix = true;
+                        }
+                    }
+                    
+                    // 若有偵測到錯誤並修復，將正確的資料立刻寫回 Firebase 雲端
+                    if (needFix) {
+                        setDoc(doc(db, 'settings', 'global'), window.sysSettings).catch(e => console.log("修復分區失敗:", e));
+                    }
+
                 } else {
                     // 若雲端尚未有設定資料，寫入預設值初始化
                     setDoc(doc(db, 'settings', 'global'), window.sysSettings).catch(err => console.error("初始化參數失敗", err));
