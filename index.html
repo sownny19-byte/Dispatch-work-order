@@ -624,6 +624,9 @@
             document.getElementById('btn-add-general').classList.toggle('hidden', user.role === 'vendor');
             document.getElementById('btn-add-report').classList.toggle('hidden', user.role !== 'vendor');
             
+            const btnWo = document.getElementById('btn-add-wo');
+            if (btnWo) btnWo.style.display = (user.role === 'owner') ? 'none' : 'flex';
+            
             document.getElementById('login-pwd').value = '';
             window.showSection('work-orders');
         };
@@ -918,7 +921,10 @@
 
             window.workOrders.forEach(wo => {
                 if (window.currentRole === 'vendor') {
-                    if (wo.year !== window.currentUserData.year || wo.zone !== window.currentUserData.zone) return; 
+                    // 嚴格驗證：只允許看到「所屬年度與分區」的派工單
+                    if (wo.year !== window.currentUserData.year || wo.zone !== window.currentUserData.zone) return;
+                    // 進階防護：如果是其他廠商的名字，則過濾掉不顯示
+                    if (wo.vendor && wo.vendor !== window.currentUserData.name && wo.vendor !== '此分區尚無指派廠商') return;
                 }
                 if (filterYear && wo.year !== filterYear) return;
                 if (filterZone && wo.zone !== filterZone) return;
