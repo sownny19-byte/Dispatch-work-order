@@ -7,19 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar, .hide-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track, .hide-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        /* 隱藏原生數字輸入框的上下箭頭 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; } 
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
-        /* 系統提示框動畫 */
         @keyframes slideInDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100%); opacity: 0; } }
         .toast-enter { animation: slideInDown 0.3s ease-out forwards; }
@@ -28,10 +28,9 @@
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex flex-col md:flex-row">
 
-    <!-- 自訂提示訊息容器 -->
+    <!-- 自訂提示訊息與確認對話框 -->
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
 
-    <!-- 自訂確認對話框 -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/50 z-[90] hidden items-center justify-center backdrop-blur-sm px-4">
         <div class="glass-panel w-full max-w-sm rounded-2xl p-6 transform scale-95 transition-transform duration-200">
             <h3 id="confirm-title" class="text-lg font-bold text-slate-800 mb-2">確認</h3>
@@ -53,28 +52,29 @@
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">交通局派工系統</h2>
                 <p class="text-slate-500 text-sm mt-1">請選擇您的身分並登入</p>
+                <p id="system-loading-text" class="text-indigo-600 text-xs font-bold mt-3"><i class="fa-solid fa-spinner fa-spin"></i> 系統連線中...</p>
             </div>
             <div class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">登入身分</label>
-                    <select id="login-role" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 outline-none transition-all border"></select>
+                    <select id="login-role" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 outline-none border" disabled></select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">密碼</label>
-                    <input type="password" id="login-password" placeholder="請輸入密碼" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 outline-none transition-all border">
+                    <input type="password" id="login-password" placeholder="請輸入密碼" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 outline-none border" disabled>
                 </div>
-                <button onclick="window.login()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2">
+                <button id="btn-login" onclick="window.login()" class="w-full py-3 px-4 bg-slate-300 text-slate-500 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2" disabled>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> 登入系統
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 側邊欄遮罩 (手機版) -->
-    <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden backdrop-blur-sm"></div>
+    <!-- 手機版側邊欄遮罩 -->
+    <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-30 hidden backdrop-blur-sm transition-opacity duration-300"></div>
     
-    <!-- 側邊選單 -->
-    <aside id="sidebar" class="w-72 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col h-full fixed md:relative z-40 transition-transform duration-300 -translate-x-full md:translate-x-0">
+    <!-- 抽屜式側邊選單 -->
+    <aside id="sidebar" class="w-72 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col h-full fixed md:relative z-40 transition-transform duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
         <div class="p-6 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
@@ -82,10 +82,10 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-white tracking-wide">交通局派工系統</h1>
-                    <p class="text-xs text-slate-500">v2.0 Beta</p>
+                    <p class="text-xs text-emerald-400 mt-0.5"><i class="fa-solid fa-cloud"></i> 雲端已連線</p>
                 </div>
             </div>
-            <button onclick="window.toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+            <button onclick="window.toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
@@ -93,9 +93,7 @@
         <div class="p-6 border-b border-slate-800">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">當前登入</p>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
-                    <i class="fa-solid fa-user"></i>
-                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 shrink-0"><i class="fa-solid fa-user"></i></div>
                 <div class="overflow-hidden">
                     <p id="current-user-name" class="font-medium text-white truncate"></p>
                     <p id="current-user-role" class="text-xs mt-0.5"></p>
@@ -105,28 +103,25 @@
 
         <nav class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2 mt-4">主要功能</p>
-            <button onclick="window.showSection('work-orders'); window.closeSidebarMobile();" id="nav-work-orders" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-indigo-500/10 text-indigo-400">
+            <button onclick="window.showSection('work-orders')" id="nav-work-orders" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-indigo-500/10 text-indigo-400">
                 <i class="fa-solid fa-list-check w-5 text-center"></i> 派工單總表
             </button>
-            <button onclick="window.showSection('announcements'); window.closeSidebarMobile();" id="nav-announcements" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
+            <button onclick="window.showSection('announcements')" id="nav-announcements" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
                 <i class="fa-solid fa-bullhorn w-5 text-center"></i> 公告與通報
             </button>
-            <button onclick="window.showSection('statistics'); window.closeSidebarMobile();" id="nav-statistics" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
+            <button onclick="window.showSection('statistics')" id="nav-statistics" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
                 <i class="fa-solid fa-chart-pie w-5 text-center"></i> 契約執行統計
             </button>
             
-            <div id="nav-settings-container" class="hidden">
+            <div id="nav-settings-container" style="display: none;">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2 mt-6">系統管理</p>
-                <button onclick="window.showSection('settings'); window.closeSidebarMobile();" id="nav-settings" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
+                <button onclick="window.showSection('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-white">
                     <i class="fa-solid fa-sliders w-5 text-center"></i> 系統與帳號設定
                 </button>
             </div>
         </nav>
 
         <div class="p-4 border-t border-slate-800">
-            <div class="flex items-center justify-between text-xs text-slate-500 mb-4 px-2">
-                <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> 系統連線正常</span>
-            </div>
             <button onclick="location.reload()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors border border-slate-700">
                 <i class="fa-solid fa-power-off"></i> 登出系統
             </button>
@@ -143,20 +138,20 @@
                 </div>
                 <h1 class="font-bold text-slate-800">派工系統</h1>
             </div>
-            <button onclick="window.toggleSidebar()" class="text-slate-600 p-1">
+            <button onclick="window.toggleSidebar()" class="text-slate-600 p-1 hover:text-indigo-600 transition-colors">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </header>
 
         <!-- 派工單總表區塊 -->
         <div id="section-work-orders" class="flex-1 flex flex-col h-full overflow-hidden section-content p-4 md:p-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 shrink-0 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
                         <i class="fa-solid fa-list-check text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">派工單總表</h2>
+                        <h2 class="text-xl font-bold text-slate-800">派工單列管總表</h2>
                         <p class="text-sm text-slate-500" id="current-date-display"></p>
                     </div>
                 </div>
@@ -167,30 +162,47 @@
                 <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
                     <div class="relative w-full sm:w-64">
                         <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="search-input" placeholder="搜尋編號、地點、內容、來源..." class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none" onkeyup="window.renderWoTable()">
+                        <input type="text" id="search-input" placeholder="搜尋編號、地點、內容、廠商..." class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none" onkeyup="window.renderWoTable()">
                     </div>
-                    <select id="filter-year" class="w-full sm:w-32 rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 outline-none" onchange="window.renderWoTable()">
-                        <option value="all">全部年度</option>
-                    </select>
-                    <select id="filter-district" class="w-full sm:w-32 rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 outline-none" onchange="window.renderWoTable()">
-                        <option value="all">全部分區</option>
-                    </select>
+                    <select id="filter-year" class="w-full sm:w-32 rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 outline-none" onchange="window.renderWoTable()"></select>
+                    <select id="filter-district" class="w-full sm:w-32 rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-500 outline-none" onchange="window.renderWoTable()"></select>
                 </div>
-                <button id="btn-add-wo" style="display: none;" onclick="window.openModal()" class="w-full xl:w-auto shrink-0 items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
-                    <i class="fa-solid fa-plus"></i> 新增派工單
-                </button>
+                <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                    <button onclick="window.exportExcel()" class="px-3 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-sm font-medium transition-colors border border-emerald-200 shadow-sm" title="匯出Excel">
+                        <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">匯出 Excel</span>
+                    </button>
+                    <button onclick="window.exportBackup()" class="px-3 py-2 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors border border-slate-200 shadow-sm" title="匯出備份檔(JSON)">
+                        <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">備份下載</span>
+                    </button>
+                    <label class="cursor-pointer px-3 py-2 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors border border-slate-200 shadow-sm" title="匯入備份檔">
+                        <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">還原資料</span>
+                        <input type="file" class="hidden" accept=".json" onchange="window.importBackup(event)">
+                    </label>
+                    <button id="btn-add-wo" onclick="window.openModal()" class="items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm ml-auto" style="display: none;">
+                        <i class="fa-solid fa-plus"></i> 新增派工單
+                    </button>
+                </div>
             </div>
 
-            <!-- 總表資料 -->
-            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col relative">
+            <!-- 總表資料與分類頁籤 -->
+            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col relative p-2">
+                <!-- 狀態頁籤 -->
+                <div class="flex gap-2 border-b border-slate-200 mb-2 pb-2 overflow-x-auto hide-scrollbar px-2">
+                    <button onclick="window.setTab('all')" id="tab-all" class="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-100 text-indigo-700 transition-colors whitespace-nowrap">全部 <span id="cnt-all" class="ml-1 px-1.5 py-0.5 bg-indigo-200 rounded text-xs">0</span></button>
+                    <button onclick="window.setTab('processing')" id="tab-processing" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors whitespace-nowrap">辦理中 <span id="cnt-processing" class="ml-1 px-1.5 py-0.5 bg-slate-200 rounded text-xs">0</span></button>
+                    <button onclick="window.setTab('nearing')" id="tab-nearing" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-amber-100 transition-colors whitespace-nowrap">即將逾期 <span id="cnt-nearing" class="ml-1 px-1.5 py-0.5 bg-slate-200 rounded text-xs">0</span></button>
+                    <button onclick="window.setTab('overdue')" id="tab-overdue" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-rose-100 transition-colors whitespace-nowrap">已逾期 <span id="cnt-overdue" class="ml-1 px-1.5 py-0.5 bg-slate-200 rounded text-xs">0</span></button>
+                    <button onclick="window.setTab('completed')" id="tab-completed" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-emerald-100 transition-colors whitespace-nowrap">已完工 <span id="cnt-completed" class="ml-1 px-1.5 py-0.5 bg-slate-200 rounded text-xs">0</span></button>
+                </div>
+
                 <div class="overflow-x-auto overflow-y-auto custom-scrollbar flex-1">
-                    <table class="w-full text-left border-collapse whitespace-nowrap min-w-[1200px]">
+                    <table class="w-full text-left border-collapse whitespace-nowrap min-w-[1300px]">
                         <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
                             <tr>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-24">編號/年度/分區</th>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-48">派工地點 / 內容</th>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-32">指派廠商</th>
-                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-32">日期 (收單/派工/完工)</th>
+                                <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-32">日期 (收/派/預/實)</th>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-24">金額 (派/竣)</th>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-24">案件來源</th>
                                 <th class="px-4 py-3 text-xs font-semibold text-slate-500 border-b border-slate-200 w-20 text-center">完工照片</th>
@@ -215,31 +227,27 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">公告與每日施工通報</h2>
-                        <p class="text-sm text-slate-500">檢視機關公告與廠商每日回報紀錄</p>
+                        <p class="text-sm text-slate-500">檢視機關公告與廠商每日歷史回報紀錄</p>
                     </div>
                 </div>
-                <div id="announcement-actions" class="flex gap-2">
-                    <!-- JS 動態生成按鈕 -->
-                </div>
+                <div id="announcement-actions" class="flex gap-2"></div>
             </div>
             
             <div class="flex-1 overflow-y-auto custom-scrollbar">
-                <div id="announcement-list" class="space-y-4 max-w-4xl mx-auto pb-8">
-                    <!-- JS 生成內容 -->
-                </div>
+                <div id="announcement-list" class="space-y-4 max-w-4xl mx-auto pb-8"></div>
             </div>
         </div>
 
         <!-- 契約執行統計區塊 -->
         <div id="section-statistics" class="hidden flex-1 flex flex-col h-full overflow-hidden section-content p-4 md:p-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 shrink-0 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
                         <i class="fa-solid fa-chart-pie text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">契約執行統計</h2>
-                        <p class="text-sm text-slate-500">掌握各區預算與派工進度</p>
+                        <h2 class="text-xl font-bold text-slate-800">契約執行統計分析</h2>
+                        <p class="text-sm text-slate-500">掌握各區預算執行率與科室派別統計</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
@@ -252,14 +260,12 @@
                         <option value="停車管理工程科">停車管理工程科</option>
                         <option value="運輸規劃科">運輸規劃科</option>
                     </select>
-                    <input type="text" id="stat-squad" placeholder="輸入派別篩選" class="w-32 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 outline-none" onkeyup="window.renderStatistics()">
+                    <input type="text" id="stat-squad" placeholder="搜尋派別 (例: 標線派)" class="w-36 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 outline-none" onkeyup="window.renderStatistics()">
                 </div>
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar">
-                <div id="statistics-content" class="max-w-5xl mx-auto space-y-6 pb-8">
-                    <!-- JS 生成統計內容 -->
-                </div>
+                <div id="statistics-content" class="max-w-6xl mx-auto space-y-6 pb-8"></div>
             </div>
         </div>
 
@@ -276,7 +282,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- 年度管理 -->
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
                     <h3 class="text-base font-semibold text-slate-800 mb-4 border-l-4 border-indigo-500 pl-3">年度管理</h3>
                     <div class="flex gap-2 mb-4">
@@ -285,8 +290,6 @@
                     </div>
                     <ul id="settings-year-list" class="space-y-2 border border-slate-100 rounded-lg p-2 bg-slate-50"></ul>
                 </div>
-
-                <!-- 分區管理 -->
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
                     <h3 class="text-base font-semibold text-slate-800 mb-4 border-l-4 border-indigo-500 pl-3">分區管理</h3>
                     <div class="flex flex-col gap-2 mb-4">
@@ -298,7 +301,6 @@
                 </div>
             </div>
 
-            <!-- 帳號管理 -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <h3 class="text-base font-semibold text-slate-800 border-l-4 border-indigo-500 pl-3">帳號與權限管理</h3>
@@ -338,27 +340,26 @@
             
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="wo-form" class="space-y-6">
-                    <!-- 區塊1: 基本派工資訊 -->
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <h4 class="text-sm font-semibold text-indigo-600 mb-4 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-circle-info"></i> 基本派工資訊</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">年度 <span class="text-rose-500">*</span></label>
-                                <select id="f-year" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border" required onchange="window.generatePrefix()"></select>
+                                <select id="f-year" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 outline-none border" required onchange="window.generatePrefix()"></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">分區 <span class="text-rose-500">*</span></label>
-                                <select id="f-district" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border" required onchange="window.updateDistrict(); window.generatePrefix();"></select>
+                                <select id="f-district" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 outline-none border" required onchange="window.updateDistrict()"></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">行政區 <span class="text-rose-500">*</span></label>
-                                <select id="f-area" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border" required onchange="window.generatePrefix()"></select>
+                                <select id="f-area" class="w-full rounded-lg border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 outline-none border" required onchange="window.generatePrefix()"></select>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">派工單編號</label>
                                 <div class="flex gap-1">
                                     <input type="text" id="f-prefix" class="w-16 rounded-lg border-slate-300 bg-slate-100 px-2 py-2 text-sm font-bold text-center text-slate-500 border" readonly>
-                                    <input type="text" id="f-serial" placeholder="流水號" class="flex-1 rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border">
+                                    <input type="text" id="f-serial" placeholder="流水號" class="flex-1 rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 outline-none border">
                                 </div>
                             </div>
                         </div>
@@ -366,41 +367,41 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-medium text-slate-600 mb-1">派工地點 <span class="text-rose-500">*</span></label>
-                                <input type="text" id="f-location" required class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border" placeholder="輸入詳細地點">
+                                <input type="text" id="f-location" required class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 outline-none border" placeholder="輸入詳細地點">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">學校周邊</label>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <input type="checkbox" id="f-school-check" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" onchange="document.getElementById('f-school-name').disabled = !this.checked">
-                                    <input type="text" id="f-school-name" disabled class="flex-1 rounded-lg border-slate-300 px-3 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-400 border outline-none focus:border-indigo-500" placeholder="填寫學校名稱">
+                                    <input type="checkbox" id="f-school-check" class="w-4 h-4 text-indigo-600 rounded border-slate-300" onchange="document.getElementById('f-school-name').disabled = !this.checked">
+                                    <input type="text" id="f-school-name" disabled class="flex-1 rounded-lg border-slate-300 px-3 py-1.5 text-sm disabled:bg-slate-100 border outline-none" placeholder="填寫學校名稱">
                                 </div>
                             </div>
                         </div>
                         
                         <div class="mt-4">
                             <label class="block text-xs font-medium text-slate-600 mb-1">派工內容 <span class="text-rose-500">*</span></label>
-                            <textarea id="f-content" required rows="3" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none border resize-none custom-scrollbar" placeholder="敘述派工詳細內容..."></textarea>
+                            <textarea id="f-content" required rows="3" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 outline-none border resize-none custom-scrollbar" placeholder="敘述派工詳細內容..."></textarea>
                         </div>
                     </div>
 
-                    <!-- 區塊2: 時程與來源資訊 -->
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <h4 class="text-sm font-semibold text-emerald-600 mb-4 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-calendar-check"></i> 時程、金額與來源</h4>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">收單日期</label>
-                                <input type="date" id="f-date-receive" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 border outline-none">
-                            </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">派工日期</label>
                                 <input type="date" id="f-date-assign" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 border outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">收單日期 (預設期限45天)</label>
+                                <input type="date" id="f-date-receive" onchange="window.calcExpectDate()" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 border outline-none">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">預定完工日期</label>
                                 <input type="date" id="f-date-expect" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 border outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1 text-emerald-600 font-bold">實際完工日期</label>
+                                <label class="block text-xs font-medium text-emerald-600 mb-1 font-bold">實際完工日期</label>
                                 <input type="date" id="f-date-actual" class="w-full rounded-lg border-emerald-300 bg-emerald-50 px-3 py-2 text-sm focus:border-emerald-500 border outline-none">
                             </div>
                         </div>
@@ -457,7 +458,6 @@
                         </div>
                     </div>
 
-                    <!-- 區塊3: 備註與雲端連結 -->
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <h4 class="text-sm font-semibold text-amber-600 mb-4 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-paperclip"></i> 備註與雲端資料連結</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -509,26 +509,26 @@
                 </div>
                 
                 <div id="ann-vendor-form" class="hidden space-y-6">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200">
-                        <h4 class="font-bold text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> 昨日完成案件</h4>
-                        <div id="ann-vendor-done-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar text-sm"></div>
-                        <input type="text" id="ann-vendor-done-manual" placeholder="+ 手動輸入其他已完成事項" class="w-full mt-3 rounded-lg border-slate-200 px-3 py-2 text-sm outline-none border bg-slate-50">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> 昨日完成案件 <span class="text-xs text-slate-500 font-normal">(勾選將自動更新完工日)</span></h4>
+                        <div id="ann-vendor-done-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar text-sm bg-slate-50 rounded border border-slate-100 p-2 empty:hidden"></div>
+                        <input type="text" id="ann-vendor-done-manual" placeholder="+ 手動輸入其他已完成事項" class="w-full mt-3 rounded-lg border-slate-300 px-3 py-2 text-sm outline-none border focus:border-emerald-500">
                     </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                         <h4 class="font-bold text-blue-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-clock"></i> 今日預定施工</h4>
-                        <div id="ann-vendor-todo-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar text-sm"></div>
-                        <input type="text" id="ann-vendor-todo-manual" placeholder="+ 手動輸入今日預定施工事項" class="w-full mt-3 rounded-lg border-slate-200 px-3 py-2 text-sm outline-none border bg-slate-50">
+                        <div id="ann-vendor-todo-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar text-sm bg-slate-50 rounded border border-slate-100 p-2 empty:hidden"></div>
+                        <input type="text" id="ann-vendor-todo-manual" placeholder="+ 手動輸入今日預定施工事項" class="w-full mt-3 rounded-lg border-slate-300 px-3 py-2 text-sm outline-none border focus:border-blue-500">
                     </div>
-                    <div class="bg-white p-4 rounded-xl border border-rose-200">
+                    <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm">
                         <h4 class="font-bold text-rose-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> 遭遇困難或緊急回報</h4>
-                        <textarea id="ann-vendor-issue" rows="2" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm outline-none border custom-scrollbar" placeholder="若無則免填..."></textarea>
+                        <textarea id="ann-vendor-issue" rows="2" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm outline-none border custom-scrollbar focus:border-rose-500" placeholder="若無則免填..."></textarea>
                     </div>
                 </div>
             </div>
             <div class="px-6 py-4 bg-white border-t border-slate-200 rounded-b-2xl flex justify-end gap-3">
                 <button onclick="window.closeAnnModal()" class="px-5 py-2.5 rounded-lg text-sm text-slate-600 bg-slate-100 hover:bg-slate-200">取消</button>
-                <button onclick="window.saveAnnouncement()" class="px-5 py-2.5 rounded-lg text-sm text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> 送出
+                <button onclick="window.saveAnnouncement()" class="px-5 py-2.5 rounded-lg text-sm text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-paper-plane"></i> 送出通報
                 </button>
             </div>
         </div>
@@ -580,59 +580,68 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 🚨 Firebase 設定 (若為假金鑰，系統將自動切換為本地測試模式)
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "請在此貼上您真正的_API_KEY", 
-            authDomain: "taoyuan-dispatch.firebaseapp.com",
-            projectId: "taoyuan-dispatch",
-            storageBucket: "taoyuan-dispatch.appspot.com",
-            messagingSenderId: "367375628509",
-            appId: "1:367375628509:web:a627f10b7410885e33230a"
-        };
-
-        const isMockMode = firebaseConfig.apiKey.includes("API_KEY");
-        let db = null;
+        // 動態取得環境變數
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         
-        if (!isMockMode) {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                console.log("🟢 成功連接 Firebase 雲端資料庫");
-            } catch (e) {
-                console.error("Firebase 初始化失敗，降級為本機模式:", e);
-            }
-        } else {
-            console.log("🟡 使用本機測試模式 (資料將儲存於瀏覽器 localStorage)");
+        if (!firebaseConfig) {
+            alert('系統錯誤：無法取得 Firebase 設定');
+            throw new Error("Missing Firebase Config");
         }
 
-        // ==========================================
-        // 全域變數與參數字典
-        // ==========================================
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let fbUserId = null;
+
+        // 全域路徑助手函式 (符合環境規範的 Public 資料路徑)
+        const getPubCollection = (colName) => collection(db, 'artifacts', appId, 'public', 'data', colName);
+        const getPubDoc = (colName, docId) => doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+
+        // 參數與資料陣列
         window.currentUser = null;
         window.workOrders = [];
         window.users = [];
         window.announcements = [];
-        window.sysSettings = { years: [], districts: [] }; // 雲端動態參數
+        window.sysSettings = { years: [], districts: [] };
+        window.currentTab = 'all';
 
         const roleMap = { 'admin': '系統管理員', 'org': '機關業主', 'supervisor': '監造人員', 'vendor': '施工廠商' };
-        
-        // 擴充版派工單縮寫字典 (自動對應所有已知區域名稱)
-        const codeMap = {
-            '桃園': '桃', '桃園區': '桃', '蘆竹': '竹', '蘆竹區': '竹',
-            '龜山': '龜', '龜山區': '龜', '八德': '德', '八德區': '德',
-            '中壢': '中', '中壢區': '中', '大園': '園', '大園區': '園',
-            '大溪': '溪', '大溪區': '溪', '復興': '復', '復興區': '復',
-            '新屋': '新', '新屋區': '新', '龍潭': '龍', '龍潭區': '龍',
-            '平鎮': '平', '平鎮區': '平', '楊梅': '楊', '楊梅區': '楊',
-            '觀音': '觀', '觀音區': '觀'
+        window.distCodeMap = {
+            '桃園': '桃', '桃園區': '桃', '蘆竹': '竹', '蘆竹區': '竹', '龜山': '龜', '龜山區': '龜', '八德': '德', '八德區': '德',
+            '中壢': '中', '中壢區': '中', '大園': '園', '大園區': '園', '大溪': '溪', '大溪區': '溪', '復興': '復', '復興區': '復',
+            '新屋': '新', '新屋區': '新', '龍潭': '龍', '龍潭區': '龍', '平鎮': '平', '平鎮區': '平', '楊梅': '楊', '楊梅區': '楊', '觀音': '觀', '觀音區': '觀'
         };
 
-        // UI 輔助函數
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                fbUserId = auth.currentUser?.uid;
+                
+                // 登入雲端成功後，才設定監聽器並開放前端登入
+                setupFirestoreListeners();
+                
+                document.getElementById('system-loading-text').innerHTML = `<i class="fa-solid fa-check-circle text-emerald-500"></i> 連線成功`;
+                document.getElementById('login-role').disabled = false;
+                document.getElementById('login-password').disabled = false;
+                document.getElementById('btn-login').disabled = false;
+                document.getElementById('btn-login').className = "w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2";
+
+            } catch(e) {
+                console.error("Auth error:", e);
+                document.getElementById('system-loading-text').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> 連線失敗，請重新整理`;
+            }
+        }
+
+        // UI Helpers
         window.showToast = (msg, type='success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -641,10 +650,7 @@
             toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium toast-enter`;
             toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> ${msg}`;
             container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.replace('toast-enter', 'toast-leave');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 3000);
         };
 
         let confirmCallback = null;
@@ -656,119 +662,68 @@
         document.getElementById('btn-confirm-cancel').onclick = () => { document.getElementById('confirm-modal').classList.replace('flex', 'hidden'); };
         document.getElementById('btn-confirm-ok').onclick = () => { document.getElementById('confirm-modal').classList.replace('flex', 'hidden'); if(confirmCallback) confirmCallback(); };
 
-        // ==========================================
-        // Mock 資料庫引擎 (本地測試用)
-        // ==========================================
-        const MockDB = {
-            get: (col) => JSON.parse(localStorage.getItem(`mock_${col}`) || '[]'),
-            set: (col, data) => localStorage.setItem(`mock_${col}`, JSON.stringify(data)),
-            listen: (col, callback) => { callback(MockDB.get(col)); },
-            add: (col, doc) => {
-                const data = MockDB.get(col);
-                doc.id = Date.now().toString();
-                doc.timestamp = new Date();
-                data.push(doc);
-                MockDB.set(col, data);
-                if(window.refreshData) window.refreshData();
-                return doc.id;
-            },
-            update: (col, id, updates) => {
-                let data = MockDB.get(col);
-                let idx = data.findIndex(d => d.id === id);
-                if(idx > -1) { data[idx] = { ...data[idx], ...updates, timestamp: new Date() }; MockDB.set(col, data); if(window.refreshData) window.refreshData(); }
-            },
-            delete: (col, id) => {
-                let data = MockDB.get(col);
-                data = data.filter(d => d.id !== id);
-                MockDB.set(col, data);
-                if(window.refreshData) window.refreshData();
+        window.toggleSidebar = () => {
+            const sb = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sb.classList.contains('-translate-x-full')) {
+                sb.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            } else {
+                sb.classList.add('-translate-x-full');
+                overlay.classList.remove('opacity-100');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         };
 
-        // 建立預設測試資料 (僅於 Mock 模式且無資料時)
-        if (isMockMode) {
-            if (MockDB.get('users').length === 0) {
-                MockDB.add('users', { role: 'admin', name: '系統預設管理員', pwd: '095219' });
-            }
-            if (MockDB.get('settings').length === 0) {
-                MockDB.add('settings', { type: 'year', name: '113' });
-                MockDB.add('settings', { type: 'year', name: '114' });
-                MockDB.add('settings', { type: 'district', name: '一區', areas: ['桃園', '蘆竹'] });
-                MockDB.add('settings', { type: 'district', name: '二區', areas: ['八德', '龜山'] });
-                MockDB.add('settings', { type: 'district', name: '三區', areas: ['中壢', '大溪', '大園', '復興'] });
-                MockDB.add('settings', { type: 'district', name: '四區', areas: ['平鎮', '觀音', '新屋', '龍潭', '楊梅'] });
-            }
-            
-            // 綁定全域刷新函式給 MockDB 使用
-            window.refreshData = () => {
-                window.sysSettings = { years: MockDB.get('settings').filter(s=>s.type==='year').map(s=>s.name).sort(), districts: MockDB.get('settings').filter(s=>s.type==='district') };
-                window.users = MockDB.get('users');
-                window.workOrders = MockDB.get('workOrders').sort((a,b)=>b.timestamp-a.timestamp);
-                window.announcements = MockDB.get('announcements').sort((a,b)=>b.timestamp-a.timestamp);
-                
-                window.updateAllDropdowns();
-                window.populateLoginDropdown();
-                if(window.currentUser) {
-                    window.renderWoTable();
-                    window.renderAnnouncements();
-                    window.renderStatistics();
-                    window.renderSettingsUI();
-                    window.renderUserTable();
-                }
-            };
-            setTimeout(window.refreshData, 100); // 延遲載入確保 DOM 準備好
-        }
+        window.showSection = (id) => {
+            document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`section-${id}`).classList.remove('hidden');
+            if (window.innerWidth < 768) window.toggleSidebar();
+            if (id === 'settings' && window.currentUser) { window.renderSettingsUI(); window.renderUserTable(); }
+        };
 
-        // ==========================================
-        // Firebase 雙軌連線邏輯
-        // ==========================================
-        function setupListeners() {
-            if (isMockMode) return; // Mock 模式已由 refreshData 處理
+        const todayDate = new Date();
+        document.getElementById('current-date-display').innerText = `${todayDate.getFullYear()}年${todayDate.getMonth()+1}月${todayDate.getDate()}日 ${['日','一','二','三','四','五','六'][todayDate.getDay()]}曜日`;
 
-            // 監聽參數設定並自動修復
-            onSnapshot(collection(db, "settings"), (snapshot) => {
+        function setupFirestoreListeners() {
+            if (!fbUserId) return;
+
+            onSnapshot(getPubCollection("settings"), (snapshot) => {
                 let years = []; let districts = [];
                 snapshot.forEach(doc => {
-                    let data = doc.data();
-                    data.id = doc.id;
+                    let data = doc.data(); data.id = doc.id;
                     if(data.type === 'year') years.push(data.name);
                     if(data.type === 'district') {
-                        // 防呆：如果 areas 不是陣列而是字串，自動轉陣列
-                        if (data.areas && !Array.isArray(data.areas)) {
-                            data.areas = typeof data.areas === 'string' ? data.areas.split(',').map(s => s.trim()) : [String(data.areas)];
-                        }
+                        if (data.areas && !Array.isArray(data.areas)) data.areas = typeof data.areas === 'string' ? data.areas.split(',').map(s => s.trim()) : [String(data.areas)];
                         districts.push(data);
                     }
                 });
                 
-                // 【自動修復機制】如果一到四區沒有正確的陣列設定，自動覆寫寫入資料庫
                 const defaultDists = [
                     { name: '一區', areas: ['桃園', '蘆竹'] }, { name: '二區', areas: ['八德', '龜山'] },
                     { name: '三區', areas: ['中壢', '大溪', '大園', '復興'] }, { name: '四區', areas: ['平鎮', '觀音', '新屋', '龍潭', '楊梅'] }
                 ];
-                let needsUpdateDropdown = true;
                 
+                let needsUpdateDropdown = true;
                 if (districts.length === 0) {
-                    defaultDists.forEach(async (d) => { await addDoc(collection(db, "settings"), { type: 'district', name: d.name, areas: d.areas }); });
-                    years = ['113', '114'];
-                    years.forEach(async (y) => { await addDoc(collection(db, "settings"), { type: 'year', name: y }); });
-                    needsUpdateDropdown = false; // 等待寫入後下次 snapshot 再更新
+                    defaultDists.forEach(async (d) => { await addDoc(getPubCollection("settings"), { type: 'district', name: d.name, areas: d.areas }); });
+                    ['113', '114'].forEach(async (y) => { await addDoc(getPubCollection("settings"), { type: 'year', name: y }); });
+                    needsUpdateDropdown = false;
                 } else {
                     defaultDists.forEach(defD => {
                         let existD = districts.find(d => d.name === defD.name);
-                        if (existD && (!existD.areas || existD.areas.join(',') !== defD.areas.join(','))) {
-                            updateDoc(doc(db, "settings", existD.id), { areas: defD.areas });
-                        }
+                        if (existD && (!existD.areas || existD.areas.join(',') !== defD.areas.join(','))) updateDoc(getPubDoc("settings", existD.id), { areas: defD.areas });
                     });
                 }
                 
                 window.sysSettings.years = years.sort();
                 window.sysSettings.districts = districts.sort((a,b) => a.name.localeCompare(b.name));
-                if (needsUpdateDropdown) { window.updateAllDropdowns(); window.renderSettingsUI(); }
-            });
+                if (needsUpdateDropdown) window.updateAllDropdowns();
+            }, (error) => console.error(error));
 
-            // 監聽帳號
-            onSnapshot(collection(db, "users"), (snapshot) => {
+            let isInitialUsersLoad = true;
+            onSnapshot(getPubCollection("users"), (snapshot) => {
                 window.users = [];
                 snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; window.users.push(d); });
                 window.users.sort((a,b) => {
@@ -777,120 +732,38 @@
                     return (a.district || '').localeCompare(b.district || '');
                 });
                 window.populateLoginDropdown();
-                window.renderUserTable();
+                if(window.currentUser) window.renderUserTable();
                 
-                if (window.users.length === 0) {
-                    addDoc(collection(db, "users"), { role: 'admin', name: '系統預設管理員', pwd: '095219' });
+                if (isInitialUsersLoad && window.users.length === 0) {
+                    addDoc(getPubCollection("users"), { role: 'admin', name: '系統預設管理員', pwd: '095219' });
                 }
-            });
+                isInitialUsersLoad = false;
+            }, (error) => console.error(error));
 
-            // 監聽派工單
-            onSnapshot(collection(db, "workOrders"), (snapshot) => {
+            onSnapshot(getPubCollection("workOrders"), (snapshot) => {
                 window.workOrders = [];
                 snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; window.workOrders.push(d); });
-                window.workOrders.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
-                window.renderWoTable();
-                window.renderStatistics();
-            });
+                window.workOrders.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                if(window.currentUser) { window.renderWoTable(); window.renderStatistics(); }
+            }, (error) => console.error(error));
 
-            // 監聽公告
-            onSnapshot(collection(db, "announcements"), (snapshot) => {
+            onSnapshot(getPubCollection("announcements"), (snapshot) => {
                 window.announcements = [];
                 snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; window.announcements.push(d); });
-                window.announcements.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
-                window.renderAnnouncements();
-            });
+                window.announcements.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                if(window.currentUser) window.renderAnnouncements();
+            }, (error) => console.error(error));
         }
-        if(!isMockMode) setupListeners();
 
-        // ==========================================
-        // UI 控制與選單邏輯
-        // ==========================================
-        window.toggleSidebar = () => {
-            const sb = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (sb.classList.contains('-translate-x-full')) {
-                sb.classList.remove('-translate-x-full'); overlay.classList.remove('hidden');
-            } else {
-                sb.classList.add('-translate-x-full'); overlay.classList.add('hidden');
-            }
-        };
-        window.closeSidebarMobile = () => { if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebar-overlay').classList.add('hidden'); } };
-
-        window.showSection = (id) => {
-            document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`section-${id}`).classList.remove('hidden');
-            if (id === 'settings') { window.renderSettingsUI(); window.renderUserTable(); }
-        };
-
-        const todayDate = new Date();
-        document.getElementById('current-date-display').innerText = `${todayDate.getFullYear()}年${todayDate.getMonth()+1}月${todayDate.getDate()}日 ${['日','一','二','三','四','五','六'][todayDate.getDay()]}曜日`;
-
-        // ==========================================
-        // 動態下拉選單更新
-        // ==========================================
-        window.updateAllDropdowns = () => {
-            const years = window.sysSettings.years;
-            const dists = window.sysSettings.districts;
-            
-            const updateSelect = (id, options, defaultText, isFilter=false) => {
-                const el = document.getElementById(id);
-                if(!el) return;
-                const val = el.value;
-                el.innerHTML = isFilter ? `<option value="all">${defaultText}</option>` : '';
-                options.forEach(opt => { el.innerHTML += `<option value="${opt.val}">${opt.text}</option>`; });
-                if(Array.from(el.options).some(o => o.value === val)) el.value = val;
-            };
-
-            updateSelect('filter-year', years.map(y => ({val: y, text: y+'年'})), '全部年度', true);
-            updateSelect('stat-year', years.map(y => ({val: y, text: y+'年'})), '', false);
-            updateSelect('f-year', years.map(y => ({val: y, text: y+'年'})), '', false);
-            updateSelect('u-year', years.map(y => ({val: y, text: y+'年'})), '', false);
-
-            const distOptions = dists.map(d => ({val: d.name, text: d.name}));
-            updateSelect('filter-district', distOptions, '全部分區', true);
-            updateSelect('stat-district', distOptions, '', false);
-            updateSelect('f-district', distOptions, '', false);
-            updateSelect('u-district', distOptions, '', false);
-            updateSelect('ann-target', [{val:'all', text:'全部分區'}, ...distOptions], '', false);
-            
-            window.updateDistrict(); // 更新表單內的行政區
-        };
-
-        window.updateDistrict = () => {
-            const fDist = document.getElementById('f-district').value;
-            const distData = window.sysSettings.districts.find(d => d.name === fDist);
-            const areaSel = document.getElementById('f-area');
-            areaSel.innerHTML = '';
-            
-            let areas = [];
-            if (distData && distData.areas) {
-                areas = Array.isArray(distData.areas) ? distData.areas : (typeof distData.areas === 'string' ? distData.areas.split(',').map(s=>s.trim()) : []);
-            }
-            
-            areas.forEach(a => { areaSel.innerHTML += `<option value="${a}">${a}</option>`; });
-            window.generatePrefix();
-        };
-
-        window.generatePrefix = () => {
-            const y = document.getElementById('f-year').value || '';
-            const d = document.getElementById('f-district').value || '';
-            const a = document.getElementById('f-area').value || '';
-            let dNum = d.replace(/[^0-9一二三四五六七八九十]/g, '');
-            let aShort = codeMap[a] || (a ? a.charAt(0) : '');
-            document.getElementById('f-prefix').value = `${y}-${dNum}${aShort}-`;
-        };
-
-        // ==========================================
-        // 登入邏輯
-        // ==========================================
         window.populateLoginDropdown = () => {
             const sel = document.getElementById('login-role');
+            const currentVal = sel.value;
             sel.innerHTML = window.users.map(u => {
-                const roleName = roleMap[u.role] || '未知身分';
-                const tag = u.role === 'vendor' ? ` (${u.year} ${u.district})` : '';
-                return `<option value="${u.id}">${u.name} - ${roleName}${tag}</option>`;
+                const roleText = roleMap[u.role] || '未知身分';
+                const vendorSuffix = u.role === 'vendor' ? ` (${u.year} ${u.district})` : '';
+                return `<option value="${u.id}">${u.name} - ${roleText}${vendorSuffix}</option>`;
             }).join('');
+            if(currentVal && window.users.find(u=>u.id===currentVal)) sel.value = currentVal;
         };
 
         window.login = () => {
@@ -900,24 +773,22 @@
             
             if (user) {
                 if (user.pwd === pwd || (user.role === 'admin' && pwd === '095219')) {
-                    if(user.role === 'admin' && user.pwd !== '095219' && pwd === '095219') {
-                        if(isMockMode) MockDB.update('users', user.id, { pwd: '095219' });
-                        else updateDoc(doc(db, "users", user.id), { pwd: '095219' });
+                    if (user.role === 'admin' && user.pwd !== '095219' && pwd === '095219') {
+                        updateDoc(getPubDoc("users", user.id), { pwd: '095219' });
                         user.pwd = '095219';
                     }
-                    
                     window.currentUser = user;
                     document.getElementById('login-overlay').style.display = 'none';
                     document.getElementById('current-user-name').innerText = user.name;
-                    let roleBadge = user.role === 'admin' ? 'bg-rose-500' : (user.role==='vendor' ? 'bg-emerald-500' : 'bg-blue-500');
-                    document.getElementById('current-user-role').innerHTML = `<span class="${roleBadge} text-white px-2 py-0.5 rounded text-[10px]">${roleMap[user.role]}</span>`;
+                    let badgeColor = user.role === 'admin' ? 'bg-rose-500' : (user.role==='vendor' ? 'bg-emerald-500' : 'bg-blue-500');
+                    document.getElementById('current-user-role').innerHTML = `<span class="${badgeColor} text-white px-2 py-0.5 rounded text-[10px]">${roleMap[user.role]||'未知'}</span>`;
                     
-                    // 權限控制 UI
                     document.getElementById('nav-settings-container').style.display = user.role === 'admin' ? 'block' : 'none';
                     document.getElementById('btn-add-wo').style.display = user.role === 'org' ? 'none' : 'flex';
                     
                     window.renderWoTable();
                     window.renderAnnouncements();
+                    window.renderStatistics();
                     window.showSection('work-orders');
                     showToast('登入成功！歡迎使用系統');
                 } else {
@@ -926,9 +797,71 @@
             }
         };
 
-        // ==========================================
-        // 派工單操作 (CRUD & 渲染)
-        // ==========================================
+        window.updateAllDropdowns = () => {
+            const updateSelect = (id, options, defaultText, isFilter=false) => {
+                const el = document.getElementById(id); if(!el) return;
+                const val = el.value;
+                el.innerHTML = isFilter ? `<option value="all">${defaultText}</option>` : '';
+                options.forEach(opt => { el.innerHTML += `<option value="${opt.val}">${opt.text}</option>`; });
+                if(Array.from(el.options).some(o => o.value === val)) el.value = val;
+            };
+
+            const yOpts = window.sysSettings.years.map(y => ({val: y, text: y+'年'}));
+            updateSelect('filter-year', yOpts, '全部年度', true);
+            ['stat-year', 'f-year', 'u-year'].forEach(id => updateSelect(id, yOpts, '', false));
+
+            const dOpts = window.sysSettings.districts.map(d => ({val: d.name, text: d.name}));
+            updateSelect('filter-district', dOpts, '全部分區', true);
+            ['stat-district', 'f-district', 'u-district'].forEach(id => updateSelect(id, dOpts, '', false));
+            updateSelect('ann-target', [{val:'all', text:'全部分區'}, ...dOpts], '', false);
+            
+            window.updateDistrict();
+        };
+
+        window.updateDistrict = () => {
+            const fDist = document.getElementById('f-district').value;
+            const distData = window.sysSettings.districts.find(d => d.name === fDist);
+            const areaSel = document.getElementById('f-area');
+            if(!areaSel) return;
+            areaSel.innerHTML = '';
+            
+            let areas = [];
+            if (distData && distData.areas) {
+                areas = Array.isArray(distData.areas) ? distData.areas : (typeof distData.areas === 'string' ? distData.areas.split(',').map(s=>s.trim()) : []);
+            }
+            areas.forEach(a => { areaSel.innerHTML += `<option value="${a}">${a}</option>`; });
+            window.generatePrefix();
+        };
+
+        window.generatePrefix = () => {
+            const y = document.getElementById('f-year').value || '';
+            const d = document.getElementById('f-district').value || '';
+            const a = document.getElementById('f-area').value || '';
+            let dNum = d.replace(/[^0-9一二三四五六七八九十]/g, '');
+            let aShort = window.distCodeMap[a] || (a ? a.charAt(0) : '');
+            document.getElementById('f-prefix').value = `${y}-${dNum}${aShort}-`;
+        };
+
+        window.calcExpectDate = () => {
+            const recv = document.getElementById('f-date-receive').value;
+            const expEl = document.getElementById('f-date-expect');
+            if (recv && !expEl.value) {
+                let d = new Date(recv);
+                d.setDate(d.getDate() + 45);
+                expEl.value = d.toISOString().split('T')[0];
+            }
+        };
+
+        window.setTab = (tab) => {
+            window.currentTab = tab;
+            ['all', 'processing', 'nearing', 'overdue', 'completed'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(t === tab) el.className = `px-4 py-2 rounded-lg text-sm font-bold bg-indigo-100 text-indigo-700 transition-colors whitespace-nowrap`;
+                else el.className = `px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors whitespace-nowrap`;
+            });
+            window.renderWoTable();
+        };
+
         window.renderWoTable = () => {
             if (!window.currentUser) return;
             const tbody = document.getElementById('wo-table-body');
@@ -937,192 +870,157 @@
             const searchStr = document.getElementById('search-input').value.toLowerCase();
             
             tbody.innerHTML = '';
-            let count = 0;
+            let counts = { all: 0, processing: 0, nearing: 0, overdue: 0, completed: 0 };
+            const today = new Date(); today.setHours(0,0,0,0);
 
             window.workOrders.forEach(wo => {
-                // 權限與篩選過濾
                 if (window.currentUser.role === 'vendor') {
-                    if (wo.year !== window.currentUser.year || wo.district !== window.currentUser.district) return;
+                    if (wo.year !== window.currentUser.year || wo.district !== window.currentUser.district || wo.vendor !== window.currentUser.name) return;
                 } else {
                     if (sYear !== 'all' && wo.year !== sYear) return;
                     if (sDist !== 'all' && wo.district !== sDist) return;
                 }
 
-                const searchable = Object.values(wo).join(' ').toLowerCase();
+                const searchable = `${wo.serialFull} ${wo.location} ${wo.content} ${wo.vendor} ${wo.dept} ${wo.squad} ${wo.source} ${wo.memo}`.toLowerCase();
                 if (searchStr && !searchable.includes(searchStr)) return;
 
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors group";
-                
-                // 狀態與金額判斷
-                const st = wo.dateActual ? '完工' : (wo.dateAssign ? '派工中' : '未派工');
-                const stColor = st === '完工' ? 'bg-emerald-100 text-emerald-700' : (st === '派工中' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600');
-                
+                let status = 'processing'; let stText = '辦理中'; let rowClass = "hover:bg-slate-50 transition-colors group"; let stColor = "bg-blue-100 text-blue-700";
+
+                if (wo.dateActual) {
+                    status = 'completed'; stText = '已完工'; stColor = "bg-emerald-100 text-emerald-700";
+                } else if (wo.dateExpect) {
+                    const expDate = new Date(wo.dateExpect);
+                    const diffDays = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    if (diffDays < 0) { status = 'overdue'; stText = '已逾期'; rowClass = "bg-rose-50 hover:bg-rose-100 transition-colors group border-l-4 border-rose-500"; stColor = "bg-rose-100 text-rose-700"; } 
+                    else if (diffDays <= 10) { status = 'nearing'; stText = '即將逾期'; rowClass = "bg-amber-50 hover:bg-amber-100 transition-colors group border-l-4 border-amber-500"; stColor = "bg-amber-100 text-amber-700"; }
+                }
+
+                counts.all++; counts[status]++;
+                if (window.currentTab !== 'all' && status !== window.currentTab) return;
+
                 let amtStyle = "text-slate-600";
                 if (wo.amtAssign && wo.amtActual) {
                     const diff = Math.abs(wo.amtAssign - wo.amtActual) / wo.amtAssign;
-                    if (diff > 0.1) amtStyle = "text-rose-600 font-bold <i class='fa-solid fa-circle-exclamation text-rose-500'></i>";
+                    if (diff > 0.1) amtStyle = "text-rose-600 font-bold <i class='fa-solid fa-circle-exclamation text-rose-500 ml-1' title='落差超過 10%'></i>";
                 }
 
-                // 連結轉圖示
-                const mapUrlIcon = (url, type) => url && url.startsWith('http') ? `<a href="${url}" target="_blank" class="text-${type==='photo'?'emerald':'indigo'}-500 hover:text-${type==='photo'?'emerald':'indigo'}-700 text-lg" title="點擊開啟"><i class="fa-solid ${type==='photo'?'fa-image':'fa-file-pdf'}"></i></a>` : '<span class="text-slate-300">-</span>';
+                const mapUrlIcon = (url, type) => url && url.startsWith('http') ? `<a href="${url}" target="_blank" class="text-${type==='photo'?'emerald':'indigo'}-500 hover:text-${type==='photo'?'emerald':'indigo'}-700 text-xl block hover:scale-110 transition-transform" title="點擊開啟"><i class="fa-solid ${type==='photo'?'fa-image':'fa-file-pdf'}"></i></a>` : '<span class="text-slate-300">-</span>';
 
+                const tr = document.createElement('tr');
+                tr.className = rowClass;
                 tr.innerHTML = `
-                    <td class="px-4 py-3 border-b border-slate-100">
-                        <div class="font-bold text-indigo-600">${wo.serialFull || '-'}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">${wo.year} / ${wo.district}</div>
-                    </td>
-                    <td class="px-4 py-3 border-b border-slate-100">
-                        <div class="font-medium text-slate-800 break-words whitespace-normal line-clamp-1" title="${wo.location}">${wo.location}</div>
-                        <div class="text-xs text-slate-500 mt-1 break-words whitespace-normal line-clamp-1" title="${wo.content}">${wo.content}</div>
-                    </td>
-                    <td class="px-4 py-3 border-b border-slate-100">
-                        <div class="text-sm font-medium text-slate-700">${wo.vendor || '-'}</div>
-                        <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-medium ${stColor}">${st}</span>
-                    </td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-xs text-slate-500 space-y-1">
-                        <div><span class="inline-block w-8 text-slate-400">收單</span> ${wo.dateReceive || '-'}</div>
-                        <div><span class="inline-block w-8 text-blue-400">派工</span> ${wo.dateAssign || '-'}</div>
-                        <div class="font-medium text-emerald-600"><span class="inline-block w-8 text-emerald-500">完工</span> ${wo.dateActual || '-'}</div>
-                    </td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-xs space-y-1">
-                        <div class="text-slate-500"><span class="inline-block w-4">派</span> $${wo.amtAssign ? Number(wo.amtAssign).toLocaleString() : '-'}</div>
-                        <div class="${amtStyle}"><span class="inline-block w-4">竣</span> $${wo.amtActual ? Number(wo.amtActual).toLocaleString() : '-'}</div>
-                    </td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-xs">
-                        <div class="text-slate-700">${wo.source || '-'}</div>
-                        ${wo.sourceDetail ? `<div class="text-indigo-500 mt-1">${wo.sourceDetail}</div>` : ''}
-                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100"><div class="font-bold text-indigo-600">${wo.serialFull || '-'}</div><div class="text-[10px] text-slate-400 mt-1">${wo.year} / ${wo.district}</div></td>
+                    <td class="px-4 py-3 border-b border-slate-100"><div class="font-medium text-slate-800 break-words whitespace-normal line-clamp-1" title="${wo.location}">${wo.location}</div><div class="text-xs text-slate-500 mt-1 break-words whitespace-normal line-clamp-1" title="${wo.content}">${wo.content}</div></td>
+                    <td class="px-4 py-3 border-b border-slate-100"><div class="text-sm font-medium text-slate-700">${wo.vendor || '-'}</div><span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-medium ${stColor}">${stText}</span></td>
+                    <td class="px-4 py-3 border-b border-slate-100 text-xs text-slate-500 space-y-1"><div><span class="inline-block w-8 text-slate-400">收單</span> ${wo.dateReceive || '-'}</div><div><span class="inline-block w-8 text-blue-400">派工</span> ${wo.dateAssign || '-'}</div><div><span class="inline-block w-8 text-amber-500">預定</span> <span class="font-bold text-slate-600">${wo.dateExpect || '-'}</span></div><div class="font-medium text-emerald-600"><span class="inline-block w-8 text-emerald-500">完工</span> ${wo.dateActual || '-'}</div></td>
+                    <td class="px-4 py-3 border-b border-slate-100 text-xs space-y-1"><div class="text-slate-500"><span class="inline-block w-4">派</span> $${wo.amtAssign ? Number(wo.amtAssign).toLocaleString() : '-'}</div><div class="${amtStyle}"><span class="inline-block w-4">竣</span> $${wo.amtActual ? Number(wo.amtActual).toLocaleString() : '-'}</div></td>
+                    <td class="px-4 py-3 border-b border-slate-100 text-xs"><div class="text-slate-700">${wo.source || '-'}</div>${wo.sourceDetail ? `<div class="text-indigo-500 mt-1">${wo.sourceDetail}</div>` : ''}</td>
                     <td class="px-4 py-3 border-b border-slate-100 text-center">${mapUrlIcon(wo.urlPhoto, 'photo')}</td>
                     <td class="px-4 py-3 border-b border-slate-100 text-center">${mapUrlIcon(wo.urlWo, 'wo')}</td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-center">
-                        <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="window.editWorkOrder('${wo.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors shadow-sm" title="編輯">
-                                <i class="fa-solid fa-pen text-xs"></i>
-                            </button>
-                            ${window.currentUser.role === 'admin' ? `
-                            <button onclick="window.deleteWorkOrder('${wo.id}')" class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors shadow-sm" title="刪除">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>` : ''}
-                        </div>
-                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100 text-center"><div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"><button onclick="window.editWorkOrder('${wo.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors shadow-sm" title="編輯"><i class="fa-solid fa-pen text-xs"></i></button>${window.currentUser.role === 'admin' ? `<button onclick="window.deleteWorkOrder('${wo.id}')" class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors shadow-sm" title="刪除"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}</div></td>
                 `;
                 tbody.appendChild(tr);
-                count++;
             });
             
-            if(count === 0) tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-12 text-center text-slate-400"><i class="fa-solid fa-folder-open text-3xl mb-3 block text-slate-300"></i>查無派工單資料</td></tr>`;
+            if(counts[window.currentTab] === 0) tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-12 text-center text-slate-400"><i class="fa-solid fa-folder-open text-3xl mb-3 block text-slate-300"></i>查無資料</td></tr>`;
+
+            ['all', 'processing', 'nearing', 'overdue', 'completed'].forEach(t => { document.getElementById(`cnt-${t}`).innerText = counts[t]; });
+        };
+
+        window.exportExcel = () => {
+            if(window.workOrders.length === 0) return showToast('目前沒有資料可匯出', 'error');
+            try {
+                const wsData = window.workOrders.map(wo => ({
+                    "年度": wo.year, "分區": wo.district, "行政區": wo.area, "派工編號": wo.serialFull, "派工地點": wo.location, "派工內容": wo.content, "指派廠商": wo.vendor, "科室": wo.dept, "派別": wo.squad, "案件來源": wo.source, "服務處": wo.sourceDetail || '', "收單日期": wo.dateReceive, "派工日期": wo.dateAssign, "預定完工": wo.dateExpect, "實際完工": wo.dateActual, "派工金額": wo.amtAssign, "竣工金額": wo.amtActual, "備註": wo.memo
+                }));
+                const ws = XLSX.utils.json_to_sheet(wsData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "派工單列表");
+                XLSX.writeFile(wb, `派工系統匯出_${new Date().toISOString().split('T')[0]}.xlsx`); showToast('Excel 匯出成功！');
+            } catch (e) { showToast('匯出失敗，請確認已載入 SheetJS', 'error'); }
+        };
+
+        window.exportBackup = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.workOrders));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `派工備份檔_${new Date().toISOString().split('T')[0]}.json`); dl.click(); showToast('備份檔已下載！');
+        };
+
+        window.importBackup = async (event) => {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        showToast('正在上傳備份至雲端...', 'success');
+                        for(let wo of data) { if(wo.id) await setDoc(getPubDoc("workOrders", wo.id), wo); }
+                        showToast('雲端備份還原完成！');
+                    } else throw new Error("Format Invalid");
+                } catch (err) { showToast('檔案格式錯誤', 'error'); }
+            };
+            reader.readAsText(file); event.target.value = '';
         };
 
         let editingWoId = null;
         window.openModal = () => {
-            editingWoId = null;
-            document.getElementById('wo-form').reset();
+            editingWoId = null; document.getElementById('wo-form').reset();
             document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-file-signature text-indigo-600"></i> 新增派工單';
-            document.getElementById('f-source-detail-wrap').style.display = 'none';
-            document.getElementById('f-school-name').disabled = true;
+            document.getElementById('f-source-detail-wrap').style.display = 'none'; document.getElementById('f-school-name').disabled = true;
             
             if (window.currentUser.role === 'vendor') {
-                document.getElementById('f-year').value = window.currentUser.year;
-                document.getElementById('f-district').value = window.currentUser.district;
-                document.getElementById('f-vendor').value = window.currentUser.name;
-            } else {
-                document.getElementById('f-vendor').value = ''; 
-            }
-            window.updateDistrict();
-            document.getElementById('wo-modal').classList.replace('hidden', 'flex');
+                document.getElementById('f-year').value = window.currentUser.year; document.getElementById('f-district').value = window.currentUser.district; document.getElementById('f-vendor').value = window.currentUser.name;
+            } else { document.getElementById('f-vendor').value = ''; }
+            window.updateDistrict(); document.getElementById('wo-modal').classList.replace('hidden', 'flex');
         };
 
         window.closeModal = () => document.getElementById('wo-modal').classList.replace('flex', 'hidden');
 
         window.saveWorkOrder = async () => {
+            if (!fbUserId) return;
             const requiredIds = ['f-year', 'f-district', 'f-area', 'f-location', 'f-content'];
             const missing = requiredIds.find(id => !document.getElementById(id).value.trim());
             if (missing) return showToast('請填寫所有必填欄位 (*)', 'error');
 
             const woData = {
-                year: document.getElementById('f-year').value,
-                district: document.getElementById('f-district').value,
-                area: document.getElementById('f-area').value,
-                serialFull: document.getElementById('f-prefix').value + document.getElementById('f-serial').value,
-                serial: document.getElementById('f-serial').value,
-                location: document.getElementById('f-location').value,
-                schoolCheck: document.getElementById('f-school-check').checked,
-                schoolName: document.getElementById('f-school-name').value,
+                year: document.getElementById('f-year').value, district: document.getElementById('f-district').value, area: document.getElementById('f-area').value,
+                serialFull: document.getElementById('f-prefix').value + document.getElementById('f-serial').value, serial: document.getElementById('f-serial').value,
+                location: document.getElementById('f-location').value, schoolCheck: document.getElementById('f-school-check').checked, schoolName: document.getElementById('f-school-name').value,
                 content: document.getElementById('f-content').value,
-                dateReceive: document.getElementById('f-date-receive').value,
-                dateAssign: document.getElementById('f-date-assign').value,
-                dateExpect: document.getElementById('f-date-expect').value,
-                dateActual: document.getElementById('f-date-actual').value,
-                amtAssign: document.getElementById('f-amt-assign').value,
-                amtActual: document.getElementById('f-amt-actual').value,
-                vendor: document.getElementById('f-vendor').value,
-                squad: document.getElementById('f-squad').value,
-                dept: document.getElementById('f-dept').value,
-                source: document.getElementById('f-source').value,
-                sourceDetail: document.getElementById('f-source-detail').value,
-                urlWo: document.getElementById('f-url-wo').value,
-                urlPhoto: document.getElementById('f-url-photo').value,
-                memo: document.getElementById('f-memo').value
+                dateReceive: document.getElementById('f-date-receive').value, dateAssign: document.getElementById('f-date-assign').value,
+                dateExpect: document.getElementById('f-date-expect').value, dateActual: document.getElementById('f-date-actual').value,
+                amtAssign: document.getElementById('f-amt-assign').value, amtActual: document.getElementById('f-amt-actual').value,
+                vendor: document.getElementById('f-vendor').value, squad: document.getElementById('f-squad').value,
+                dept: document.getElementById('f-dept').value, source: document.getElementById('f-source').value, sourceDetail: document.getElementById('f-source-detail').value,
+                urlWo: document.getElementById('f-url-wo').value, urlPhoto: document.getElementById('f-url-photo').value, memo: document.getElementById('f-memo').value
             };
 
-            const btn = document.getElementById('btn-save-wo');
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 儲存中...';
-
+            const btn = document.getElementById('btn-save-wo'); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 儲存中...';
             try {
                 if (editingWoId) {
-                    if(isMockMode) MockDB.update("workOrders", editingWoId, woData);
-                    else await updateDoc(doc(db, "workOrders", editingWoId), woData);
-                    showToast('更新成功');
+                    await updateDoc(getPubDoc("workOrders", editingWoId), woData); showToast('更新成功');
                 } else {
-                    woData.timestamp = isMockMode ? new Date() : serverTimestamp();
-                    woData.creatorId = window.currentUser.id;
-                    if(isMockMode) MockDB.add("workOrders", woData);
-                    else await addDoc(collection(db, "workOrders"), woData);
-                    showToast('新增成功');
+                    woData.timestamp = serverTimestamp(); woData.creatorId = window.currentUser.id;
+                    await addDoc(getPubCollection("workOrders"), woData); showToast('新增成功');
                 }
                 window.closeModal();
-            } catch(e) {
-                showToast('儲存失敗', 'error'); console.error(e);
-            }
+            } catch(e) { showToast('儲存失敗', 'error'); console.error(e); }
             btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> 儲存派工單';
         };
 
         window.editWorkOrder = (id) => {
-            const wo = window.workOrders.find(w => w.id === id);
-            if (!wo) return;
-            editingWoId = id;
-            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-600"></i> 編輯派工單';
-            
-            Object.keys(wo).forEach(key => {
-                const el = document.getElementById(`f-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`);
-                if (el) {
-                    if (el.type === 'checkbox') el.checked = wo[key];
-                    else el.value = wo[key];
-                }
-            });
-            
-            document.getElementById('f-school-name').disabled = !wo.schoolCheck;
-            document.getElementById('f-source-detail-wrap').style.display = wo.source === '議員' ? 'block' : 'none';
-            window.updateDistrict();
-            document.getElementById('f-area').value = wo.area;
-            document.getElementById('f-serial').value = wo.serial;
-            window.generatePrefix();
-            
+            const wo = window.workOrders.find(w => w.id === id); if (!wo) return;
+            editingWoId = id; document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-600"></i> 編輯派工單';
+            Object.keys(wo).forEach(key => { const el = document.getElementById(`f-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`); if (el) { if (el.type === 'checkbox') el.checked = wo[key]; else el.value = wo[key]; } });
+            document.getElementById('f-school-name').disabled = !wo.schoolCheck; document.getElementById('f-source-detail-wrap').style.display = wo.source === '議員' ? 'block' : 'none';
+            window.updateDistrict(); document.getElementById('f-area').value = wo.area; document.getElementById('f-serial').value = wo.serial; window.generatePrefix();
             document.getElementById('wo-modal').classList.replace('hidden', 'flex');
         };
 
         window.deleteWorkOrder = (id) => {
-            window.showConfirm('確定要刪除這筆派工單嗎？刪除後無法恢復。', async () => {
-                if(isMockMode) MockDB.delete("workOrders", id);
-                else await deleteDoc(doc(db, "workOrders", id));
-                showToast('已刪除資料');
+            if (!fbUserId) return;
+            window.showConfirm('確定要刪除這筆派工單嗎？', async () => {
+                await deleteDoc(getPubDoc("workOrders", id)); showToast('已刪除資料');
             });
         };
 
-        // ==========================================
-        // 公告與通報邏輯
-        // ==========================================
         window.renderAnnouncements = () => {
             if (!window.currentUser) return;
             let actions = document.getElementById('announcement-actions');
@@ -1130,50 +1028,19 @@
                 ? `<button onclick="window.openAnnModal('vendor')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors shadow-sm"><i class="fa-solid fa-clipboard-check"></i> 填寫每日通報</button>`
                 : `<button onclick="window.openAnnModal('admin')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors shadow-sm"><i class="fa-solid fa-pen-to-square"></i> 發布公告</button>`;
 
-            const list = document.getElementById('announcement-list');
-            list.innerHTML = '';
+            const list = document.getElementById('announcement-list'); list.innerHTML = '';
             
             window.announcements.forEach(a => {
                 if (window.currentUser.role === 'vendor') {
                     if (a.type === 'report' && a.authorId !== window.currentUser.id) return;
                     if (a.type === 'notice' && a.target !== 'all' && a.target !== window.currentUser.district) return;
                 }
-
-                const dateStr = a.timestamp ? (isMockMode ? new Date(a.timestamp).toLocaleString() : a.timestamp.toDate().toLocaleString()) : '';
-                const el = document.createElement('div');
-                el.className = 'bg-white rounded-xl shadow-sm border border-slate-100 p-5 relative overflow-hidden';
-                
+                const dateStr = a.timestamp && typeof a.timestamp.toDate === 'function' ? a.timestamp.toDate().toLocaleString() : new Date().toLocaleString();
+                const el = document.createElement('div'); el.className = 'bg-white rounded-xl shadow-sm border border-slate-100 p-5 relative overflow-hidden';
                 if (a.type === 'notice') {
-                    el.innerHTML = `
-                        <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded font-bold">機關公告</span>
-                            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${dateStr}</span>
-                            <span class="text-xs text-slate-500 bg-slate-100 px-2 rounded-full ml-auto">對象: ${a.target==='all'?'全區':a.target}</span>
-                        </div>
-                        <p class="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">${a.content}</p>
-                        <p class="text-xs text-slate-400 mt-3 text-right">- 發布人: ${a.author}</p>
-                    `;
+                    el.innerHTML = `<div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div><div class="flex items-center gap-2 mb-2"><span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded font-bold">機關公告</span><span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${dateStr}</span><span class="text-xs text-slate-500 bg-slate-100 px-2 rounded-full ml-auto">對象: ${a.target==='all'?'全區':a.target}</span></div><p class="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">${a.content}</p><p class="text-xs text-slate-400 mt-3 text-right">- 發布人: ${a.author}</p>`;
                 } else {
-                    el.innerHTML = `
-                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded font-bold">施工通報</span>
-                            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${dateStr}</span>
-                            <span class="text-xs font-bold text-slate-600 ml-auto">${a.author}</span>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                <p class="text-xs font-bold text-emerald-600 mb-2 border-b border-slate-200 pb-1">昨日完成</p>
-                                <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">${a.done ? a.done.map(d=>`<li>${d}</li>`).join('') : '<li class="text-slate-400">無</li>'}</ul>
-                            </div>
-                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                <p class="text-xs font-bold text-blue-600 mb-2 border-b border-slate-200 pb-1">今日預定</p>
-                                <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">${a.todo ? a.todo.map(d=>`<li>${d}</li>`).join('') : '<li class="text-slate-400">無</li>'}</ul>
-                            </div>
-                        </div>
-                        ${a.issue ? `<div class="mt-3 bg-rose-50 p-3 rounded-lg border border-rose-100"><p class="text-xs font-bold text-rose-600 mb-1">緊急回報</p><p class="text-sm text-rose-700">${a.issue}</p></div>` : ''}
-                    `;
+                    el.innerHTML = `<div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div><div class="flex items-center gap-2 mb-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded font-bold">施工通報</span><span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${dateStr}</span><span class="text-xs font-bold text-slate-600 ml-auto">${a.author}</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-slate-50 p-3 rounded-lg border border-slate-100"><p class="text-xs font-bold text-emerald-600 mb-2 border-b border-slate-200 pb-1">昨日完成</p><ul class="text-sm text-slate-600 list-disc list-inside space-y-1">${a.done ? a.done.map(d=>`<li>${d}</li>`).join('') : '<li class="text-slate-400">無</li>'}</ul></div><div class="bg-slate-50 p-3 rounded-lg border border-slate-100"><p class="text-xs font-bold text-blue-600 mb-2 border-b border-slate-200 pb-1">今日預定</p><ul class="text-sm text-slate-600 list-disc list-inside space-y-1">${a.todo ? a.todo.map(d=>`<li>${d}</li>`).join('') : '<li class="text-slate-400">無</li>'}</ul></div></div>${a.issue ? `<div class="mt-3 bg-rose-50 p-3 rounded-lg border border-rose-100"><p class="text-xs font-bold text-rose-600 mb-1">緊急回報</p><p class="text-sm text-rose-700">${a.issue}</p></div>` : ''}`;
                 }
                 list.appendChild(el);
             });
@@ -1181,265 +1048,131 @@
 
         let currentAnnType = '';
         window.openAnnModal = (type) => {
-            currentAnnType = type;
-            document.getElementById('ann-admin-form').style.display = type === 'admin' ? 'block' : 'none';
-            document.getElementById('ann-vendor-form').style.display = type === 'vendor' ? 'block' : 'none';
-            document.getElementById('ann-modal-title').innerText = type === 'admin' ? '發布公告' : '填寫每日施工通報';
-            
+            currentAnnType = type; document.getElementById('ann-admin-form').style.display = type === 'admin' ? 'block' : 'none'; document.getElementById('ann-vendor-form').style.display = type === 'vendor' ? 'block' : 'none'; document.getElementById('ann-modal-title').innerText = type === 'admin' ? '發布公告' : '填寫每日施工通報';
             if (type === 'vendor') {
                 const uncompleted = window.workOrders.filter(w => w.vendor === window.currentUser.name && w.year === window.currentUser.year && !w.dateActual);
-                const buildList = (id) => document.getElementById(id).innerHTML = uncompleted.map(w => 
-                    `<label class="flex items-start gap-2 p-2 hover:bg-slate-100 rounded cursor-pointer border border-transparent hover:border-slate-200 transition-colors">
-                        <input type="checkbox" value="${w.id}" class="mt-0.5 text-indigo-600 rounded">
-                        <div><span class="font-bold text-indigo-600 block">${w.serialFull || w.serial || '無編號'}</span><span class="text-slate-600 line-clamp-1">${w.location} - ${w.content}</span></div>
-                    </label>`
-                ).join('');
-                buildList('ann-vendor-done-list');
-                buildList('ann-vendor-todo-list');
-                document.getElementById('ann-vendor-done-manual').value = '';
-                document.getElementById('ann-vendor-todo-manual').value = '';
-                document.getElementById('ann-vendor-issue').value = '';
-            } else {
-                document.getElementById('ann-content').value = '';
-            }
+                const buildList = (id) => document.getElementById(id).innerHTML = uncompleted.map(w => `<label class="flex items-start gap-2 p-2 hover:bg-slate-100 rounded cursor-pointer border border-transparent hover:border-slate-200 transition-colors"><input type="checkbox" value="${w.id}" class="mt-0.5 text-indigo-600 rounded"><div><span class="font-bold text-indigo-600 block">${w.serialFull || w.serial || '無編號'}</span><span class="text-slate-600 line-clamp-1">${w.location} - ${w.content}</span></div></label>`).join('');
+                buildList('ann-vendor-done-list'); buildList('ann-vendor-todo-list'); document.getElementById('ann-vendor-done-manual').value = ''; document.getElementById('ann-vendor-todo-manual').value = ''; document.getElementById('ann-vendor-issue').value = '';
+            } else { document.getElementById('ann-content').value = ''; }
             document.getElementById('announcement-modal').classList.replace('hidden', 'flex');
         };
         window.closeAnnModal = () => document.getElementById('announcement-modal').classList.replace('flex', 'hidden');
 
         window.saveAnnouncement = async () => {
-            let data = {
-                type: currentAnnType === 'admin' ? 'notice' : 'report',
-                author: window.currentUser.name,
-                authorId: window.currentUser.id,
-                timestamp: isMockMode ? new Date() : serverTimestamp()
-            };
-
+            if (!fbUserId) return;
+            let data = { type: currentAnnType === 'admin' ? 'notice' : 'report', author: window.currentUser.name, authorId: window.currentUser.id, timestamp: serverTimestamp() };
             if (currentAnnType === 'admin') {
-                data.target = document.getElementById('ann-target').value;
-                data.content = document.getElementById('ann-content').value;
+                data.target = document.getElementById('ann-target').value; data.content = document.getElementById('ann-content').value;
                 if(!data.content) return showToast('請填寫公告內容', 'error');
             } else {
                 const getVals = (id, manualId) => {
-                    let items = Array.from(document.getElementById(id).querySelectorAll('input:checked')).map(el => {
-                        const wo = window.workOrders.find(w => w.id === el.value);
-                        return wo ? `${wo.serialFull || ''} ${wo.location}` : '';
-                    });
-                    const manual = document.getElementById(manualId).value.trim();
-                    if(manual) items.push(manual);
-                    return items;
+                    let items = Array.from(document.getElementById(id).querySelectorAll('input:checked')).map(el => { const wo = window.workOrders.find(w => w.id === el.value); return wo ? `${wo.serialFull || ''} ${wo.location}` : ''; });
+                    const manual = document.getElementById(manualId).value.trim(); if(manual) items.push(manual); return items;
                 };
-                data.done = getVals('ann-vendor-done-list', 'ann-vendor-done-manual');
-                data.todo = getVals('ann-vendor-todo-list', 'ann-vendor-todo-manual');
-                data.issue = document.getElementById('ann-vendor-issue').value;
+                data.done = getVals('ann-vendor-done-list', 'ann-vendor-done-manual'); data.todo = getVals('ann-vendor-todo-list', 'ann-vendor-todo-manual'); data.issue = document.getElementById('ann-vendor-issue').value;
                 
-                // 自動更新完工日期
                 const doneIds = Array.from(document.getElementById('ann-vendor-done-list').querySelectorAll('input:checked')).map(el => el.value);
-                const yDate = new Date(); yDate.setDate(yDate.getDate() - 1);
-                const yDateStr = yDate.toISOString().split('T')[0];
-                doneIds.forEach(id => {
-                    if(isMockMode) MockDB.update('workOrders', id, {dateActual: yDateStr});
-                    else updateDoc(doc(db, "workOrders", id), {dateActual: yDateStr});
-                });
+                const yDate = new Date(); yDate.setDate(yDate.getDate() - 1); const yDateStr = yDate.toISOString().split('T')[0];
+                doneIds.forEach(id => { updateDoc(getPubDoc("workOrders", id), {dateActual: yDateStr}); });
             }
-
-            try {
-                if(isMockMode) MockDB.add('announcements', data);
-                else await addDoc(collection(db, "announcements"), data);
-                showToast('發布成功');
-                window.closeAnnModal();
-            } catch(e) { showToast('發布失敗', 'error'); }
+            try { await addDoc(getPubCollection("announcements"), data); showToast(currentAnnType === 'admin' ? '發布成功' : '通報已送出並自動更新完工日'); window.closeAnnModal(); } catch(e) { showToast('發布失敗', 'error'); console.error(e); }
         };
 
-        // ==========================================
-        // 契約執行統計邏輯
-        // ==========================================
         window.renderStatistics = () => {
-            const year = document.getElementById('stat-year').value;
-            const dist = document.getElementById('stat-district').value;
-            const dept = document.getElementById('stat-dept').value;
-            const squad = document.getElementById('stat-squad').value.trim();
-            const container = document.getElementById('statistics-content');
-            
-            if(!year || !dist) return;
+            const year = document.getElementById('stat-year').value; const dist = document.getElementById('stat-district').value; const dept = document.getElementById('stat-dept').value; const squad = document.getElementById('stat-squad').value.trim();
+            const container = document.getElementById('statistics-content'); if(!year || !dist) return;
 
             let filteredWos = window.workOrders.filter(w => w.year === year && w.district === dist);
-            
-            let html = `<div class="bg-indigo-600 text-white p-6 rounded-2xl shadow-md mb-6"><h3 class="text-xl font-bold mb-2">${year}年 ${dist} 總體契約概況</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">`;
-            
             let totalAssign = filteredWos.reduce((sum, w) => sum + (Number(w.amtAssign)||0), 0);
             let totalActual = filteredWos.reduce((sum, w) => sum + (Number(w.amtActual)||0), 0);
+            let progressPct = totalAssign > 0 ? Math.round((totalActual / totalAssign) * 100) : 0;
             
-            const moneyBlock = (title, val, icon) => `<div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm"><p class="text-indigo-100 text-xs mb-1">${title}</p><p class="text-xl font-bold flex items-center gap-2"><i class="fa-solid ${icon} text-indigo-300 opacity-50"></i> $${val.toLocaleString()}</p></div>`;
-            
-            html += moneyBlock('派工總金額', totalAssign, 'fa-file-invoice-dollar');
-            html += moneyBlock('竣工總金額', totalActual, 'fa-sack-dollar');
-            html += moneyBlock('總派工件數', filteredWos.length, 'fa-clipboard-list');
-            html += moneyBlock('已完工件數', filteredWos.filter(w=>w.dateActual).length, 'fa-check-double');
-            html += `</div></div>`;
+            let html = `
+            <div class="bg-indigo-600 text-white p-6 rounded-2xl shadow-md mb-6 relative overflow-hidden">
+                <div class="absolute right-0 top-0 opacity-10 transform scale-150 translate-x-1/4 -translate-y-1/4"><i class="fa-solid fa-chart-pie text-9xl"></i></div>
+                <h3 class="text-xl font-bold mb-4 relative z-10">${year}年 ${dist} 總體契約概況</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm"><p class="text-indigo-100 text-xs mb-1">派工總金額</p><p class="text-xl font-bold">$${totalAssign.toLocaleString()}</p></div>
+                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm"><p class="text-indigo-100 text-xs mb-1">竣工總金額</p><p class="text-xl font-bold">$${totalActual.toLocaleString()}</p></div>
+                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm"><p class="text-indigo-100 text-xs mb-1">總派工件數</p><p class="text-xl font-bold">${filteredWos.length} 件</p></div>
+                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm"><p class="text-indigo-100 text-xs mb-1">已完工件數</p><p class="text-xl font-bold">${filteredWos.filter(w=>w.dateActual).length} 件</p></div>
+                </div>
+                <div class="mt-6 relative z-10"><div class="flex justify-between text-xs font-bold mb-1"><span class="text-indigo-100">竣工結算進度</span><span>${progressPct}%</span></div><div class="w-full bg-indigo-900/50 rounded-full h-3 overflow-hidden"><div class="bg-emerald-400 h-3 rounded-full transition-all duration-1000" style="width: ${progressPct}%"></div></div></div>
+            </div>`;
 
-            // 科室與派別篩選結果
             if(dept !== 'all' || squad) {
-                let subWos = filteredWos;
-                if(dept !== 'all') subWos = subWos.filter(w => w.dept === dept);
-                if(squad) subWos = subWos.filter(w => w.squad && w.squad.includes(squad));
-                
-                let subAssign = subWos.reduce((sum, w) => sum + (Number(w.amtAssign)||0), 0);
-                let subActual = subWos.reduce((sum, w) => sum + (Number(w.amtActual)||0), 0);
-                
-                html += `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-1">進階篩選分析</h3>
-                    <p class="text-sm text-slate-500 mb-4">條件：${dept !== 'all' ? dept : '全部科室'} ${squad ? `+ 派別「${squad}」` : ''}</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">符合件數</p><p class="text-2xl font-bold text-slate-700">${subWos.length} <span class="text-sm font-normal">件</span></p></div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">派工總額</p><p class="text-2xl font-bold text-blue-600">$${subAssign.toLocaleString()}</p></div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">竣工總額</p><p class="text-2xl font-bold text-emerald-600">$${subActual.toLocaleString()}</p></div>
-                    </div>
-                </div>`;
+                let subWos = filteredWos; if(dept !== 'all') subWos = subWos.filter(w => w.dept === dept); if(squad) subWos = subWos.filter(w => w.squad && w.squad.includes(squad));
+                let subAssign = subWos.reduce((sum, w) => sum + (Number(w.amtAssign)||0), 0); let subActual = subWos.reduce((sum, w) => sum + (Number(w.amtActual)||0), 0);
+                html += `<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden"><div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div><h3 class="text-lg font-bold text-slate-800 mb-1">進階篩選分析結果</h3><p class="text-sm text-slate-500 mb-4">條件：<span class="font-bold text-emerald-600">${dept !== 'all' ? dept : '全部科室'}</span> ${squad ? ` ＋ 派別「<span class="font-bold text-emerald-600">${squad}</span>」` : ''}</p><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">符合件數</p><p class="text-2xl font-bold text-slate-700">${subWos.length} <span class="text-sm font-normal">件</span></p></div><div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">派工總額</p><p class="text-2xl font-bold text-blue-600">$${subAssign.toLocaleString()}</p></div><div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center"><p class="text-slate-500 text-sm mb-1">竣工總額</p><p class="text-2xl font-bold text-emerald-600">$${subActual.toLocaleString()}</p></div></div></div>`;
             }
-
             container.innerHTML = html;
         };
 
-        // ==========================================
-        // 系統與帳號設定 (包含年度、分區動態增刪)
-        // ==========================================
         window.renderSettingsUI = () => {
-            const yearList = document.getElementById('settings-year-list');
-            const distList = document.getElementById('settings-dist-list');
-            yearList.innerHTML = ''; distList.innerHTML = '';
-            
-            window.sysSettings.years.forEach(y => {
-                yearList.innerHTML += `<li class="flex justify-between items-center bg-white px-3 py-2 rounded border border-slate-100 text-sm"><span class="font-medium text-slate-700">${y} 年</span><button onclick="window.delSetting('year', '${y}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button></li>`;
-            });
-            window.sysSettings.districts.forEach(d => {
-                let areaStr = Array.isArray(d.areas) ? d.areas.join(', ') : '';
-                distList.innerHTML += `<li class="flex justify-between items-center bg-white px-3 py-2 rounded border border-slate-100 text-sm"><div><span class="font-bold text-indigo-600 mr-2">${d.name}</span><span class="text-slate-500 text-xs">${areaStr}</span></div><button onclick="window.delSetting('district', '${d.name}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button></li>`;
-            });
+            const yearList = document.getElementById('settings-year-list'); const distList = document.getElementById('settings-dist-list'); yearList.innerHTML = ''; distList.innerHTML = '';
+            window.sysSettings.years.forEach(y => { yearList.innerHTML += `<li class="flex justify-between items-center bg-white px-3 py-2 rounded border border-slate-100 text-sm"><span class="font-medium text-slate-700">${y} 年</span><button onclick="window.delSetting('year', '${y}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button></li>`; });
+            window.sysSettings.districts.forEach(d => { let areaStr = Array.isArray(d.areas) ? d.areas.join(', ') : ''; distList.innerHTML += `<li class="flex justify-between items-center bg-white px-3 py-2 rounded border border-slate-100 text-sm"><div><span class="font-bold text-indigo-600 mr-2">${d.name}</span><span class="text-slate-500 text-xs">${areaStr}</span></div><button onclick="window.delSetting('district', '${d.name}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button></li>`; });
         };
 
         window.addYear = async () => {
-            const y = document.getElementById('new-year-input').value.trim();
-            if(!y) return;
-            if(window.sysSettings.years.includes(y)) return showToast('年度已存在', 'error');
-            try {
-                if(isMockMode) MockDB.add('settings', {type: 'year', name: y});
-                else await addDoc(collection(db, "settings"), { type: 'year', name: y });
-                document.getElementById('new-year-input').value = ''; showToast('新增年度成功');
-            } catch(e) {}
+            if (!fbUserId) return;
+            const y = document.getElementById('new-year-input').value.trim(); if(!y) return; if(window.sysSettings.years.includes(y)) return showToast('年度已存在', 'error');
+            try { await addDoc(getPubCollection("settings"), { type: 'year', name: y }); document.getElementById('new-year-input').value = ''; showToast('新增年度成功'); } catch(e) {}
         };
 
         window.addDistrict = async () => {
-            const name = document.getElementById('new-dist-name').value.trim();
-            const areas = document.getElementById('new-dist-areas').value.split(',').map(s=>s.trim()).filter(s=>s);
-            if(!name || areas.length===0) return showToast('請填寫分區名稱與至少一個行政區', 'error');
-            if(window.sysSettings.districts.find(d=>d.name===name)) return showToast('分區已存在', 'error');
-            try {
-                if(isMockMode) MockDB.add('settings', {type: 'district', name: name, areas: areas});
-                else await addDoc(collection(db, "settings"), { type: 'district', name: name, areas: areas });
-                document.getElementById('new-dist-name').value = ''; document.getElementById('new-dist-areas').value = ''; showToast('新增分區成功');
-            } catch(e) {}
+            if (!fbUserId) return;
+            const name = document.getElementById('new-dist-name').value.trim(); const areas = document.getElementById('new-dist-areas').value.split(',').map(s=>s.trim()).filter(s=>s);
+            if(!name || areas.length===0) return showToast('請填寫分區名稱與至少一個行政區', 'error'); if(window.sysSettings.districts.find(d=>d.name===name)) return showToast('分區已存在', 'error');
+            try { await addDoc(getPubCollection("settings"), { type: 'district', name: name, areas: areas }); document.getElementById('new-dist-name').value = ''; document.getElementById('new-dist-areas').value = ''; showToast('新增分區成功'); } catch(e) {}
         };
 
-        window.delSetting = async (type, name) => {
-            window.showConfirm(`確定刪除此${type==='year'?'年度':'分區'}設定嗎？`, async () => {
-                try {
-                    if(isMockMode) {
-                        let target = MockDB.get('settings').find(s => s.type === type && s.name === name);
-                        if(target) MockDB.delete('settings', target.id);
-                    } else {
-                        // Firebase 需要先查詢後刪除
-                        // 簡化處理：此處僅示範介面運作，正式版建議使用 Query
-                        window.location.reload(); 
-                    }
-                    showToast('已刪除設定');
-                } catch(e) {}
-            });
+        window.delSetting = (type, name) => {
+            if (!fbUserId) return;
+            window.showConfirm(`確定刪除此${type==='year'?'年度':'分區'}設定嗎？`, async () => { window.location.reload(); });
         };
 
         window.renderUserTable = () => {
             const tbody = document.getElementById('user-table-body');
-            tbody.innerHTML = window.users.map(u => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 border-b border-slate-100"><span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded font-medium">${roleMap[u.role]||'未知'}</span></td>
-                    <td class="px-4 py-3 border-b border-slate-100 font-medium text-slate-700">${u.name}</td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-sm text-indigo-600">${u.role === 'vendor' ? `${u.year} / ${u.district}` : '-'}</td>
-                    <td class="px-4 py-3 border-b border-slate-100"><span class="font-mono bg-slate-100 px-2 py-1 rounded text-xs text-slate-500">${u.pwd}</span></td>
-                    <td class="px-4 py-3 border-b border-slate-100 text-right">
-                        <button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen"></i></button>
-                        ${u.role !== 'admin' ? `<button onclick="window.deleteUser('${u.id}')" class="text-rose-500 hover:text-rose-700 mx-1"><i class="fa-solid fa-trash"></i></button>`:''}
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = window.users.map(u => `<tr class="hover:bg-slate-50"><td class="px-4 py-3 border-b border-slate-100"><span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded font-medium">${roleMap[u.role]||'未知'}</span></td><td class="px-4 py-3 border-b border-slate-100 font-medium text-slate-700">${u.name}</td><td class="px-4 py-3 border-b border-slate-100 text-sm text-indigo-600">${u.role === 'vendor' ? `${u.year} / ${u.district}` : '-'}</td><td class="px-4 py-3 border-b border-slate-100"><span class="font-mono bg-slate-100 px-2 py-1 rounded text-xs text-slate-500">${u.pwd}</span></td><td class="px-4 py-3 border-b border-slate-100 text-right"><button onclick="window.editUser('${u.id}')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen"></i></button>${u.role !== 'admin' ? `<button onclick="window.deleteUser('${u.id}')" class="text-rose-500 hover:text-rose-700 mx-1"><i class="fa-solid fa-trash"></i></button>`:''}</td></tr>`).join('');
         };
 
-        window.toggleUserVendorFields = () => {
-            document.getElementById('u-vendor-fields').style.display = document.getElementById('u-role').value === 'vendor' ? 'block' : 'none';
-        };
+        window.toggleUserVendorFields = () => { document.getElementById('u-vendor-fields').style.display = document.getElementById('u-role').value === 'vendor' ? 'block' : 'none'; };
 
         window.openUserModal = () => {
-            document.getElementById('u-id').value = '';
-            document.getElementById('u-name').value = '';
-            document.getElementById('u-pwd').value = '';
-            document.getElementById('u-role').value = 'vendor';
-            window.toggleUserVendorFields();
-            document.getElementById('user-modal').classList.replace('hidden', 'flex');
+            document.getElementById('u-id').value = ''; document.getElementById('u-name').value = ''; document.getElementById('u-pwd').value = ''; document.getElementById('u-role').value = 'vendor';
+            window.toggleUserVendorFields(); document.getElementById('user-modal').classList.replace('hidden', 'flex');
         };
-
         window.closeUserModal = () => document.getElementById('user-modal').classList.replace('flex', 'hidden');
 
         window.saveUser = async () => {
-            const data = {
-                role: document.getElementById('u-role').value,
-                name: document.getElementById('u-name').value.trim(),
-                pwd: document.getElementById('u-pwd').value.trim()
-            };
+            if (!fbUserId) return;
+            const data = { role: document.getElementById('u-role').value, name: document.getElementById('u-name').value.trim(), pwd: document.getElementById('u-pwd').value.trim() };
             if(!data.name || !data.pwd) return showToast('請填寫名稱與密碼', 'error');
-            if(data.role === 'vendor') {
-                data.year = document.getElementById('u-year').value;
-                data.district = document.getElementById('u-district').value;
-            }
-            
+            if(data.role === 'vendor') { data.year = document.getElementById('u-year').value; data.district = document.getElementById('u-district').value; }
             const id = document.getElementById('u-id').value;
             try {
-                if(id) {
-                    if(isMockMode) MockDB.update('users', id, data);
-                    else await updateDoc(doc(db, "users", id), data);
-                    showToast('帳號已更新');
-                } else {
-                    if(isMockMode) MockDB.add('users', data);
-                    else await addDoc(collection(db, "users"), data);
-                    showToast('帳號新增成功');
-                }
+                if(id) { await updateDoc(getPubDoc("users", id), data); showToast('帳號已更新'); } 
+                else { await addDoc(getPubCollection("users"), data); showToast('帳號新增成功'); }
                 window.closeUserModal();
             } catch(e) {}
         };
 
         window.editUser = (id) => {
-            const u = window.users.find(u => u.id === id);
-            if(!u) return;
-            document.getElementById('u-id').value = u.id;
-            document.getElementById('u-name').value = u.name;
-            document.getElementById('u-pwd').value = u.pwd;
-            document.getElementById('u-role').value = u.role;
-            if(u.role === 'vendor') {
-                document.getElementById('u-year').value = u.year;
-                document.getElementById('u-district').value = u.district;
-            }
-            window.toggleUserVendorFields();
-            document.getElementById('user-modal').classList.replace('hidden', 'flex');
+            const u = window.users.find(u => u.id === id); if(!u) return;
+            document.getElementById('u-id').value = u.id; document.getElementById('u-name').value = u.name; document.getElementById('u-pwd').value = u.pwd; document.getElementById('u-role').value = u.role;
+            if(u.role === 'vendor') { document.getElementById('u-year').value = u.year; document.getElementById('u-district').value = u.district; }
+            window.toggleUserVendorFields(); document.getElementById('user-modal').classList.replace('hidden', 'flex');
         };
 
         window.deleteUser = (id) => {
-            window.showConfirm('確定要刪除此帳號嗎？', async () => {
-                try {
-                    if(isMockMode) MockDB.delete('users', id);
-                    else await deleteDoc(doc(db, "users", id));
-                    showToast('帳號已刪除');
-                } catch(e) {}
-            });
+            if (!fbUserId) return;
+            window.showConfirm('確定要刪除此帳號嗎？', async () => { await deleteDoc(getPubDoc("users", id)); showToast('帳號已刪除'); });
         };
+
+        // 啟動系統
+        initAuth();
+
     </script>
 </body>
 </html>
