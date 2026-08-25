@@ -21,7 +21,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-  <!-- 左側導覽列 (Drawer) -->
   <aside id="sidebar" class="bg-slate-900 text-slate-100 w-64 flex-shrink-0 fixed inset-y-0 left-0 transform transition-transform duration-300 z-50 drawer-closed md:relative md:transform-none shadow-xl">
     <div class="p-4 flex justify-between items-center bg-slate-950 border-b border-slate-800">
       <h1 class="text-xl font-bold tracking-wider">交通局派工系統</h1>
@@ -47,7 +46,7 @@
 
   <!-- 主要內容區 -->
   <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
-    <!-- 上方標題列 -->
+    
     <header class="bg-white shadow-sm p-4 flex justify-between items-center z-10 border-b border-slate-200">
       <div class="flex items-center">
         <button onclick="window.toggleSidebar()" class="mr-4 text-slate-500 hover:text-indigo-600 md:hidden transition-colors"><i class="fas fa-bars text-xl"></i></button>
@@ -68,7 +67,6 @@
     <!-- 內容區塊 -->
     <div class="p-4 flex-1 overflow-y-auto relative">
       
-      <!-- 區塊：派工單總表 -->
       <section id="section-work-orders" class="fade-in h-full flex flex-col">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-wrap justify-between items-center gap-3 shrink-0">
           <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
@@ -110,7 +108,6 @@
         </div>
       </section>
 
-      <!-- 區塊：公告與通報 -->
       <section id="section-announcements" class="hidden fade-in space-y-4">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex justify-between items-center">
           <h3 class="font-bold text-lg text-indigo-800"><i class="fas fa-bullhorn mr-2"></i>公告與施工通報區</h3>
@@ -132,7 +129,6 @@
         </div>
       </section>
 
-      <!-- 區塊：契約執行統計 -->
       <section id="section-statistics" class="hidden fade-in space-y-4">
         <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500">
           <h3 class="font-bold text-lg mb-4 text-slate-700">選擇統計條件</h3>
@@ -167,7 +163,6 @@
         </div>
       </section>
 
-      <!-- 區塊：系統設定 -->
       <section id="section-settings" class="hidden fade-in space-y-6">
         
         <!-- 1. 獨立年度設定 -->
@@ -234,7 +229,6 @@
     </div>
   </main>
 
-  <!-- 系統共用：自訂對話框 (解決 alert/confirm 遭阻擋問題) -->
   <div id="custom-dialog-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-70 backdrop-blur-sm z-[999] flex items-center justify-center hidden transition-opacity">
     <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm fade-in border border-slate-200 text-center">
       <div id="custom-dialog-icon" class="mb-4 text-4xl"></div>
@@ -246,7 +240,6 @@
     </div>
   </div>
 
-  <!-- Modal: 登入 (全新下拉式選單與毛玻璃質感) -->
   <div id="login-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity duration-300">
     <div class="glass-panel p-8 rounded-2xl shadow-2xl w-96 fade-in border border-white/40">
       <div class="text-center mb-6">
@@ -285,7 +278,6 @@
     </div>
   </div>
 
-  <!-- Modal: 派工單表單 -->
   <div id="wo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-4xl max-h-[90vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
       <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
@@ -316,7 +308,7 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">行政區</label>
-                <select id="wo-district" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="window.updateWoPrefix()">
+                <select id="wo-district" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="window.updateWoPrefix(); window.updateVendorByDistrict();">
                   <option value="桃園區">桃園區</option><option value="蘆竹區">蘆竹區</option><option value="龜山區">龜山區</option>
                   <option value="八德區">八德區</option><option value="中壢區">中壢區</option><option value="大園區">大園區</option>
                   <option value="大溪區">大溪區</option><option value="復興區">復興區</option><option value="新屋區">新屋區</option>
@@ -362,7 +354,7 @@
             </div>
 
             <label class="block text-sm font-semibold text-slate-600 mb-1">年度</label>
-            <select id="wo-year-select" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.updateWoPrefix()"></select>
+            <select id="wo-year-select" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.updateVendorByDistrict()"></select>
             
             <label class="block text-sm font-semibold text-slate-600 mb-1">派工人員</label>
             <input type="text" id="wo-dispatcher" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="輸入派工人員姓名">
@@ -436,7 +428,6 @@
     </div>
   </div>
 
-  <!-- Modal: 系統年度設定 -->
   <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity">
     <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
       <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-calendar-plus mr-2 text-indigo-500"></i>新增年度</h2>
@@ -448,7 +439,6 @@
     </div>
   </div>
 
-  <!-- Modal: 系統分區設定 -->
   <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity">
     <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md fade-in border border-slate-200">
       <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-map-marked mr-2 text-emerald-500"></i>新增/編輯 分區綁定</h2>
@@ -480,7 +470,6 @@
     </div>
   </div>
 
-  <!-- Modal: 年度與分區預算設定 (綁定) -->
   <div id="yd-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity">
     <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
       <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-file-contract mr-2 text-amber-500"></i>設定年度分區預算</h2>
@@ -511,26 +500,6 @@
     </div>
   </div>
 
-  <!-- Modal: 追加額度設定 (供機關與管理員在統計面板使用) -->
-  <div id="extra-budget-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[200] flex items-center justify-center hidden p-4 transition-opacity">
-    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
-      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-edit mr-2 text-indigo-500"></i>更新追加額度</h2>
-      <input type="hidden" id="extra-yd-doc-id">
-      
-      <label class="block text-sm font-semibold text-slate-600 mb-1">增購金額</label>
-      <input type="number" id="extra-yd-additional" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-      
-      <label class="block text-sm font-semibold text-slate-600 mb-1">後續擴充金額</label>
-      <input type="number" id="extra-yd-expansion" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
-      
-      <div class="flex justify-end space-x-3 mt-2">
-        <button onclick="document.getElementById('extra-budget-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
-        <button onclick="window.saveExtraBudget()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: 帳號管理 -->
   <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity">
     <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
       <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-user-plus mr-2 text-blue-500"></i>新增/編輯帳號</h2>
@@ -556,9 +525,22 @@
     </div>
   </div>
 
-  <!-- Modal: 廠商施工通報 -->
+  <div id="extra-budget-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[200] flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-edit mr-2 text-indigo-500"></i>更新追加額度</h2>
+      <input type="hidden" id="extra-yd-doc-id">
+      <label class="block text-sm font-semibold text-slate-600 mb-1">增購金額</label>
+      <input type="number" id="extra-yd-additional" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+      <label class="block text-sm font-semibold text-slate-600 mb-1">後續擴充金額</label>
+      <input type="number" id="extra-yd-expansion" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
+      <div class="flex justify-end space-x-3 mt-2">
+        <button onclick="document.getElementById('extra-budget-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveExtraBudget()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
+      </div>
+    </div>
+  </div>
+
   <div id="report-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <!-- (施工通報 UI 保持原樣) -->
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-lg flex flex-col fade-in border border-slate-200">
       <div class="p-4 border-b bg-emerald-50 flex justify-between items-center rounded-t-xl">
         <h2 class="text-xl font-bold text-emerald-800"><i class="fas fa-hard-hat mr-2"></i>發布今日施工通報</h2>
@@ -581,7 +563,6 @@
     </div>
   </div>
 
-  <!-- Modal: 機關一般公告 -->
   <div id="general-announcement-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border border-slate-200">
       <h2 class="text-xl font-bold mb-4 text-amber-800"><i class="fas fa-bullhorn mr-2"></i>發布系統公告</h2>
@@ -596,12 +577,12 @@
     </div>
   </div>
 
-  <!-- JavaScript 與 Firebase 邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
+    // 1. Firebase Initialization
     const myFirebaseConfig = {
       apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88",
       authDomain: "dispatch-work-order.firebaseapp.com",
@@ -614,11 +595,10 @@
     const app = initializeApp(myFirebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-
     window.db = db;
+
+    // 2. Global State Variables
     window.currentUser = null;
-    
-    // 全局資料狀態
     window.sysYears = [];
     window.sysZones = [];
     window.users = [];
@@ -627,13 +607,14 @@
     window.announcements = [];
     window.currentTab = '全部';
 
+    // Static Dictionary for prefix mappings
     const deptMap = { '交工科': '工', '停管科': '停', '公運科': '公', '交安科': '安', '運規科': '規' };
     const distMap = {
       '桃園區':'桃', '蘆竹區':'竹', '龜山區':'龜', '八德區':'德', '中壢區':'中', '大園區':'園',
       '大溪區':'溪', '復興區':'復', '新屋區':'新', '龍潭區':'龍', '平鎮區':'平', '楊梅區':'楊', '觀音區':'觀'
     };
 
-    // --- 自訂彈窗系統 (取代 alert / confirm) ---
+    // 3. Custom Alert & Confirm Modals
     window.customAlert = (msg, title = "提示", icon = '<i class="fas fa-info-circle text-indigo-500"></i>') => {
       return new Promise((resolve) => {
         document.getElementById('custom-dialog-title').innerText = title;
@@ -650,30 +631,33 @@
       });
     };
 
-    window.customConfirm = (msg, title = "確認執行", icon = '<i class="fas fa-exclamation-triangle text-amber-500"></i>') => {
+    window.customConfirm = (msg, title = "確認", icon = '<i class="fas fa-exclamation-triangle text-rose-500"></i>') => {
       return new Promise((resolve) => {
         document.getElementById('custom-dialog-title').innerText = title;
         document.getElementById('custom-dialog-message').innerText = msg;
         document.getElementById('custom-dialog-icon').innerHTML = icon;
         document.getElementById('custom-dialog-buttons').innerHTML = `
-          <button id="cd-cancel-btn" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm transition-colors w-full">取消</button>
-          <button id="cd-yes-btn" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-colors w-full">確定</button>
+          <button id="cd-cancel-btn" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors w-full">取消</button>
+          <button id="cd-confirm-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-colors w-full">確定</button>
         `;
         document.getElementById('custom-dialog-overlay').classList.remove('hidden');
         document.getElementById('cd-cancel-btn').onclick = () => {
           document.getElementById('custom-dialog-overlay').classList.add('hidden');
           resolve(false);
         };
-        document.getElementById('cd-yes-btn').onclick = () => {
+        document.getElementById('cd-confirm-btn').onclick = () => {
           document.getElementById('custom-dialog-overlay').classList.add('hidden');
           resolve(true);
         };
       });
     };
 
-    signInAnonymously(auth).then(() => { fetchInitialData(); }).catch(err => { window.customAlert("連線失敗，請檢查網路狀態", "錯誤", '<i class="fas fa-wifi text-rose-500"></i>'); });
+    // 4. Initialization & Data Fetching
+    signInAnonymously(auth).then(() => {
+      fetchInitialData();
+    }).catch(err => console.error("連線失敗:", err));
 
-    async function fetchInitialData() {
+    function fetchInitialData() {
       onSnapshot(collection(db, "sysYears"), snap => {
         window.sysYears = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
         window.updateAllDropdowns();
@@ -691,7 +675,7 @@
       });
       onSnapshot(collection(db, "yearDistricts"), snap => {
         window.yearDistricts = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        if(window.currentUser) window.renderYearDistricts();
+        if(window.currentUser) { window.renderYearDistricts(); window.renderStatistics(); }
       });
       onSnapshot(collection(db, "workOrders"), snap => {
         window.workOrders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
@@ -703,11 +687,14 @@
       });
     }
 
+    // 5. Auth, Login & General UI Navigation
     window.updateLoginOptions = () => {
       const select = document.getElementById('login-username');
       if(!select) return;
       let options = `<option value="系統管理員">系統管理員 (預設)</option>`;
-      window.users.forEach(u => { options += `<option value="${u.username}">${u.username} (${u.role})</option>`; });
+      window.users.forEach(u => {
+        options += `<option value="${u.username}">${u.username} (${u.role})</option>`;
+      });
       select.innerHTML = options;
     };
 
@@ -717,7 +704,7 @@
       document.getElementById('login-modal').classList.remove('hidden');
     };
 
-    window.login = async () => {
+    window.login = () => {
       const u = document.getElementById('login-username').value;
       const p = document.getElementById('login-password').value;
       
@@ -725,10 +712,7 @@
         window.currentUser = { username: '系統管理員', role: '系統管理員' };
       } else {
         const user = window.users.find(x => x.username === u && x.password === p);
-        if (!user) {
-          await window.customAlert('密碼錯誤，請重新輸入！', '登入失敗', '<i class="fas fa-times-circle text-rose-500"></i>');
-          return;
-        }
+        if (!user) return window.customAlert('密碼錯誤，請重新輸入！', '登入失敗', '<i class="fas fa-times-circle text-rose-500"></i>');
         window.currentUser = user;
       }
       
@@ -748,7 +732,7 @@
 
       window.showSection('work-orders');
       
-      // 確保登入後所有介面都能繪製出來
+      // Perform initial renders after successful login
       window.renderWoTable();
       window.renderAnnouncements();
       window.renderStatistics();
@@ -763,71 +747,18 @@
     window.logout = () => { window.currentUser = null; window.location.reload(); };
 
     window.showSection = (sec) => {
-      if (!window.currentUser) { window.customAlert("請先登入！"); return; }
+      if (!window.currentUser) return;
       ['work-orders', 'announcements', 'statistics', 'settings'].forEach(s => document.getElementById(`section-${s}`)?.classList.add('hidden'));
       document.getElementById(`section-${sec}`)?.classList.remove('hidden');
       document.getElementById('page-title').innerText = {'work-orders':'派工單總表', 'announcements':'公告與通報', 'statistics':'契約執行統計', 'settings':'系統設定'}[sec];
-      if(window.innerWidth < 768) {
-        document.getElementById('sidebar').classList.add('drawer-closed');
-        document.getElementById('sidebar-overlay').classList.add('hidden');
-      }
+      if(window.innerWidth < 768) window.toggleSidebar();
     };
 
     window.toggleSidebar = () => {
-      document.getElementById('sidebar').classList.toggle('drawer-closed');
-      document.getElementById('sidebar-overlay').classList.toggle('hidden');
-    };
-
-    window.updateAllDropdowns = () => {
-      // 年度選項
-      const yArr = [...window.sysYears].sort((a,b)=>b.year-a.year).map(y => y.year);
-      ['wo-year-select', 'user-year', 'yd-year', 'stat-year'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.innerHTML = (id==='stat-year'?'<option value="全部">全部年度</option>':'') + yArr.map(y => `<option value="${y}">${y}</option>`).join('');
-      });
-      
-      // 分區選項
-      const zArr = [...window.sysZones].map(z => z.name);
-      ['user-zone', 'yd-zone', 'stat-district', 'announcement-target'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.innerHTML = (id==='stat-district'?'<option value="全部">全部分區</option>':'') + (id==='announcement-target'?'<option value="全部">通知所有人(全部)</option>':'') + zArr.map(z => `<option value="${z}">${z}</option>`).join('');
-      });
-    };
-
-    // 自動編號與廠商尋找邏輯
-    window.updateWoPrefix = () => {
-      const dept = document.getElementById('wo-dept').value || '交工科';
-      const batch = document.getElementById('wo-batch').value || '01';
-      const dist = document.getElementById('wo-district').value || '桃園區';
-      const serial = document.getElementById('wo-serial').value || '01';
-      document.getElementById('wo-preview-id').innerText = `${deptMap[dept]}${batch}-${distMap[dist]}${serial}`;
-      
-      // 動態更新負責廠商
-      const year = document.getElementById('wo-year-select').value;
-      if (window.currentUser && window.currentUser.role !== '施工廠商') {
-        const activeZone = window.sysZones.find(z => z.districts && z.districts.includes(dist));
-        let vendorName = '待系統指派 (無對應分區或廠商)';
-        if (activeZone) {
-          const vUser = window.users.find(u => u.role === '施工廠商' && u.year === year && u.zone === activeZone.name);
-          if (vUser) vendorName = vUser.username;
-        }
-        document.getElementById('wo-vendor').value = vendorName;
-      }
-    };
-
-    window.toggleSourceDetails = () => {
-      const s = document.getElementById('wo-source-type').value;
-      const c = document.getElementById('wo-source-detail-container');
-      if (s === '議員' || s === '里長') c.classList.remove('hidden');
-      else { c.classList.add('hidden'); document.getElementById('wo-source-detail').value = ''; }
-    };
-
-    window.calcExpectedDate = () => {
-      const rd = document.getElementById('wo-recv-date').value;
-      if(rd) {
-        let d = new Date(rd); d.setDate(d.getDate() + 45);
-        document.getElementById('wo-expected-date').value = d.toISOString().split('T')[0];
-      }
+      const sb = document.getElementById('sidebar');
+      const ov = document.getElementById('sidebar-overlay');
+      sb.classList.toggle('drawer-closed');
+      ov.classList.toggle('hidden');
     };
 
     window.switchTab = (tab) => {
@@ -843,6 +774,63 @@
       window.renderWoTable();
     };
 
+    window.updateAllDropdowns = () => {
+      const yearsHTML = window.sysYears.map(y => `<option value="${y.year}">${y.year}</option>`).join('');
+      const zonesHTML = window.sysZones.map(z => `<option value="${z.name}">${z.name}</option>`).join('');
+      
+      ['wo-year-select', 'user-year', 'yd-year'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = yearsHTML;
+      });
+      ['user-zone', 'yd-zone'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = zonesHTML;
+      });
+      
+      // Stat filter dropdowns
+      const statYearEl = document.getElementById('stat-year');
+      if(statYearEl) statYearEl.innerHTML = '<option value="全部">全部年度</option>' + yearsHTML;
+      const statZoneEl = document.getElementById('stat-district');
+      if(statZoneEl) statZoneEl.innerHTML = '<option value="全部">全部分區</option>' + zonesHTML;
+    };
+
+    // 6. Work Orders Logic
+    window.updateWoPrefix = () => {
+      const dept = document.getElementById('wo-dept').value || '交工科';
+      const batch = document.getElementById('wo-batch').value || '01';
+      const dist = document.getElementById('wo-district').value || '桃園區';
+      const serial = document.getElementById('wo-serial').value || '01';
+      document.getElementById('wo-preview-id').innerText = `${deptMap[dept]}${batch}-${distMap[dist]}${serial}`;
+    };
+
+    window.updateVendorByDistrict = () => {
+      if(window.currentUser && window.currentUser.role === '施工廠商') return;
+      const dist = document.getElementById('wo-district').value;
+      const year = document.getElementById('wo-year-select').value;
+      const zoneObj = window.sysZones.find(z => z.districts && z.districts.includes(dist));
+      if(zoneObj) {
+        const vUser = window.users.find(u => u.role === '施工廠商' && u.year === year && u.zone === zoneObj.name);
+        document.getElementById('wo-vendor').value = vUser ? vUser.username : '無對應廠商';
+      } else {
+        document.getElementById('wo-vendor').value = '未綁定分區';
+      }
+    };
+
+    window.toggleSourceDetails = () => {
+      const s = document.getElementById('wo-source-type').value;
+      const c = document.getElementById('wo-source-detail-container');
+      if (s === '議員' || s === '里長') { c.classList.remove('hidden'); } 
+      else { c.classList.add('hidden'); document.getElementById('wo-source-detail').value = ''; }
+    };
+
+    window.calcExpectedDate = () => {
+      const rd = document.getElementById('wo-recv-date').value;
+      if(rd) {
+        let d = new Date(rd); d.setDate(d.getDate() + 45);
+        document.getElementById('wo-expected-date').value = d.toISOString().split('T')[0];
+      }
+    };
+
     window.renderWoTable = () => {
       if (!window.currentUser) return;
       const tbody = document.getElementById('wo-table-body');
@@ -851,7 +839,7 @@
       
       let filtered = window.workOrders.filter(wo => {
         if(role === '施工廠商' && wo.vendor !== window.currentUser.username) return false;
-        const textToSearch = [wo.id, wo.location, wo.village, wo.content, wo.source, wo.sourceDetail, wo.vendor, wo.status].join(' ').toLowerCase();
+        const textToSearch = [wo.id, wo.location, wo.village, wo.content, wo.source, wo.vendor, wo.status].join(' ').toLowerCase();
         if(searchStr && !textToSearch.includes(searchStr)) return false;
         return true;
       });
@@ -865,7 +853,8 @@
         else {
           counts['辦理中']++;
           if(wo.expectedDate) {
-            const diffDays = Math.ceil((new Date(wo.expectedDate) - todayDate)/(1000*60*60*24));
+            const ed = new Date(wo.expectedDate);
+            const diffDays = Math.ceil((ed - todayDate)/(1000*60*60*24));
             if(diffDays < 0) counts['已逾期']++;
             else if(diffDays <= 10) counts['即將逾期']++;
           }
@@ -882,16 +871,14 @@
         if(window.currentTab === '已完工') return wo.status === '已完工';
         if(wo.status === '已完工') return false; 
         if(window.currentTab === '辦理中') return true; 
-        
-        const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - todayDate)/(1000*60*60*24)) : 999;
+        const ed = wo.expectedDate ? new Date(wo.expectedDate) : null;
+        const diff = ed ? Math.ceil((ed - todayDate)/(1000*60*60*24)) : 999;
         if(window.currentTab === '已逾期') return diff < 0;
-        if(window.currentTab === '即遇到期') return diff >= 0 && diff <= 10; // Typo fix for display match logic
         if(window.currentTab === '即將逾期') return diff >= 0 && diff <= 10;
         return true;
       });
 
       filtered.sort((a,b) => new Date(b.recvDate) - new Date(a.recvDate));
-
       tbody.innerHTML = '';
       if(filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>沒有符合的資料</td></tr>`;
@@ -899,71 +886,61 @@
       }
 
       filtered.forEach(wo => {
-        const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - todayDate)/(1000*60*60*24)) : 999;
+        const ed = wo.expectedDate ? new Date(wo.expectedDate) : null;
+        const diff = ed ? Math.ceil((ed - todayDate)/(1000*60*60*24)) : 999;
         let rowClass = "hover:bg-slate-50 transition-colors";
-        if(wo.status !== '已完工' && wo.expectedDate) {
+        if(wo.status !== '已完工' && ed) {
           if(diff < 0) rowClass = "bg-rose-50 hover:bg-rose-100 transition-colors";
           else if(diff <= 10) rowClass = "bg-amber-50 hover:bg-amber-100 transition-colors";
         }
-
         const pAmt = parseFloat(wo.dispatchAmount) || 0;
         const cAmt = parseFloat(wo.completeAmount) || 0;
         let amtHtml = `${pAmt} / ${cAmt}`;
         if (pAmt > 0 && Math.abs(cAmt - pAmt)/pAmt > 0.1) amtHtml = `${pAmt} / <span class="text-rose-600 font-bold"><i class="fas fa-exclamation-triangle"></i> ${cAmt}</span>`;
 
         const urlIcon = (url, icon) => url && url.startsWith('http') ? `<a href="${url}" target="_blank" class="text-indigo-600 hover:text-indigo-800"><i class="${icon} text-lg"></i></a>` : '-';
-
         let sourceHtml = wo.source || '-';
         if ((wo.source === '議員' || wo.source === '里長') && wo.sourceDetail) sourceHtml = `${wo.source}<br><span class="text-xs text-indigo-500">${wo.sourceDetail}</span>`;
-        
         let locHtml = wo.location;
         if (wo.village) locHtml += `<br><span class="text-xs text-emerald-600">${wo.village}</span>`;
 
-        const tr = document.createElement('tr');
-        tr.className = rowClass;
-        tr.innerHTML = `
-          <td class="p-3 font-bold text-indigo-700">${wo.id}</td>
-          <td class="p-3 text-xs text-slate-600">
-            收: ${wo.recvDate || '-'}<br>派: ${wo.dispatchDate || '-'}<br>
-            預: <span class="${diff < 0 && wo.status !== '已完工' ? 'text-rose-600 font-bold' : ''}">${wo.expectedDate || '-'}</span>
-          </td>
-          <td class="p-3 text-sm">${sourceHtml}</td>
-          <td class="p-3 text-sm max-w-[150px] truncate" title="${wo.location}">${locHtml}</td>
-          <td class="p-3 text-sm">${amtHtml}</td>
-          <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500 shadow-sm'}">${wo.status}</span></td>
-          <td class="p-3 text-center space-x-2">${urlIcon(wo.docUrl, 'fas fa-file-alt')} ${urlIcon(wo.photoUrl, 'fas fa-image')}</td>
-          <td class="p-3 text-sm text-slate-600">${wo.actualDate || '-'}</td>
-          <td class="p-3 text-center">
-            <button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1 transition-colors" title="編輯"><i class="fas fa-edit"></i></button>
-            ${role === '系統管理員' ? `<button onclick="window.deleteWo('${wo.docId}')" class="text-rose-500 hover:text-rose-700 px-2 py-1 transition-colors" title="刪除"><i class="fas fa-trash"></i></button>` : ''}
-          </td>
+        tbody.innerHTML += `
+          <tr class="${rowClass}">
+            <td class="p-3 font-bold text-indigo-700">${wo.id}</td>
+            <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate || '-'}<br>派: ${wo.dispatchDate || '-'}<br>預: <span class="${diff < 0 && wo.status !== '已完工' ? 'text-rose-600 font-bold' : ''}">${wo.expectedDate || '-'}</span></td>
+            <td class="p-3 text-sm">${sourceHtml}</td>
+            <td class="p-3 text-sm max-w-[150px] truncate" title="${wo.location}">${locHtml}</td>
+            <td class="p-3 text-sm">${amtHtml}</td>
+            <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500'}">${wo.status}</span></td>
+            <td class="p-3 text-center space-x-2">${urlIcon(wo.docUrl, 'fas fa-file-alt')} ${urlIcon(wo.photoUrl, 'fas fa-image')}</td>
+            <td class="p-3 text-sm text-slate-600">${wo.actualDate || '-'}</td>
+            <td class="p-3 text-center">
+              <button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1 transition-colors" title="編輯"><i class="fas fa-edit"></i></button>
+              ${role === '系統管理員' ? `<button onclick="window.deleteWo('${wo.docId}')" class="text-rose-500 hover:text-rose-700 px-2 py-1 transition-colors" title="刪除"><i class="fas fa-trash"></i></button>` : ''}
+            </td>
+          </tr>
         `;
-        tbody.appendChild(tr);
       });
     };
 
     window.openWoModal = (docId = null) => {
       document.getElementById('wo-doc-id').value = docId || '';
-      const fields = ['wo-dept', 'wo-batch', 'wo-district', 'wo-serial', 'wo-recv-date', 'wo-dispatch-date', 'wo-expected-date', 'wo-source-type', 'wo-source-detail', 'wo-village', 'wo-location', 'wo-content', 'wo-doc-url', 'wo-photo-url', 'wo-actual-date', 'wo-status', 'wo-dispatch-amount', 'wo-complete-amount', 'wo-dispatcher'];
-      fields.forEach(f => { const el = document.getElementById(f); if(el) el.value = ''; });
+      ['wo-dept', 'wo-batch', 'wo-district', 'wo-serial', 'wo-recv-date', 'wo-dispatch-date', 'wo-expected-date', 'wo-source-type', 'wo-source-detail', 'wo-village', 'wo-location', 'wo-content', 'wo-doc-url', 'wo-photo-url', 'wo-actual-date', 'wo-status', 'wo-dispatch-amount', 'wo-complete-amount', 'wo-dispatcher'].forEach(f => {
+        const el = document.getElementById(f);
+        if(el) el.value = '';
+      });
       document.querySelectorAll('.wo-attr').forEach(cb => cb.checked = false);
       
       document.getElementById('wo-source-type').value = '一般派工';
       window.toggleSourceDetails();
       
-      const vEl = document.getElementById('wo-vendor');
-      const yEl = document.getElementById('wo-year-select');
-      
       if (docId) {
         document.getElementById('wo-modal-title').innerText = '編輯派工單';
         const wo = window.workOrders.find(w => w.docId === docId);
-        if(!wo) return;
-        
         document.getElementById('wo-dept').value = wo.dept || '交工科';
         document.getElementById('wo-batch').value = wo.batch || '';
         document.getElementById('wo-district').value = wo.district || '桃園區';
         document.getElementById('wo-serial').value = wo.serial || '';
-        
         document.getElementById('wo-recv-date').value = wo.recvDate;
         document.getElementById('wo-dispatch-date').value = wo.dispatchDate;
         document.getElementById('wo-expected-date').value = wo.expectedDate || '';
@@ -972,19 +949,16 @@
         document.getElementById('wo-village').value = wo.village || '';
         document.getElementById('wo-location').value = wo.location;
         document.getElementById('wo-content').value = wo.content;
+        document.getElementById('wo-vendor').value = wo.vendor;
+        document.getElementById('wo-year-select').value = wo.year;
         document.getElementById('wo-dispatcher').value = wo.dispatcher || '';
-        vEl.value = wo.vendor;
-        if(yEl) yEl.value = wo.year;
-        
-        window.toggleSourceDetails();
-
         document.getElementById('wo-doc-url').value = wo.docUrl || '';
         document.getElementById('wo-photo-url').value = wo.photoUrl || '';
         document.getElementById('wo-actual-date').value = wo.actualDate || '';
         document.getElementById('wo-status').value = wo.status || '辦理中';
         document.getElementById('wo-dispatch-amount').value = wo.dispatchAmount || '';
         document.getElementById('wo-complete-amount').value = wo.completeAmount || '';
-
+        window.toggleSourceDetails();
         if(wo.attributes) wo.attributes.forEach(a => {
           const cb = document.querySelector(`.wo-attr[value="${a}"]`);
           if(cb) cb.checked = true;
@@ -992,20 +966,17 @@
       } else {
         document.getElementById('wo-modal-title').innerText = '新增派工單';
         document.getElementById('wo-status').value = '辦理中';
-        const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('wo-recv-date').value = todayStr;
-        window.calcExpectedDate();
-
-        if (window.currentUser && window.currentUser.role !== '施工廠商') {
-          document.getElementById('wo-dispatcher').value = window.currentUser.username;
-        }
-
         if(window.currentUser.role === '施工廠商') {
-          vEl.value = window.currentUser.username;
-          if(yEl) yEl.value = window.currentUser.year || '';
+          document.getElementById('wo-vendor').value = window.currentUser.username;
+          document.getElementById('wo-year-select').value = window.currentUser.year || '';
+          if(window.sysZones.length > 0) {
+            const myZone = window.sysZones.find(z => z.name === window.currentUser.zone);
+            if(myZone && myZone.districts && myZone.districts.length > 0) document.getElementById('wo-district').value = myZone.districts[0];
+          }
+        } else {
+          window.updateVendorByDistrict();
         }
       }
-      
       window.updateWoPrefix();
       document.getElementById('wo-modal').classList.remove('hidden');
     };
@@ -1018,12 +989,15 @@
       const serial = document.getElementById('wo-serial').value;
       const combinedId = `${deptMap[dept]}${batch}-${distMap[dist]}${serial}`;
       
-      const year = document.getElementById('wo-year-select').value;
-      let vendor = document.getElementById('wo-vendor').value;
+      if (!batch || !serial || !document.getElementById('wo-location').value) {
+        return window.customAlert('請填寫完整編號(派別/編號)與派工地點！');
+      }
 
       const data = {
         id: combinedId, dept, batch, district: dist, serial,
-        year, vendor,
+        year: document.getElementById('wo-year-select').value, 
+        vendor: document.getElementById('wo-vendor').value,
+        dispatcher: document.getElementById('wo-dispatcher').value,
         recvDate: document.getElementById('wo-recv-date').value,
         dispatchDate: document.getElementById('wo-dispatch-date').value,
         expectedDate: document.getElementById('wo-expected-date').value,
@@ -1032,7 +1006,6 @@
         village: document.getElementById('wo-village').value,
         location: document.getElementById('wo-location').value,
         content: document.getElementById('wo-content').value,
-        dispatcher: document.getElementById('wo-dispatcher').value,
         attributes: Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb => cb.value),
         docUrl: document.getElementById('wo-doc-url').value,
         photoUrl: document.getElementById('wo-photo-url').value,
@@ -1043,33 +1016,159 @@
         updatedAt: Date.now()
       };
 
-      if (!data.batch || !data.serial || !data.location) {
-        await window.customAlert('請填寫完整編號(派別/編號)與派工地點！');
-        return;
-      }
-
       try {
         if (docId) await updateDoc(doc(db, "workOrders", docId), data);
         else await addDoc(collection(db, "workOrders"), data);
         document.getElementById('wo-modal').classList.add('hidden');
-      } catch (e) {
-        await window.customAlert('儲存失敗：' + e.message);
-      }
+      } catch(e) { window.customAlert('儲存失敗：' + e.message); }
     };
 
     window.deleteWo = async (docId) => {
-      if(await window.customConfirm('確定刪除此派工單？')) {
-        try {
-          await deleteDoc(doc(db, "workOrders", docId));
-        } catch (e) { await window.customAlert('刪除失敗'); }
+      if(await window.customConfirm('確定要刪除這筆派工單嗎？此動作無法復原。')) {
+        try { await deleteDoc(doc(db, "workOrders", docId)); } catch(e) { window.customAlert('刪除失敗'); }
       }
     };
 
-    // 契約執行統計
+    // 7. Announcements Logic
+    window.renderAnnouncements = () => {
+      if(!window.currentUser) return;
+      const actionDiv = document.getElementById('announcement-actions');
+      const role = window.currentUser.role;
+      
+      if(role === '施工廠商') {
+        actionDiv.innerHTML = `<button onclick="window.openReportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-edit mr-1"></i>發布今日通報</button>`;
+      } else {
+        actionDiv.innerHTML = `<button onclick="window.openGeneralAnnouncementModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-bullhorn mr-1"></i>發布機關公告</button>`;
+      }
+
+      const gList = document.getElementById('general-announcements-list');
+      const rList = document.getElementById('report-announcements-list');
+      gList.innerHTML = ''; rList.innerHTML = '';
+
+      let gAnns = window.announcements.filter(a => a.type === 'general');
+      if(role === '施工廠商') gAnns = gAnns.filter(a => a.target === '全部' || a.target === window.currentUser.zone);
+      
+      gAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
+        const canEdit = role === '系統管理員' || a.author === window.currentUser.username;
+        const btnHtml = canEdit ? `<div class="mt-3 flex justify-end space-x-2 border-t border-amber-100 pt-2"><button onclick="window.openGeneralAnnouncementModal('${a.docId}')" class="text-indigo-500 hover:text-indigo-700 text-xs"><i class="fas fa-edit"></i> 編輯</button><button onclick="window.deleteAnnouncement('${a.docId}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fas fa-trash"></i> 刪除</button></div>` : '';
+        gList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm relative"><div class="text-xs text-slate-400 flex justify-between mb-2"><span><i class="fas fa-clock mr-1"></i> ${new Date(a.timestamp).toLocaleString()}</span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">發布者: ${a.author} (對象:${a.target})</span></div><div class="font-medium text-slate-700 whitespace-pre-wrap">${a.content}</div>${btnHtml}</div>`;
+      });
+
+      let rAnns = window.announcements.filter(a => a.type === 'report');
+      rAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
+        const canEdit = role === '系統管理員' || (role === '施工廠商' && a.author === window.currentUser.username);
+        let wosHtml = a.wos && a.wos.length > 0 ? `<ul class="list-disc pl-5 mt-2 text-indigo-600 text-sm space-y-1">` + a.wos.map(w => `<li>${w}</li>`).join('') + `</ul>` : '';
+        const btnHtml = canEdit ? `<div class="mt-3 flex justify-end space-x-2 border-t border-emerald-100 pt-2"><button onclick="window.openReportModal('${a.docId}')" class="text-indigo-500 hover:text-indigo-700 text-xs"><i class="fas fa-edit"></i> 編輯</button><button onclick="window.deleteAnnouncement('${a.docId}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fas fa-trash"></i> 刪除</button></div>` : '';
+        rList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm relative"><div class="text-xs text-slate-400 flex justify-between mb-2 border-b border-emerald-100 pb-2"><span><i class="fas fa-calendar-day mr-1"></i> 日期: ${a.date}</span><span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${a.author}</span></div>${wosHtml}<div class="mt-2 text-sm text-slate-600 whitespace-pre-wrap">${a.note || '無補充事項'}</div>${btnHtml}</div>`;
+      });
+    };
+
+    window.openReportModal = (docId = null) => {
+      let existing = null;
+      let targetAuthor = window.currentUser.username;
+      
+      if (docId) {
+        existing = window.announcements.find(a => a.docId === docId);
+        if (existing) targetAuthor = existing.author;
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        existing = window.announcements.find(a => a.type === 'report' && a.date === today && a.author === window.currentUser.username);
+      }
+
+      const vendorWOs = window.workOrders.filter(wo => wo.vendor === targetAuthor && wo.status !== '已完工');
+      const listDiv = document.getElementById('report-wo-list');
+      listDiv.innerHTML = vendorWOs.map(wo => `
+        <label class="flex items-center space-x-3 p-3 hover:bg-emerald-50 cursor-pointer report-wo-item border-b border-slate-100 transition-colors">
+          <input type="checkbox" value="${wo.id}" class="report-wo-cb w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500" ${existing?.wos?.includes(wo.id) ? 'checked' : ''}>
+          <span class="text-sm text-slate-700"><b class="text-indigo-700">${wo.id}</b> - ${wo.location}</span>
+        </label>
+      `).join('');
+
+      document.getElementById('report-search').value = '';
+      if(existing) {
+        document.getElementById('report-note').value = existing.note || '';
+        document.getElementById('btn-delete-report').classList.add('hidden'); // Use card delete btn instead
+        window.currentReportId = existing.docId;
+        window.currentReportDate = existing.date;
+        window.currentReportAuthor = existing.author;
+      } else {
+        document.getElementById('report-note').value = '';
+        document.getElementById('btn-delete-report').classList.add('hidden');
+        window.currentReportId = null;
+        window.currentReportDate = new Date().toISOString().split('T')[0];
+        window.currentReportAuthor = window.currentUser.username;
+      }
+      document.getElementById('report-modal').classList.remove('hidden');
+    };
+
+    window.filterReportWOs = () => {
+      const q = document.getElementById('report-search').value.toLowerCase();
+      document.querySelectorAll('.report-wo-item').forEach(el => { el.style.display = el.innerText.toLowerCase().includes(q) ? 'flex' : 'none'; });
+    };
+
+    window.saveReport = async () => {
+      const selected = Array.from(document.querySelectorAll('.report-wo-cb:checked')).map(cb => cb.value);
+      const note = document.getElementById('report-note').value;
+      if(selected.length === 0 && !note.trim()) return window.customAlert("請勾選案件或填寫說明！");
+      
+      const date = window.currentReportDate || new Date().toISOString().split('T')[0];
+      const author = window.currentReportAuthor || window.currentUser.username;
+      const data = { type: 'report', date: date, author: author, wos: selected, note: note, timestamp: Date.now() };
+
+      try {
+        if(window.currentReportId) await updateDoc(doc(db, "announcements", window.currentReportId), data);
+        else await addDoc(collection(db, "announcements"), data);
+        document.getElementById('report-modal').classList.add('hidden');
+      } catch (e) { window.customAlert('發布失敗: ' + e.message); }
+    };
+
+    window.openGeneralAnnouncementModal = (docId = null) => {
+      const targetInput = document.getElementById('announcement-target');
+      const contentInput = document.getElementById('announcement-content');
+      if(docId) {
+        const ann = window.announcements.find(a => a.docId === docId);
+        if(ann) {
+          window.currentAnnouncementId = docId;
+          targetInput.value = ann.target;
+          contentInput.value = ann.content;
+        }
+      } else {
+        window.currentAnnouncementId = null;
+        targetInput.value = '全部';
+        contentInput.value = '';
+      }
+      document.getElementById('general-announcement-modal').classList.remove('hidden');
+    };
+
+    window.saveGeneralAnnouncement = async () => {
+      const t = document.getElementById('announcement-target').value;
+      const c = document.getElementById('announcement-content').value;
+      if(!c) return window.customAlert("請填寫內容！");
+      
+      const data = { type: 'general', target: t, content: c, timestamp: Date.now() };
+      if(window.currentAnnouncementId) {
+         const existing = window.announcements.find(a => a.docId === window.currentAnnouncementId);
+         data.author = existing.author;
+      } else { data.author = window.currentUser.username; }
+
+      try {
+        if(window.currentAnnouncementId) await updateDoc(doc(db, "announcements", window.currentAnnouncementId), data);
+        else await addDoc(collection(db, "announcements"), data);
+        document.getElementById('general-announcement-modal').classList.add('hidden');
+      } catch (e) { window.customAlert('發布失敗'); }
+    };
+
+    window.deleteAnnouncement = async (docId) => {
+      if(await window.customConfirm('確定要刪除這筆紀錄嗎？此動作無法復原。')) {
+        try { await deleteDoc(doc(db, "announcements", docId)); } catch(e) { window.customAlert('刪除失敗'); }
+      }
+    };
+
+    // 8. Statistics Logic
     window.renderStatistics = () => {
       if(!window.currentUser) return;
       const sYear = document.getElementById('stat-year').value;
-      const sZone = document.getElementById('stat-district').value;
+      const sDist = document.getElementById('stat-district').value;
       const sDept = document.getElementById('stat-dept').value;
       const sBatch = document.getElementById('stat-batch').value.trim();
 
@@ -1078,15 +1177,14 @@
 
       let targetYD = window.yearDistricts.filter(y => {
         if(window.currentUser.role === '施工廠商') return y.year === window.currentUser.year && y.zone === window.currentUser.zone;
-        return (sYear==='全部' || y.year === sYear) && (sZone==='全部' || y.zone === sZone);
+        return (sYear==='全部' || y.year === sYear) && (sDist==='全部' || y.zone === sDist);
       });
 
       targetYD.forEach(yd => {
-        // Find which districts belong to this zone
-        const matchedZone = window.sysZones.find(z => z.name === yd.zone);
-        const dists = matchedZone ? (matchedZone.districts || []) : [];
-        
-        let wos = window.workOrders.filter(w => w.year === yd.year && dists.includes(w.district));
+        const zoneObj = window.sysZones.find(z => z.name === yd.zone);
+        const validDistricts = zoneObj ? zoneObj.districts : [];
+
+        let wos = window.workOrders.filter(w => w.year === yd.year && validDistricts.includes(w.district));
         
         let filteredWos = wos;
         if(sDept !== '全部') filteredWos = filteredWos.filter(w => w.dept === sDept);
@@ -1095,43 +1193,56 @@
         const dTotal = filteredWos.reduce((sum, w) => sum + (parseFloat(w.dispatchAmount)||0), 0);
         const cTotal = filteredWos.reduce((sum, w) => sum + (parseFloat(w.completeAmount)||0), 0);
         
-        const baseContract = parseFloat(yd.contract) || 0;
-        const additionalAmt = parseFloat(yd.additionalAmt) || 0;
-        const expansionAmt = parseFloat(yd.expansionAmt) || 0;
-        const totalContract = baseContract + additionalAmt + expansionAmt;
-        const contractCalc = totalContract || 1; 
+        const contract = parseFloat(yd.contract)||0;
+        const extra = parseFloat(yd.additional)||0;
+        const expansion = parseFloat(yd.expansion)||0;
+        const totalBudget = contract + extra + expansion;
 
-        const dpct = Math.min(100, (dTotal/contractCalc*100)).toFixed(1);
-        const cpct = Math.min(100, (cTotal/contractCalc*100)).toFixed(1);
+        const remainD = totalBudget - dTotal;
+        const remainC = totalBudget - cTotal;
+
+        const dpct = totalBudget > 0 ? Math.min(100, (dTotal/totalBudget*100)).toFixed(1) : 0;
+        const cpct = totalBudget > 0 ? Math.min(100, (cTotal/totalBudget*100)).toFixed(1) : 0;
+
+        const isManager = window.currentUser.role === '系統管理員' || window.currentUser.role === '機關/監造';
+        const editBtn = isManager ? `<button onclick="window.openExtraBudgetModal('${yd.docId}')" class="ml-2 text-indigo-500 hover:text-indigo-700 bg-indigo-50 px-2 py-1 rounded shadow-sm text-xs transition-colors"><i class="fas fa-edit"></i> 調整額度</button>` : '';
 
         const filterHint = (sDept!=='全部' || sBatch!=='') ? `<div class="mt-3 text-sm text-indigo-700 bg-indigo-50 p-2 rounded-lg border border-indigo-100 flex items-center"><i class="fas fa-filter mr-2"></i>過濾條件：${sDept} ${sBatch?'派別:'+sBatch:''} (包含 ${filteredWos.length} 件)</div>` : '';
-
-        const canEditExtra = (window.currentUser.role === '系統管理員' || window.currentUser.role === '機關/監造');
-        const editBtnHtml = canEditExtra ? `<button onclick="window.openExtraBudgetModal('${yd.docId}')" class="text-sm bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg transition-colors font-medium"><i class="fas fa-edit mr-1"></i>更新追加額度</button>` : '';
 
         container.innerHTML += `
           <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
-              <h4 class="font-bold text-lg text-indigo-900"><i class="fas fa-chart-pie mr-2 text-indigo-500"></i>${yd.year} 年度 - ${yd.zone} <span class="text-xs font-normal text-slate-500 ml-2">(包含: ${dists.join(', ') || '無'})</span></h4>
-              ${editBtnHtml}
+              <h4 class="font-bold text-lg text-indigo-900"><i class="fas fa-chart-pie mr-2 text-indigo-500"></i>${yd.year} 年度 - ${yd.zone} 分區</h4>
+              ${editBtn}
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-2 text-sm">
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500">本約金額: <br><span class="font-bold text-lg text-slate-700">${baseContract}</span></div>
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500">增購金額: <br><span class="font-bold text-lg text-amber-600">${additionalAmt}</span></div>
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500">後續擴充: <br><span class="font-bold text-lg text-amber-600">${expansionAmt}</span></div>
-              <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-indigo-700 shadow-inner">總契約金額: <br><span class="font-bold text-lg">${totalContract}</span></div>
-              <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 text-blue-700 shadow-inner">派工總計: <br><span class="font-bold text-lg">${dTotal}</span></div>
-              <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-800 shadow-inner">竣工總計: <br><span class="font-bold text-lg">${cTotal}</span></div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2 text-sm">
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500 flex flex-col justify-between">
+                <div>契約金額: <br><span class="font-bold text-xl text-slate-700">${contract.toLocaleString()}</span></div>
+                <div class="text-xs mt-1 text-slate-400">總預算額度: <span class="text-slate-600">${parseFloat(yd.budget||0).toLocaleString()}</span></div>
+              </div>
+              <div class="bg-amber-50 p-3 rounded-xl border border-amber-100 text-amber-800 flex flex-col justify-between shadow-inner">
+                <div>可用總額度: <br><span class="font-bold text-xl text-amber-700">${totalBudget.toLocaleString()}</span></div>
+                <div class="text-xs mt-1 text-amber-600">包含 增購: ${extra} / 後續: ${expansion}</div>
+              </div>
+              <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-indigo-700 flex flex-col justify-between shadow-inner">
+                <div>派工總計: <br><span class="font-bold text-xl">${dTotal.toLocaleString()}</span></div>
+                <div class="text-xs mt-1 font-bold ${remainD < 0 ? 'text-rose-600' : 'text-indigo-500'}">派工剩餘: ${remainD.toLocaleString()}</div>
+              </div>
+              <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-800 flex flex-col justify-between shadow-inner">
+                <div>竣工總計: <br><span class="font-bold text-xl">${cTotal.toLocaleString()}</span></div>
+                <div class="text-xs mt-1 font-bold ${remainC < 0 ? 'text-rose-600' : 'text-emerald-600'}">竣工剩餘: ${remainC.toLocaleString()}</div>
+              </div>
             </div>
             ${filterHint}
             <div class="space-y-4 mt-5 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div>
-                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>派工執行進度 (${dpct}%)</span><span>${dTotal} / ${totalContract}</span></div>
-                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="bg-indigo-500 h-3 rounded-full transition-all duration-500" style="width: ${dpct}%"></div></div>
+                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>派工執行進度 (${dpct}%)</span><span>${dTotal.toLocaleString()} / ${totalBudget.toLocaleString()}</span></div>
+                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="${dpct > 90 ? 'bg-rose-500' : 'bg-indigo-500'} h-3 rounded-full transition-all duration-500" style="width: ${dpct}%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>竣工結算進度 (${cpct}%)</span><span>${cTotal} / ${totalContract}</span></div>
-                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: ${cpct}%"></div></div>
+                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>竣工結算進度 (${cpct}%)</span><span>${cTotal.toLocaleString()} / ${totalBudget.toLocaleString()}</span></div>
+                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="${cpct > 90 ? 'bg-rose-500' : 'bg-emerald-500'} h-3 rounded-full transition-all duration-500" style="width: ${cpct}%"></div></div>
               </div>
             </div>
           </div>
@@ -1144,31 +1255,29 @@
       const yd = window.yearDistricts.find(y => y.docId === docId);
       if(!yd) return;
       document.getElementById('extra-yd-doc-id').value = docId;
-      document.getElementById('extra-yd-additional').value = yd.additionalAmt || '';
-      document.getElementById('extra-yd-expansion').value = yd.expansionAmt || '';
+      document.getElementById('extra-yd-additional').value = yd.additional || '';
+      document.getElementById('extra-yd-expansion').value = yd.expansion || '';
       document.getElementById('extra-budget-modal').classList.remove('hidden');
     };
 
     window.saveExtraBudget = async () => {
       const docId = document.getElementById('extra-yd-doc-id').value;
-      const addAmt = document.getElementById('extra-yd-additional').value;
-      const expAmt = document.getElementById('extra-yd-expansion').value;
+      const add = document.getElementById('extra-yd-additional').value;
+      const exp = document.getElementById('extra-yd-expansion').value;
       try {
-        await updateDoc(doc(db, "yearDistricts", docId), { additionalAmt: addAmt, expansionAmt: expAmt });
+        await updateDoc(doc(db, "yearDistricts", docId), { additional: add, expansion: exp });
         document.getElementById('extra-budget-modal').classList.add('hidden');
-        window.customAlert('追加額度更新成功！', '成功', '<i class="fas fa-check-circle text-emerald-500"></i>');
-      } catch (e) {
-        window.customAlert('更新失敗：' + e.message);
-      }
+      } catch (e) { window.customAlert("更新失敗"); }
     };
 
-    // 獨立年度管理
+    // 9. System Settings Logic
     window.renderSysYears = () => {
-      const tb = document.getElementById('sys-year-table-body');
-      tb.innerHTML = [...window.sysYears].sort((a,b)=>b.year-a.year).map(y => `
-        <tr class="hover:bg-slate-50">
+      const tbody = document.getElementById('sys-year-table-body');
+      if(!tbody) return;
+      tbody.innerHTML = [...window.sysYears].sort((a,b)=>b.year-a.year).map(y => `
+        <tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-bold text-slate-700">${y.year}</td>
-          <td class="p-3 text-center"><button onclick="window.deleteSysYear('${y.docId}')" class="text-rose-400 hover:text-rose-600 p-1"><i class="fas fa-trash"></i></button></td>
+          <td class="p-3 text-center"><button onclick="window.deleteSysYear('${y.docId}')" class="text-rose-500 hover:text-rose-700 transition-colors p-1"><i class="fas fa-trash"></i></button></td>
         </tr>
       `).join('');
     };
@@ -1179,32 +1288,30 @@
     };
 
     window.saveSysYear = async () => {
-      const y = document.getElementById('sys-year-input').value.trim();
-      if(!y) return window.customAlert('請輸入年度');
-      if(window.sysYears.find(x => x.year === y)) return window.customAlert('該年度已存在');
+      const y = document.getElementById('sys-year-input').value;
+      if(!y) return window.customAlert('系統年度不可空白！');
       try {
         await addDoc(collection(db, "sysYears"), { year: y });
         document.getElementById('sys-year-modal').classList.add('hidden');
-      } catch (e) { window.customAlert('新增失敗'); }
+      } catch(e) { window.customAlert('新增失敗'); }
     };
 
     window.deleteSysYear = async (docId) => {
-      if(await window.customConfirm('確定刪除此年度嗎？')) {
-        try { await deleteDoc(doc(db, "sysYears", docId)); } 
-        catch (e) { await window.customAlert('刪除失敗'); }
+      if(await window.customConfirm('確定刪除此年度？這可能會影響依賴此年度的資料。')) {
+        try { await deleteDoc(doc(db, "sysYears", docId)); } catch(e) { window.customAlert('刪除失敗'); }
       }
     };
 
-    // 獨立分區管理
     window.renderSysZones = () => {
-      const tb = document.getElementById('sys-zone-table-body');
-      tb.innerHTML = [...window.sysZones].map(z => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 font-bold text-slate-700">${z.name}</td>
-          <td class="p-3 text-sm text-slate-600">${z.districts ? z.districts.join(', ') : '無'}</td>
+      const tbody = document.getElementById('sys-zone-table-body');
+      if(!tbody) return;
+      tbody.innerHTML = [...window.sysZones].sort((a,b)=>a.name.localeCompare(b.name)).map(z => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-emerald-700">${z.name}</td>
+          <td class="p-3 text-slate-600 text-sm">${z.districts ? z.districts.join('、') : ''}</td>
           <td class="p-3 text-center">
-            <button onclick="window.openSysZoneModal('${z.docId}')" class="text-indigo-400 hover:text-indigo-600 p-1 mr-2"><i class="fas fa-edit"></i></button>
-            <button onclick="window.deleteSysZone('${z.docId}')" class="text-rose-400 hover:text-rose-600 p-1"><i class="fas fa-trash"></i></button>
+            <button onclick="window.openSysZoneModal('${z.docId}')" class="text-indigo-500 hover:text-indigo-700 transition-colors p-1 mr-2"><i class="fas fa-edit"></i></button>
+            <button onclick="window.deleteSysZone('${z.docId}')" class="text-rose-500 hover:text-rose-700 transition-colors p-1"><i class="fas fa-trash"></i></button>
           </td>
         </tr>
       `).join('');
@@ -1229,32 +1336,31 @@
 
     window.saveSysZone = async () => {
       const docId = document.getElementById('sys-zone-doc-id').value;
-      const name = document.getElementById('sys-zone-name').value.trim();
-      const dists = Array.from(document.querySelectorAll('.sys-zone-cb:checked')).map(cb => cb.value);
+      const name = document.getElementById('sys-zone-name').value;
+      const checkedDists = Array.from(document.querySelectorAll('.sys-zone-cb:checked')).map(cb => cb.value);
       
-      if(!name) return window.customAlert('請輸入分區名稱');
-      if(dists.length < 2) return window.customAlert('請至少勾選 2 個行政區');
-
+      if(!name) return window.customAlert('分區名稱不可空白！');
+      if(checkedDists.length < 2) return window.customAlert('每個分區至少需勾選 2 個以上的行政區！');
+      
+      const data = { name, districts: checkedDists };
       try {
-        if(docId) await updateDoc(doc(db, "sysZones", docId), { name, districts: dists });
-        else await addDoc(collection(db, "sysZones"), { name, districts: dists });
+        if(docId) await updateDoc(doc(db, "sysZones", docId), data);
+        else await addDoc(collection(db, "sysZones"), data);
         document.getElementById('sys-zone-modal').classList.add('hidden');
-      } catch (e) { window.customAlert('儲存失敗'); }
+      } catch(e) { window.customAlert('儲存失敗'); }
     };
 
     window.deleteSysZone = async (docId) => {
-      if(await window.customConfirm('確定刪除此分區嗎？')) {
-        try { await deleteDoc(doc(db, "sysZones", docId)); } 
-        catch (e) { await window.customAlert('刪除失敗'); }
+      if(await window.customConfirm('確定刪除此分區？')) {
+        try { await deleteDoc(doc(db, "sysZones", docId)); } catch(e) { window.customAlert('刪除失敗'); }
       }
     };
 
-    // 系統帳號與設定管理
     window.renderUsers = () => {
-      document.getElementById('user-table-body').innerHTML = [...window.users].map(u => `
+      document.getElementById('user-table-body').innerHTML = [...window.users].sort((a,b)=>a.username.localeCompare(b.username)).map(u => `
         <tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-bold text-slate-700">${u.username}</td>
-          <td class="p-3 text-slate-500 font-mono text-xs">********</td>
+          <td class="p-3 text-slate-500 font-mono text-xs">${u.password}</td>
           <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium ${u.role==='系統管理員'?'bg-indigo-100 text-indigo-700':u.role==='施工廠商'?'bg-emerald-100 text-emerald-700':'bg-slate-200 text-slate-700'}">${u.role}</span></td>
           <td class="p-3 text-sm text-slate-600">${u.role==='施工廠商'?`${u.year} - ${u.zone}`:'-'}</td>
           <td class="p-3 text-center"><button onclick="window.deleteUser('${u.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1"><i class="fas fa-trash"></i></button></td>
@@ -1288,23 +1394,22 @@
       try {
         await addDoc(collection(db, "users"), data);
         document.getElementById('user-modal').classList.add('hidden');
-      } catch (e) { window.customAlert('新增失敗'); }
+      } catch(e) { window.customAlert('新增失敗'); }
     };
 
     window.deleteUser = async (docId) => {
       if(await window.customConfirm('確定刪除此帳號？')) {
-        try { await deleteDoc(doc(db, "users", docId)); } 
-        catch (e) { window.customAlert('刪除失敗'); }
+        try { await deleteDoc(doc(db, "users", docId)); } catch(e) { window.customAlert('刪除失敗'); }
       }
     };
 
     window.renderYearDistricts = () => {
-      document.getElementById('yd-table-body').innerHTML = [...window.yearDistricts].map(y => `
+      document.getElementById('yd-table-body').innerHTML = [...window.yearDistricts].sort((a,b)=>b.year-a.year).map(y => `
         <tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-bold text-slate-700">${y.year}</td>
           <td class="p-3 font-medium text-slate-600">${y.zone}</td>
-          <td class="p-3 text-right text-slate-600">${y.budget}</td>
-          <td class="p-3 text-right text-amber-600 font-bold">${y.contract}</td>
+          <td class="p-3 text-right text-slate-600">${parseFloat(y.budget||0).toLocaleString()}</td>
+          <td class="p-3 text-right text-indigo-600 font-bold">${parseFloat(y.contract||0).toLocaleString()}</td>
           <td class="p-3 text-center"><button onclick="window.deleteYearDistrict('${y.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1"><i class="fas fa-trash"></i></button></td>
         </tr>
       `).join('');
@@ -1322,125 +1427,27 @@
     window.saveYearDistrict = async () => {
       const y = document.getElementById('yd-year').value;
       const z = document.getElementById('yd-zone').value;
-      if(!y || !z) return window.customAlert('請先建立並選擇年度與分區！');
+      if(!y || !z) return window.customAlert('請選擇年度與分區！');
       const data = { 
         year: y, zone: z, 
         budget: document.getElementById('yd-budget').value, 
         contract: document.getElementById('yd-contract').value,
-        additionalAmt: document.getElementById('yd-additional').value,
-        expansionAmt: document.getElementById('yd-expansion').value 
+        additional: document.getElementById('yd-additional').value,
+        expansion: document.getElementById('yd-expansion').value
       };
       try {
         await addDoc(collection(db, "yearDistricts"), data);
         document.getElementById('yd-modal').classList.add('hidden');
-      } catch(e) { window.customAlert('儲存失敗'); }
+      } catch(e) { window.customAlert('新增失敗'); }
     };
 
     window.deleteYearDistrict = async (docId) => {
-      if(await window.customConfirm('確定刪除此合約預算設定？')) {
-        try { await deleteDoc(doc(db, "yearDistricts", docId)); }
-        catch (e) { window.customAlert('刪除失敗'); }
+      if(await window.customConfirm('確定刪除此設定？')) {
+        try { await deleteDoc(doc(db, "yearDistricts", docId)); } catch(e) { window.customAlert('刪除失敗'); }
       }
     };
 
-    // 公告與通報邏輯
-    window.renderAnnouncements = () => {
-      if(!window.currentUser) return;
-      const actionDiv = document.getElementById('announcement-actions');
-      const role = window.currentUser.role;
-      
-      if(role === '施工廠商') {
-        actionDiv.innerHTML = `<button onclick="window.openReportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-edit mr-1"></i>發布今日通報</button>`;
-      } else {
-        actionDiv.innerHTML = `<button onclick="document.getElementById('general-announcement-modal').classList.remove('hidden')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-bullhorn mr-1"></i>發布機關公告</button>`;
-      }
-
-      const gList = document.getElementById('general-announcements-list');
-      const rList = document.getElementById('report-announcements-list');
-      gList.innerHTML = ''; rList.innerHTML = '';
-
-      let gAnns = window.announcements.filter(a => a.type === 'general');
-      if(role === '施工廠商') gAnns = gAnns.filter(a => a.target === '全部' || a.target === window.currentUser.zone);
-      gAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
-        gList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm"><div class="text-xs text-slate-400 flex justify-between mb-2"><span><i class="fas fa-clock mr-1"></i> ${new Date(a.timestamp).toLocaleString()}</span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">發布者: ${a.author} (對象:${a.target})</span></div><div class="font-medium text-slate-700 whitespace-pre-wrap">${a.content}</div></div>`;
-      });
-
-      let rAnns = window.announcements.filter(a => a.type === 'report');
-      if(role === '施工廠商') rAnns = rAnns.filter(a => a.author === window.currentUser.username);
-      rAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
-        let wosHtml = a.wos && a.wos.length > 0 ? `<ul class="list-disc pl-5 mt-2 text-indigo-600 text-sm space-y-1">` + a.wos.map(w => `<li>${w}</li>`).join('') + `</ul>` : '';
-        rList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm"><div class="text-xs text-slate-400 flex justify-between mb-2 border-b border-slate-100 pb-2"><span><i class="fas fa-calendar-day mr-1"></i> 通報日期: ${a.date}</span><span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${a.author}</span></div>${wosHtml}<div class="mt-2 text-sm text-slate-600 whitespace-pre-wrap">${a.note || '無補充事項'}</div></div>`;
-      });
-    };
-
-    window.openReportModal = () => {
-      const today = new Date().toISOString().split('T')[0];
-      const existing = window.announcements.find(a => a.type === 'report' && a.date === today && a.author === window.currentUser.username);
-      const vendorWOs = window.workOrders.filter(wo => wo.vendor === window.currentUser.username && wo.status !== '已完工');
-      
-      const listDiv = document.getElementById('report-wo-list');
-      listDiv.innerHTML = vendorWOs.map(wo => `
-        <label class="flex items-center space-x-3 p-3 hover:bg-emerald-50 cursor-pointer report-wo-item border-b border-slate-100 transition-colors">
-          <input type="checkbox" value="${wo.id}" class="report-wo-cb w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500" ${existing?.wos?.includes(wo.id) ? 'checked' : ''}>
-          <span class="text-sm text-slate-700"><b class="text-indigo-700">${wo.id}</b> - ${wo.location}</span>
-        </label>
-      `).join('');
-
-      document.getElementById('report-search').value = '';
-      if(existing) {
-        document.getElementById('report-note').value = existing.note || '';
-        document.getElementById('btn-delete-report').classList.remove('hidden');
-        window.currentReportId = existing.docId;
-      } else {
-        document.getElementById('report-note').value = '';
-        document.getElementById('btn-delete-report').classList.add('hidden');
-        window.currentReportId = null;
-      }
-      document.getElementById('report-modal').classList.remove('hidden');
-    };
-
-    window.filterReportWOs = () => {
-      const q = document.getElementById('report-search').value.toLowerCase();
-      document.querySelectorAll('.report-wo-item').forEach(el => {
-        el.style.display = el.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
-      });
-    };
-
-    window.saveReport = async () => {
-      const selected = Array.from(document.querySelectorAll('.report-wo-cb:checked')).map(cb => cb.value);
-      const note = document.getElementById('report-note').value;
-      if(selected.length === 0 && !note.trim()) return window.customAlert("請勾選案件或填寫說明！");
-      
-      const today = new Date().toISOString().split('T')[0];
-      const data = { type: 'report', date: today, author: window.currentUser.username, wos: selected, note: note, timestamp: Date.now() };
-
-      try {
-        if(window.currentReportId) await updateDoc(doc(db, "announcements", window.currentReportId), data);
-        else await addDoc(collection(db, "announcements"), data);
-        document.getElementById('report-modal').classList.add('hidden');
-      } catch (e) { window.customAlert('發布失敗'); }
-    };
-
-    window.deleteReport = async () => {
-      if(await window.customConfirm('確定要刪除今日通報嗎？') && window.currentReportId) {
-        try {
-          await deleteDoc(doc(db, "announcements", window.currentReportId));
-          document.getElementById('report-modal').classList.add('hidden');
-        } catch(e) { window.customAlert('刪除失敗'); }
-      }
-    };
-
-    window.saveGeneralAnnouncement = async () => {
-      const t = document.getElementById('announcement-target').value;
-      const c = document.getElementById('announcement-content').value;
-      if(!c) return window.customAlert("請填寫內容！");
-      try {
-        await addDoc(collection(db, "announcements"), { type: 'general', target: t, content: c, author: window.currentUser.username, timestamp: Date.now() });
-        document.getElementById('general-announcement-modal').classList.add('hidden');
-      } catch (e) { window.customAlert('發布失敗'); }
-    };
-
-    // 匯出 Excel 與 JSON 備份
+    // 10. Data Backup and Exports
     window.exportToExcel = () => {
       if(window.workOrders.length === 0) return window.customAlert('沒有資料可匯出');
       const ws = XLSX.utils.json_to_sheet(window.workOrders.map(w => ({
