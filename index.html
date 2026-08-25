@@ -584,13 +584,30 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 動態取得環境變數
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // =========================================================================
+        // ✅ 您的專屬 Firebase 設定（已匯入）
+        // =========================================================================
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88",
+            authDomain: "dispatch-work-order.firebaseapp.com",
+            projectId: "dispatch-work-order",
+            storageBucket: "dispatch-work-order.firebasestorage.app",
+            messagingSenderId: "904528914560",
+            appId: "1:904528914560:web:5ff342161da80c54ac5e65"
+        };
+
+        // 自動判斷環境：若無環境變數 (如 GitHub Pages)，則使用上方的自訂設定
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'taoyuan-dispatch-app';
+        let firebaseConfig;
         
-        if (!firebaseConfig) {
-            alert('系統錯誤：無法取得 Firebase 設定');
-            throw new Error("Missing Firebase Config");
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myFirebaseConfig;
+        } catch (e) {
+            firebaseConfig = myFirebaseConfig;
+        }
+        
+        if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.includes('請在此填寫您的')) {
+            console.warn('正在使用無效的金鑰');
         }
 
         const app = initializeApp(firebaseConfig);
