@@ -8,226 +8,142 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { 
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      background-color: #f8fafc; 
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
     .hidden { display: none !important; }
-    .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(8px); } 
-      to { opacity: 1; transform: translateY(0); } 
-    }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .drawer-open { transform: translateX(0); }
     .drawer-closed { transform: translateX(-100%); }
-    .glass-panel { 
-      background: rgba(255, 255, 255, 0.9); 
-      backdrop-filter: blur(16px); 
-      -webkit-backdrop-filter: blur(16px);
-    }
-    /* Custom Scrollbar for better UI */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
   </style>
 </head>
-<body class="flex h-screen overflow-hidden text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+<body class="flex h-screen overflow-hidden text-slate-800">
 
   <!-- 左側導覽列 (Drawer) -->
-  <aside id="sidebar" class="bg-slate-900 text-slate-100 w-64 flex-shrink-0 fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-50 drawer-closed md:relative md:transform-none shadow-2xl md:shadow-none">
-    <div class="p-5 flex justify-between items-center bg-slate-950/50 border-b border-slate-800 backdrop-blur-sm">
-      <h1 class="text-lg font-bold tracking-wider flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <i class="fas fa-hard-hat text-white text-sm"></i>
-        </div>
-        交通局派工系統
-      </h1>
-      <button onclick="window.toggleSidebar()" class="md:hidden text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></button>
+  <aside id="sidebar" class="bg-slate-900 text-slate-100 w-64 flex-shrink-0 fixed inset-y-0 left-0 transform transition-transform duration-300 z-50 drawer-closed md:relative md:transform-none shadow-xl">
+    <div class="p-4 flex justify-between items-center bg-slate-950 border-b border-slate-800">
+      <h1 class="text-xl font-bold tracking-wider">交通局派工系統</h1>
+      <button onclick="window.toggleSidebar()" class="md:hidden text-slate-300 hover:text-white"><i class="fas fa-times"></i></button>
     </div>
-    
-    <div class="p-5 flex items-center space-x-4 border-b border-slate-800 bg-slate-900/50">
-      <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xl font-bold shadow-inner relative">
-        <i class="fas fa-user text-slate-400"></i>
-        <div id="status-indicator" class="absolute bottom-0 right-0 w-3 h-3 bg-rose-500 rounded-full border-2 border-slate-900"></div>
-      </div>
+    <div class="p-4 flex items-center space-x-3 border-b border-slate-800">
+      <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl font-bold shadow-inner"><i class="fas fa-user text-slate-300"></i></div>
       <div>
-        <div id="sidebar-user-name" class="font-bold text-slate-100 truncate w-32">尚未登入</div>
-        <div id="sidebar-user-role" class="text-xs text-slate-400 mt-0.5">請登入系統</div>
+        <div id="sidebar-user-name" class="font-bold text-slate-100">尚未登入</div>
+        <div id="sidebar-user-role" class="text-xs text-slate-400">請登入系統</div>
       </div>
     </div>
-
-    <nav class="p-4 space-y-1.5">
-      <button onclick="window.showSection('work-orders')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/80 hover:text-indigo-300 transition-all flex items-center group">
-        <i class="fas fa-list-alt w-6 text-slate-500 group-hover:text-indigo-400 transition-colors"></i> 
-        <span class="font-medium">派工單總表</span>
-      </button>
-      <button onclick="window.showSection('announcements')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/80 hover:text-indigo-300 transition-all flex items-center group">
-        <i class="fas fa-bullhorn w-6 text-slate-500 group-hover:text-indigo-400 transition-colors"></i> 
-        <span class="font-medium">公告與通報</span>
-      </button>
-      <button onclick="window.showSection('statistics')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/80 hover:text-indigo-300 transition-all flex items-center group">
-        <i class="fas fa-chart-bar w-6 text-slate-500 group-hover:text-indigo-400 transition-colors"></i> 
-        <span class="font-medium">契約執行統計</span>
-      </button>
-      <div class="pt-4 mt-2 border-t border-slate-800 hidden" id="nav-settings-divider"></div>
-      <button id="nav-settings" onclick="window.showSection('settings')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/80 hover:text-indigo-300 transition-all flex items-center group hidden">
-        <i class="fas fa-cog w-6 text-slate-500 group-hover:text-indigo-400 transition-colors"></i> 
-        <span class="font-medium">系統設定</span>
-      </button>
+    <nav class="p-4 space-y-2">
+      <button onclick="window.showSection('work-orders')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-list-alt w-6 text-indigo-400"></i> 派工單總表</button>
+      <button onclick="window.showSection('announcements')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-bullhorn w-6 text-indigo-400"></i> 公告與通報</button>
+      <button onclick="window.showSection('statistics')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-chart-bar w-6 text-indigo-400"></i> 契約執行統計</button>
+      <button id="nav-settings" onclick="window.showSection('settings')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center hidden"><i class="fas fa-cog w-6 text-indigo-400"></i> 系統設定</button>
     </nav>
   </aside>
 
   <!-- 遮罩 -->
-  <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
+  <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
   <!-- 主要內容區 -->
-  <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative bg-slate-50/50">
-    
+  <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
     <!-- 上方標題列 -->
-    <header class="bg-white/80 backdrop-blur-md shadow-sm py-3 px-5 flex justify-between items-center z-10 border-b border-slate-200">
-      <div class="flex items-center gap-3">
-        <button onclick="window.toggleSidebar()" class="p-2 -ml-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-indigo-600 md:hidden transition-colors">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
-        <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">派工單總表</h2>
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center z-10 border-b border-slate-200">
+      <div class="flex items-center">
+        <button onclick="window.toggleSidebar()" class="mr-4 text-slate-500 hover:text-indigo-600 md:hidden transition-colors"><i class="fas fa-bars text-xl"></i></button>
+        <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-wide">派工單總表</h2>
       </div>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="btn-export" onclick="window.exportToExcel()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-          <i class="fas fa-file-excel mr-1.5"></i><span class="hidden sm:inline">匯出 Excel</span>
-        </button>
-        <button id="btn-export-backup" onclick="window.exportBackup()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-          <i class="fas fa-download mr-1.5"></i><span class="hidden sm:inline">備份</span>
-        </button>
-        <label id="btn-import-backup" class="hidden cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-          <i class="fas fa-upload mr-1.5"></i><span class="hidden sm:inline">匯入</span>
+      <div class="flex items-center space-x-2">
+        <button id="btn-export" onclick="window.exportToExcel()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm shadow transition-colors"><i class="fas fa-file-excel mr-1"></i>匯出 Excel</button>
+        <button id="btn-export-backup" onclick="window.exportBackup()" class="hidden bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-sm shadow transition-colors"><i class="fas fa-download mr-1"></i>匯出備份</button>
+        <label id="btn-import-backup" class="hidden cursor-pointer bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-sm shadow transition-colors">
+          <i class="fas fa-upload mr-1"></i>匯入備份
           <input type="file" class="hidden" accept=".json" onchange="window.importBackup(event)">
         </label>
-        <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-        <button id="btn-login-main" onclick="window.openLoginModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow-sm shadow-indigo-200 transition-all font-medium flex items-center gap-2">
-          <i class="fas fa-sign-in-alt"></i> 登入
-        </button>
-        <button id="btn-logout" onclick="window.logout()" class="hidden bg-white border border-slate-300 hover:bg-slate-50 text-rose-600 px-4 py-2 rounded-lg shadow-sm transition-all font-medium flex items-center gap-2">
-          <i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">登出</span>
-        </button>
+        <button id="btn-login-main" onclick="window.openLoginModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors font-medium"><i class="fas fa-sign-in-alt mr-2"></i>登入</button>
+        <button id="btn-logout" onclick="window.logout()" class="hidden bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg shadow-md transition-colors font-medium"><i class="fas fa-sign-out-alt mr-2"></i>登出</button>
       </div>
     </header>
 
     <!-- 內容區塊 -->
-    <div class="p-4 sm:p-6 flex-1 overflow-y-auto w-full max-w-7xl mx-auto">
+    <div class="p-4 flex-1 overflow-y-auto">
       
       <!-- 區塊：派工單總表 -->
       <section id="section-work-orders" class="fade-in">
-        <!-- 工具列與篩選 -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-5 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-          <div class="flex space-x-1 sm:space-x-2 overflow-x-auto w-full xl:w-auto pb-2 xl:pb-0 scrollbar-hide" id="wo-tabs">
-            <button onclick="window.switchTab('全部')" class="tab-btn px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium whitespace-nowrap shadow-sm transition-all">全部 <span id="count-all" class="opacity-80 text-sm">(0)</span></button>
-            <button onclick="window.switchTab('辦理中')" class="tab-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all">辦理中 <span id="count-processing" class="opacity-70 text-sm">(0)</span></button>
-            <button onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all">即將逾期 <span id="count-warning" class="opacity-70 text-sm">(0)</span></button>
-            <button onclick="window.switchTab('已逾期')" class="tab-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all">已逾期 <span id="count-overdue" class="opacity-70 text-sm">(0)</span></button>
-            <button onclick="window.switchTab('已完工')" class="tab-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all">已完工 <span id="count-completed" class="opacity-70 text-sm">(0)</span></button>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
+            <button onclick="window.switchTab('全部')" class="tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all">全部 <span id="count-all">(0)</span></button>
+            <button onclick="window.switchTab('辦理中')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">辦理中 <span id="count-processing">(0)</span></button>
+            <button onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">即將逾期 <span id="count-warning">(0)</span></button>
+            <button onclick="window.switchTab('已逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已逾期 <span id="count-overdue">(0)</span></button>
+            <button onclick="window.switchTab('已完工')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已完工 <span id="count-completed">(0)</span></button>
           </div>
-          
-          <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
-            <div class="relative w-full sm:w-72">
-              <i class="fas fa-search absolute left-3.5 top-3 text-slate-400"></i>
-              <input type="text" id="search-wo" onkeyup="window.renderWoTable()" placeholder="搜尋編號、地點、備註..." class="pl-10 border border-slate-300 rounded-xl px-4 py-2.5 w-full bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm">
+          <div class="flex items-center space-x-2 w-full md:w-auto mt-2 md:mt-0">
+            <div class="relative w-full md:w-64">
+              <i class="fas fa-search absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="search-wo" onkeyup="window.renderWoTable()" placeholder="搜尋編號/地點/備註..." class="pl-9 border border-slate-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
             </div>
-            <button id="btn-add-wo" onclick="window.openWoModal()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-md shadow-indigo-200 whitespace-nowrap transition-all font-medium flex items-center justify-center gap-2" style="display: none;">
-              <i class="fas fa-plus"></i> 新增案件
-            </button>
+            <button id="btn-add-wo" onclick="window.openWoModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors" style="display: none;"><i class="fas fa-plus mr-1"></i>新增案件</button>
           </div>
         </div>
-
-        <!-- 列表表格 -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse whitespace-nowrap">
-              <thead class="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th class="p-4 font-semibold rounded-tl-2xl">派工單編號</th>
-                  <th class="p-4 font-semibold">進度時程</th>
-                  <th class="p-4 font-semibold">案件來源</th>
-                  <th class="p-4 font-semibold">派工地點</th>
-                  <th class="p-4 font-semibold">金額 (派/竣)</th>
-                  <th class="p-4 font-semibold">狀態</th>
-                  <th class="p-4 text-center font-semibold">附件</th>
-                  <th class="p-4 font-semibold">實際完工日</th>
-                  <th class="p-4 text-center font-semibold rounded-tr-2xl">操作</th>
-                </tr>
-              </thead>
-              <tbody id="wo-table-body" class="divide-y divide-slate-100 text-sm">
-                <tr>
-                  <td colspan="9" class="p-12 text-center text-slate-500 bg-slate-50/50">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-                      <i class="fas fa-lock text-2xl text-slate-400"></i>
-                    </div>
-                    <p class="text-lg font-medium text-slate-600">請先登入以檢視派工資料</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+          <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3 font-semibold">派工單編號</th>
+                <th class="p-3 font-semibold">收單/派工/預計完工日期</th>
+                <th class="p-3 font-semibold">案件來源</th>
+                <th class="p-3 font-semibold">派工地點</th>
+                <th class="p-3 font-semibold">金額 (派/竣)</th>
+                <th class="p-3 font-semibold">狀態</th>
+                <th class="p-3 text-center font-semibold">單/照</th>
+                <th class="p-3 font-semibold">實際完工日</th>
+                <th class="p-3 text-center font-semibold">操作</th>
+              </tr>
+            </thead>
+            <tbody id="wo-table-body" class="divide-y divide-slate-100">
+              <tr><td colspan="9" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
       <!-- 區塊：公告與通報 -->
-      <section id="section-announcements" class="hidden fade-in space-y-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fas fa-bullhorn text-xl"></i></div>
-            <div>
-              <h3 class="font-bold text-lg text-slate-800">公告與施工通報區</h3>
-              <p class="text-xs text-slate-500">查看機關布達事項與廠商每日通報</p>
-            </div>
-          </div>
-          <div id="announcement-actions" class="w-full sm:w-auto">
+      <section id="section-announcements" class="hidden fade-in space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex justify-between items-center">
+          <h3 class="font-bold text-lg text-indigo-800"><i class="fas fa-bullhorn mr-2"></i>公告與施工通報區</h3>
+          <div id="announcement-actions">
             <!-- 動態插入按鈕 -->
           </div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- 一般公告 -->
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[70vh]">
-            <div class="bg-amber-50/50 border-b border-amber-100 p-4 flex items-center gap-2">
-              <i class="fas fa-exclamation-circle text-amber-500"></i>
-              <h4 class="font-bold text-amber-900">機關公告</h4>
-            </div>
-            <div id="general-announcements-list" class="p-4 space-y-4 overflow-y-auto flex-1 bg-slate-50/30"></div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-4 h-[70vh] overflow-y-auto">
+            <h4 class="font-bold text-amber-800 border-b border-amber-300 pb-2 mb-3"><i class="fas fa-exclamation-circle mr-2"></i>機關公告</h4>
+            <div id="general-announcements-list" class="space-y-3"></div>
           </div>
-          
           <!-- 施工通報 -->
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[70vh]">
-            <div class="bg-emerald-50/50 border-b border-emerald-100 p-4 flex items-center gap-2">
-              <i class="fas fa-hard-hat text-emerald-500"></i>
-              <h4 class="font-bold text-emerald-900">每日施工通報</h4>
-            </div>
-            <div id="report-announcements-list" class="p-4 space-y-4 overflow-y-auto flex-1 bg-slate-50/30"></div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm p-4 h-[70vh] overflow-y-auto">
+            <h4 class="font-bold text-emerald-800 border-b border-emerald-300 pb-2 mb-3"><i class="fas fa-hard-hat mr-2"></i>每日施工通報</h4>
+            <div id="report-announcements-list" class="space-y-3"></div>
           </div>
         </div>
       </section>
 
       <!-- 區塊：契約執行統計 -->
-      <section id="section-statistics" class="hidden fade-in space-y-6">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fas fa-chart-line text-xl"></i></div>
-            <h3 class="font-bold text-lg text-slate-800">執行統計條件篩選</h3>
-          </div>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section id="section-statistics" class="hidden fade-in space-y-4">
+        <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500">
+          <h3 class="font-bold text-lg mb-4 text-slate-700">選擇統計條件</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">年度</label>
-              <select id="stat-year" class="w-full border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" onchange="window.renderStatistics()"></select>
+              <label class="block text-sm text-slate-500 mb-1">年度</label>
+              <select id="stat-year" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.renderStatistics()"></select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">分區</label>
-              <select id="stat-district" class="w-full border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" onchange="window.renderStatistics()"></select>
+              <label class="block text-sm text-slate-500 mb-1">合約分區</label>
+              <select id="stat-district" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.renderStatistics()"></select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">科室篩選</label>
-              <select id="stat-dept" class="w-full border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" onchange="window.renderStatistics()">
+              <label class="block text-sm text-slate-500 mb-1">科室篩選</label>
+              <select id="stat-dept" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.renderStatistics()">
                 <option value="全部">全部科室</option>
                 <option value="交工科">交工科</option>
                 <option value="停管科">停管科</option>
@@ -237,12 +153,12 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">派別篩選 (選填)</label>
-              <input type="text" id="stat-batch" placeholder="例如: 01" class="w-full border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" onkeyup="window.renderStatistics()">
+              <label class="block text-sm text-slate-500 mb-1">派別篩選 (可留空)</label>
+              <input type="text" id="stat-batch" placeholder="例如: 01" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" onkeyup="window.renderStatistics()">
             </div>
           </div>
         </div>
-        <div id="stat-results" class="space-y-6">
+        <div id="stat-results" class="space-y-4">
           <!-- 統計結果動態渲染 -->
         </div>
       </section>
@@ -250,62 +166,72 @@
       <!-- 區塊：系統設定 -->
       <section id="section-settings" class="hidden fade-in space-y-6">
         
-        <!-- 帳號管理 -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i class="fas fa-users-cog text-xl"></i></div>
-              <div>
-                <h3 class="font-bold text-lg text-slate-800">帳號管理</h3>
-                <p class="text-xs text-slate-500">管理機關與廠商之登入權限</p>
-              </div>
+        <!-- 新增: 年度管理 -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-lg text-slate-700 flex items-center"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>年度管理</h3>
+              <p class="text-xs text-slate-500">系統年度參數獨立設定</p>
             </div>
-            <button onclick="window.openUserModal()" class="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2">
-              <i class="fas fa-user-plus"></i> 新增帳號
-            </button>
+            <button onclick="window.openSysYearModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm"><i class="fas fa-plus mr-1"></i>新增年度</button>
           </div>
-          <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-left border-collapse whitespace-nowrap">
-              <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th class="p-4 font-semibold">帳號/姓名</th>
-                  <th class="p-4 font-semibold">密碼</th>
-                  <th class="p-4 font-semibold">權限角色</th>
-                  <th class="p-4 font-semibold">專屬轄區設定</th>
-                  <th class="p-4 text-center font-semibold">操作</th>
-                </tr>
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+              <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr><th class="p-3 font-semibold">年度名稱</th><th class="p-3 text-center font-semibold w-24">操作</th></tr>
               </thead>
-              <tbody id="user-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+              <tbody id="sys-year-table-body" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- 預算設定 -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fas fa-file-contract text-xl"></i></div>
-              <div>
-                <h3 class="font-bold text-lg text-slate-800">年度與分區預算設定</h3>
-                <p class="text-xs text-slate-500">設定各分區派工合約金額基準</p>
-              </div>
+        <!-- 新增: 分區管理 -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-lg text-slate-700 flex items-center"><i class="fas fa-map mr-2 text-purple-500"></i>分區管理 (綁定行政區)</h3>
+              <p class="text-xs text-slate-500">設定合約分區與涵蓋之行政區 (每個分區需選擇至少2個行政區)</p>
             </div>
-            <button onclick="window.openYearDistrictModal()" class="w-full sm:w-auto bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2">
-              <i class="fas fa-plus"></i> 新增設定
-            </button>
+            <button onclick="window.openSysZoneModal()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm"><i class="fas fa-plus mr-1"></i>新增分區</button>
           </div>
-          <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-left border-collapse whitespace-nowrap">
-              <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th class="p-4 font-semibold">年度</th>
-                  <th class="p-4 font-semibold">分區名稱</th>
-                  <th class="p-4 text-right font-semibold">預算金額</th>
-                  <th class="p-4 text-right font-semibold">契約金額</th>
-                  <th class="p-4 text-center font-semibold">操作</th>
-                </tr>
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+              <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr><th class="p-3 font-semibold w-1/4">合約分區名稱</th><th class="p-3 font-semibold">涵蓋行政區</th><th class="p-3 text-center font-semibold w-24">操作</th></tr>
               </thead>
-              <tbody id="yd-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+              <tbody id="sys-zone-table-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 帳號管理 -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg text-slate-700 flex items-center"><i class="fas fa-users mr-2 text-indigo-500"></i>帳號管理</h3>
+            <button onclick="window.openUserModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-sm transition-colors shadow-sm"><i class="fas fa-plus mr-1"></i>新增帳號</button>
+          </div>
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+              <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr><th class="p-3">帳號/姓名</th><th class="p-3">密碼</th><th class="p-3">權限角色</th><th class="p-3">負責年度與合約分區</th><th class="p-3 text-center w-24">操作</th></tr>
+              </thead>
+              <tbody id="user-table-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 年度與分區預算設定 -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg text-slate-700 flex items-center"><i class="fas fa-file-invoice-dollar mr-2 text-emerald-500"></i>年度分區合約建檔</h3>
+            <button onclick="window.openYearDistrictModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition-colors shadow-sm"><i class="fas fa-plus mr-1"></i>新增設定</button>
+          </div>
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+              <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr><th class="p-3">年度</th><th class="p-3">合約分區名稱</th><th class="p-3 text-right">預算金額</th><th class="p-3 text-right">契約金額</th><th class="p-3 text-center w-24">操作</th></tr>
+              </thead>
+              <tbody id="yd-table-body" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </div>
@@ -315,386 +241,317 @@
   </main>
 
   <!-- Modal: 登入 (全新下拉式選單與毛玻璃質感) -->
-  <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden transition-all duration-300 opacity-0 data-[show=true]:opacity-100">
-    <div class="glass-panel p-8 rounded-3xl shadow-2xl w-[90%] max-w-md transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-white/40">
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 mb-4 shadow-inner">
+  <div id="login-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[100] flex items-center justify-center hidden transition-opacity duration-300 p-4">
+    <div class="glass-panel p-8 rounded-2xl shadow-2xl w-full max-w-sm fade-in border border-white/40">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 mb-3 shadow-inner">
           <i class="fas fa-shield-alt text-3xl"></i>
         </div>
         <h2 class="text-2xl font-bold text-slate-800 tracking-wide">系統登入</h2>
-        <p class="text-sm text-slate-500 mt-2">請選擇您的身分並輸入對應密碼</p>
+        <p class="text-sm text-slate-500 mt-1">請選擇您的身分並輸入對應密碼</p>
       </div>
       
-      <div class="space-y-5">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">登入身分</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">登入身分</label>
           <div class="relative">
-            <i class="fas fa-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-            <select id="login-username" class="w-full border border-slate-300 rounded-xl pl-11 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white/80 font-medium text-slate-700 shadow-sm transition-all cursor-pointer">
+            <i class="fas fa-user-circle absolute left-3 top-3 text-slate-400 text-lg"></i>
+            <select id="login-username" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white/80">
               <option value="系統管理員">系統管理員 (預設)</option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
           </div>
         </div>
         
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">密碼</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">密碼</label>
           <div class="relative">
-            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-            <input type="password" id="login-password" placeholder="請輸入密碼" class="w-full border border-slate-300 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 shadow-sm transition-all" onkeypress="if(event.key==='Enter') window.login()">
+            <i class="fas fa-lock absolute left-3 top-3 text-slate-400 text-lg"></i>
+            <input type="password" id="login-password" placeholder="請輸入密碼" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80" onkeypress="if(event.key==='Enter') window.login()">
           </div>
         </div>
       </div>
 
-      <div class="mt-8 flex flex-col gap-3">
-        <button onclick="window.login()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-          <span>登入系統</span> <i class="fas fa-arrow-right"></i>
-        </button>
-        <button onclick="window.closeModal('login-modal')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-all active:scale-[0.98]">
-          取消
-        </button>
+      <div class="mt-8 space-y-3">
+        <button onclick="window.login()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-95">登入系統</button>
+        <button onclick="document.getElementById('login-modal').classList.add('hidden')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl transition-all active:scale-95">取消</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: 派工單表單 -->
-  <div id="wo-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 data-[show=true]:opacity-100 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-slate-100 bg-white flex justify-between items-center z-10">
-        <h2 class="text-xl font-bold text-slate-800 tracking-wide flex items-center gap-2" id="wo-modal-title">
-          <i class="fas fa-edit text-indigo-500"></i> <span>新增派工單</span>
-        </h2>
-        <button onclick="window.closeModal('wo-modal')" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"><i class="fas fa-times"></i></button>
+  <div id="wo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
+      <div class="p-5 border-b bg-slate-50 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-indigo-800 tracking-wide" id="wo-modal-title">新增派工單</h2>
+        <button onclick="document.getElementById('wo-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl transition-colors"><i class="fas fa-times"></i></button>
       </div>
-      
-      <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+      <div class="p-5 overflow-y-auto flex-1 bg-slate-50/50">
         <input type="hidden" id="wo-doc-id">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           
           <!-- 區塊1: 智慧編號系統 -->
-          <div class="col-span-1 md:col-span-2 bg-indigo-50/40 p-5 rounded-2xl border border-indigo-100 shadow-sm relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-100 rounded-bl-full -z-10 opacity-50"></div>
-            <label class="block text-sm font-bold text-indigo-900 mb-4 flex items-center"><i class="fas fa-barcode mr-2 text-indigo-500"></i>自動派工單編號</label>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10">
+          <div class="col-span-1 sm:col-span-2 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 shadow-sm">
+            <label class="block text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-barcode mr-2 text-indigo-500"></i>自動派工單編號系統</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">派工科室</label>
-                <select id="wo-dept" class="w-full border border-slate-300 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm shadow-sm" onchange="window.updateWoPrefix()">
-                  <option value="交工科">交工科</option><option value="停管科">停管科</option>
-                  <option value="公運科">公運科</option><option value="交安科">交安科</option>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">派工科室</label>
+                <select id="wo-dept" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="window.updateWoPrefix()">
+                  <option value="交工科">交工科</option>
+                  <option value="停管科">停管科</option>
+                  <option value="公運科">公運科</option>
+                  <option value="交安科">交安科</option>
                   <option value="運規科">運規科</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">派別 (數字)</label>
-                <input type="text" id="wo-batch" class="w-full border border-slate-300 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm shadow-sm" placeholder="例如: 01" onkeyup="window.updateWoPrefix()">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">派別 (數字)</label>
+                <input type="text" id="wo-batch" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" placeholder="例如: 01" onkeyup="window.updateWoPrefix()">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">行政區</label>
-                <select id="wo-district" class="w-full border border-slate-300 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm shadow-sm" onchange="window.updateWoPrefix()">
-                  <option value="桃園區">桃園區</option><option value="蘆竹區">蘆竹區</option><option value="龜山區">龜山區</option>
-                  <option value="八德區">八德區</option><option value="中壢區">中壢區</option><option value="大園區">大園區</option>
-                  <option value="大溪區">大溪區</option><option value="復興區">復興區</option><option value="新屋區">新屋區</option>
-                  <option value="龍潭區">龍潭區</option><option value="平鎮區">平鎮區</option><option value="楊梅區">楊梅區</option>
-                  <option value="觀音區">觀音區</option>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">行政區</label>
+                <select id="wo-district" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="window.updateWoPrefix()">
+                  <!-- Options automatically generated from allDistricts by JS -->
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">廠商編號 (數字)</label>
-                <input type="text" id="wo-serial" class="w-full border border-slate-300 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm shadow-sm" placeholder="例如: 01" onkeyup="window.updateWoPrefix()">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">廠商編號 (數字)</label>
+                <input type="text" id="wo-serial" class="w-full border border-slate-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white" placeholder="例如: 01" onkeyup="window.updateWoPrefix()">
               </div>
             </div>
-            <div class="mt-4 bg-white/80 p-3 rounded-xl border border-indigo-50 flex items-center justify-between shadow-sm">
-              <span class="text-slate-500 font-medium text-sm">組合結果預覽：</span>
-              <span id="wo-preview-id" class="font-bold text-xl text-indigo-700 tracking-widest bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100">工01-桃01</span>
+            <div class="mt-3 text-sm bg-white p-3 rounded-lg border border-indigo-100 flex items-center justify-between shadow-inner">
+              <span class="text-slate-500 font-medium">組合結果：</span>
+              <span id="wo-preview-id" class="font-bold text-xl text-indigo-600 tracking-wider">工01-桃01</span>
             </div>
           </div>
 
-          <!-- 區塊2: 日期與基本設定 -->
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 flex items-center gap-2"><i class="far fa-calendar-alt text-slate-400"></i> 時程與分類</h3>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">收單日期</label>
-              <input type="date" id="wo-recv-date" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" onchange="window.calcExpectedDate()">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">派工日期</label>
-              <input type="date" id="wo-dispatch-date" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-            </div>
-            <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
-              <label class="block text-xs font-bold text-amber-800 mb-1.5">預計完工日期 (自動+45天)</label>
-              <input type="date" id="wo-expected-date" class="w-full border border-amber-200 rounded-lg p-2 bg-white focus:ring-2 focus:ring-amber-500 outline-none font-medium text-sm text-amber-900">
-            </div>
-            
-            <div class="pt-2">
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">案件來源</label>
-              <select id="wo-source-type" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" onchange="window.toggleSourceDetails()">
-                <option value="一般派工">一般派工</option><option value="市政信箱">市政信箱</option>
-                <option value="議員">議員</option><option value="里長">里長</option>
-                <option value="A1">A1</option><option value="A2">A2</option>
-                <option value="緊急派工">緊急派工</option>
-              </select>
-            </div>
-            <div id="wo-source-detail-container" class="hidden">
-              <label class="block text-xs font-semibold text-indigo-600 mb-1.5">服務處 / 單位名稱</label>
-              <input type="text" id="wo-source-detail" class="w-full border border-indigo-200 rounded-xl p-2.5 bg-indigo-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm" placeholder="請填寫名稱...">
-            </div>
+          <!-- 區塊2: 日期與廠商 -->
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <label class="block text-sm font-semibold text-slate-600 mb-1">收單日期</label>
+            <input type="date" id="wo-recv-date" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.calcExpectedDate()">
+            <label class="block text-sm font-semibold text-slate-600 mb-1">派工日期</label>
+            <input type="date" id="wo-dispatch-date" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-sm font-bold text-indigo-600 mb-1">預計完工日期 (自動+45天)</label>
+            <input type="date" id="wo-expected-date" class="w-full border border-indigo-200 rounded-lg p-2 mb-1 bg-indigo-50 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
           </div>
           
-          <!-- 區塊3: 地點與屬性 -->
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 flex flex-col">
-            <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 flex items-center gap-2"><i class="fas fa-map-marker-alt text-slate-400"></i> 地點與內容</h3>
-            
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5">年度歸屬</label>
-                <select id="wo-year-select" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"></select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5">施工廠商 (自動)</label>
-                <input type="text" id="wo-vendor" class="w-full border border-slate-200 rounded-xl p-2.5 bg-slate-50 text-slate-500 text-sm font-medium" readonly>
-              </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label>
+            <select id="wo-source-type" class="w-full border border-slate-300 rounded-lg p-2 mb-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.toggleSourceDetails()">
+              <option value="一般派工">一般派工</option>
+              <option value="市政信箱">市政信箱</option>
+              <option value="議員">議員</option>
+              <option value="里長">里長</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="緊急派工">緊急派工</option>
+            </select>
+            <div id="wo-source-detail-container" class="hidden mb-3">
+              <label class="block text-xs font-semibold text-indigo-600 mb-1">服務處 / 單位名稱</label>
+              <input type="text" id="wo-source-detail" class="w-full border border-indigo-300 rounded-lg p-2 bg-indigo-50 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="請填寫服務處名稱...">
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">派工地點 (路段/路口)</label>
-              <input type="text" id="wo-location" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">鄰里辦公處 (選填)</label>
-              <input type="text" id="wo-village" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" placeholder="例如: 成功里">
-            </div>
-            <div class="flex-1 flex flex-col">
-              <label class="block text-xs font-semibold text-slate-500 mb-1.5">派工內容說明</label>
-              <textarea id="wo-content" class="w-full flex-1 min-h-[80px] border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none text-sm resize-none"></textarea>
-            </div>
-            
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-2">案件屬性標籤</label>
-              <div class="flex flex-wrap gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1 rounded-md border border-slate-200 hover:border-indigo-300 transition-colors">
-                  <input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="民眾通報">
-                  <span class="font-medium text-slate-600 text-xs">民眾通報</span>
-                </label>
-                <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1 rounded-md border border-slate-200 hover:border-indigo-300 transition-colors">
-                  <input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="學校周邊500m內">
-                  <span class="font-medium text-slate-600 text-xs">學校周邊</span>
-                </label>
-                <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1 rounded-md border border-slate-200 hover:border-indigo-300 transition-colors">
-                  <input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="號誌化路口">
-                  <span class="font-medium text-slate-600 text-xs">號誌路口</span>
-                </label>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">年度</label>
+            <select id="wo-year-select" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商 (自動偵測對應分區廠商)</label>
+            <input type="text" id="wo-vendor" class="w-full border border-slate-200 rounded-lg p-2 bg-slate-100 text-slate-500 text-sm" readonly placeholder="待系統指派">
+          </div>
+
+          <!-- 區塊3: 地點與屬性 -->
+          <div class="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+              <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">派工地點</label>
+                <input type="text" id="wo-location" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
               </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">里辦公處</label>
+                <input type="text" id="wo-village" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例如: XX里辦公處">
+              </div>
+            </div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">派工內容說明</label>
+            <textarea id="wo-content" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" rows="2"></textarea>
+            <label class="block text-sm font-semibold text-slate-600 mb-2">屬性 (可複選)</label>
+            <div class="flex flex-wrap gap-3 text-sm mt-1 bg-slate-50 p-3 rounded-lg border border-slate-100">
+              <label class="flex items-center space-x-2 cursor-pointer hover:text-indigo-600 transition-colors"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="民眾通報"><span class="font-medium">民眾通報</span></label>
+              <label class="flex items-center space-x-2 cursor-pointer hover:text-indigo-600 transition-colors"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="學校周邊500m內"><span class="font-medium">學校周邊500m內</span></label>
+              <label class="flex items-center space-x-2 cursor-pointer hover:text-indigo-600 transition-colors"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" value="號誌化路口"><span class="font-medium">號誌化路口</span></label>
             </div>
           </div>
 
           <!-- 區塊4: 雲端連結 -->
-          <div class="col-span-1 md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-            <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2 mb-4 flex items-center gap-2"><i class="fas fa-cloud text-slate-400"></i> 雲端附件資料</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5"><i class="fas fa-link mr-1 text-slate-400"></i>派工單掃描檔網址</label>
-                <input type="url" id="wo-doc-url" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm placeholder:text-slate-300" placeholder="https://drive.google.com/...">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-500 mb-1.5"><i class="fas fa-image mr-1 text-slate-400"></i>完工照片資料夾網址</label>
-                <input type="url" id="wo-photo-url" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm placeholder:text-slate-300" placeholder="https://drive.google.com/...">
-              </div>
-            </div>
+          <div class="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+             <label class="block text-sm font-semibold text-slate-600 mb-1"><i class="fas fa-link mr-1 text-slate-400"></i>派工單雲端網址 (http開頭)</label>
+             <input type="text" id="wo-doc-url" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://...">
+             <label class="block text-sm font-semibold text-slate-600 mb-1"><i class="fas fa-image mr-1 text-slate-400"></i>完工照片雲端網址 (http開頭)</label>
+             <input type="text" id="wo-photo-url" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://...">
           </div>
 
           <!-- 區塊5: 廠商回報區 -->
-          <div class="col-span-1 md:col-span-2 bg-emerald-50/50 p-5 rounded-2xl border border-emerald-200 shadow-sm relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-100 rounded-bl-full -z-10 opacity-40"></div>
-            <h4 class="font-bold text-emerald-900 mb-4 flex items-center"><i class="fas fa-check-circle mr-2 text-emerald-500"></i>竣工回報結算區 (由施工廠商填寫)</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+          <div class="col-span-1 sm:col-span-2 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 shadow-sm">
+            <h4 class="font-bold text-emerald-800 mb-3 border-b border-emerald-200 pb-2"><i class="fas fa-check-circle mr-2 text-emerald-500"></i>完工回報區 (廠商可填)</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-emerald-800 mb-1.5">實際完工日期</label>
-                <input type="date" id="wo-actual-date" class="w-full border border-emerald-200 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm">
+                <label class="block text-sm font-semibold text-slate-600 mb-1">實際完工日期</label>
+                <input type="date" id="wo-actual-date" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-emerald-800 mb-1.5">案件狀態更新</label>
-                <select id="wo-status" class="w-full border border-emerald-200 rounded-xl p-2.5 font-bold text-indigo-700 focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm">
-                  <option value="辦理中">辦理中 (施工中)</option>
-                  <option value="已完工">已完工 (待驗收)</option>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">目前狀態</label>
+                <select id="wo-status" class="w-full border border-slate-300 rounded-lg p-2 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                  <option value="辦理中">辦理中</option>
+                  <option value="已完工">已完工</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-emerald-800 mb-1.5">派工預估金額</label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
-                  <input type="number" id="wo-dispatch-amount" class="w-full border border-emerald-200 rounded-xl pl-7 pr-3 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm font-medium" placeholder="0">
-                </div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">派工金額</label>
+                <input type="number" id="wo-dispatch-amount" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white" placeholder="0">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-emerald-800 mb-1.5">實際結算金額</label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
-                  <input type="number" id="wo-complete-amount" class="w-full border border-emerald-200 rounded-xl pl-7 pr-3 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-sm font-medium" placeholder="0">
-                </div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">竣工金額</label>
+                <input type="number" id="wo-complete-amount" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-white" placeholder="0">
               </div>
             </div>
           </div>
 
         </div>
       </div>
-      
-      <div class="p-4 border-t border-slate-100 bg-white flex justify-end space-x-3 z-10">
-        <button onclick="window.closeModal('wo-modal')" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-sm">取消返回</button>
-        <button onclick="window.saveWorkOrder()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-md shadow-indigo-200 transition-all flex items-center gap-2">
-          <i class="fas fa-save"></i> 儲存資料
-        </button>
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end space-x-3">
+        <button onclick="document.getElementById('wo-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-5 py-2 rounded-lg font-medium transition-colors shadow-sm">取消</button>
+        <button onclick="window.saveWorkOrder()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-md transition-colors">儲存派工單</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: 廠商施工通報 -->
-  <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 data-[show=true]:opacity-100 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-emerald-100 bg-emerald-50/80 flex justify-between items-center">
-        <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2"><i class="fas fa-hard-hat text-emerald-600"></i> 發布今日施工通報</h2>
-        <button onclick="window.closeModal('report-modal')" class="w-8 h-8 flex items-center justify-center rounded-full text-emerald-700 hover:bg-emerald-200 transition-colors"><i class="fas fa-times"></i></button>
+  <div id="report-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col fade-in border border-slate-200">
+      <div class="p-4 border-b bg-emerald-50 flex justify-between items-center rounded-t-xl">
+        <h2 class="text-xl font-bold text-emerald-800"><i class="fas fa-hard-hat mr-2"></i>發布今日施工通報</h2>
+        <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button>
       </div>
-      <div class="p-5 flex-1 space-y-4">
-        <p class="text-sm text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
-          <i class="fas fa-info-circle text-indigo-400 mr-1"></i> 請勾選今日預計施工的項目，系統會記錄發布時間。同一天內再次送出將會更新紀錄。
-        </p>
-        
-        <div class="relative">
-          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="report-search" placeholder="搜尋您的派工單..." class="w-full border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow" onkeyup="window.filterReportWOs()">
-        </div>
-        
-        <div id="report-wo-list" class="max-h-60 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-white shadow-inner">
-          <!-- 動態載入該廠商的案件 Checkbox -->
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold text-slate-700 mb-2">補充說明 / 緊急交辦事項</label>
-          <textarea id="report-note" rows="3" class="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none" placeholder="不在列表上的事項請填寫於此..."></textarea>
-        </div>
+      <div class="p-4 flex-1 space-y-3">
+        <p class="text-sm text-slate-500">請從您的派工案件中勾選今日預計施工的項目，系統會記錄發布時間。同一天內再次送出將會更新紀錄。</p>
+        <input type="text" id="report-search" placeholder="搜尋您的派工單..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" onkeyup="window.filterReportWOs()">
+        <div id="report-wo-list" class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1 bg-slate-50"></div>
+        <label class="block text-sm font-bold text-slate-700 mt-2">補充說明 / 緊急案件</label>
+        <textarea id="report-note" rows="3" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="不在列表上的緊急交辦事項請填寫於此..."></textarea>
       </div>
-      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
-        <button id="btn-delete-report" onclick="window.deleteReport()" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-lg hidden font-medium transition-colors text-sm"><i class="fas fa-trash-alt mr-1"></i> 撤銷今日通報</button>
-        <div class="flex space-x-3 ml-auto">
-          <button onclick="window.closeModal('report-modal')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-5 py-2 rounded-xl font-medium transition-colors text-sm shadow-sm">取消</button>
-          <button onclick="window.saveReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors text-sm flex items-center gap-2">
-            <i class="fas fa-paper-plane"></i> 發布
-          </button>
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between rounded-b-xl">
+        <button id="btn-delete-report" onclick="window.deleteReport()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg hidden shadow-sm"><i class="fas fa-trash mr-1"></i>刪除</button>
+        <div class="flex space-x-2 ml-auto">
+          <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+          <button onclick="window.saveReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold shadow-md">發布 / 更新</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Modal: 機關一般公告 -->
-  <div id="general-announcement-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 data-[show=true]:opacity-100 p-4">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-slate-200">
-      <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
-        <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2"><i class="fas fa-bullhorn text-amber-500"></i> 發布系統公告</h2>
-        <button onclick="window.closeModal('general-announcement-modal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
+  <div id="general-announcement-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-amber-800"><i class="fas fa-bullhorn mr-2"></i>發布系統公告</h2>
+      <select id="announcement-target" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-amber-500 outline-none">
+        <option value="全部">通知所有人 (全部)</option>
+      </select>
+      <textarea id="announcement-content" rows="4" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-amber-500 outline-none" placeholder="請輸入公告內容..."></textarea>
+      <div class="flex justify-end space-x-3">
+        <button onclick="document.getElementById('general-announcement-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveGeneralAnnouncement()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold shadow-md">發布公告</button>
       </div>
-      
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">通知對象</label>
-          <select id="announcement-target" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 outline-none text-sm bg-slate-50 focus:bg-white">
-            <option value="全部">通知所有人 (全部轄區)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">公告內容</label>
-          <textarea id="announcement-content" rows="4" class="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none text-sm resize-none" placeholder="請輸入詳細公告事項..."></textarea>
-        </div>
+    </div>
+  </div>
+
+  <!-- Modal: 系統設定 -> 新增年度 -->
+  <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-xs fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-calendar-plus mr-2 text-blue-500"></i>新增年度</h2>
+      <input type="text" id="sys-year-name" placeholder="年度名稱 (例如: 113)" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold">
+      <div class="flex justify-end space-x-3">
+        <button onclick="document.getElementById('sys-year-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveSysYear()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: 系統設定 -> 新增分區 -->
+  <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-map-plus mr-2 text-purple-500"></i>新增合約分區</h2>
+      <label class="block text-sm font-semibold text-slate-700 mb-1">分區名稱</label>
+      <input type="text" id="sys-zone-name" placeholder="例如: 北區 或 第一區" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-purple-500 outline-none font-bold">
       
-      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-100">
-        <button onclick="window.closeModal('general-announcement-modal')" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2 rounded-xl font-medium transition-colors text-sm shadow-sm">取消</button>
-        <button onclick="window.saveGeneralAnnouncement()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors text-sm flex items-center gap-2">
-          <i class="fas fa-broadcast-tower"></i> 發布
-        </button>
+      <label class="block text-sm font-semibold text-slate-700 mb-2">涵蓋行政區 (請至少選擇 2 個)</label>
+      <div id="sys-zone-regions-container" class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4 h-48 overflow-y-auto">
+        <!-- JS dynamically generates checkboxes -->
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveSysZone()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: 帳號管理 -->
-  <div id="user-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 data-[show=true]:opacity-100 p-4">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-slate-200">
-      <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
-        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-user-shield text-indigo-500"></i> 新增/編輯帳號</h2>
-        <button onclick="window.closeModal('user-modal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
-      </div>
-      
+  <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-user-plus mr-2 text-indigo-500"></i>新增帳號</h2>
       <input type="hidden" id="user-doc-id">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">帳號 / 廠商名稱 (不可重複)</label>
-          <input type="text" id="user-username" placeholder="例：桃園營造廠" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-slate-50 focus:bg-white">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">登入密碼</label>
-          <input type="text" id="user-password" placeholder="請設定高強度密碼" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-slate-50 focus:bg-white">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">權限層級</label>
-          <select id="user-role" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white" onchange="window.toggleUserVendorFields()">
-            <option value="機關/監造">機關 / 監造 (管理與派案)</option>
-            <option value="施工廠商">施工廠商 (僅能操作被指派案件)</option>
-            <option value="系統管理員">系統管理員 (全系統設定權限)</option>
-          </select>
-        </div>
-        
-        <div id="user-vendor-fields" class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 hidden mt-2">
-          <label class="block text-xs text-indigo-800 mb-3 font-bold flex items-center gap-1"><i class="fas fa-link"></i> 綁定廠商專屬轄區與年度</label>
-          <div class="grid grid-cols-2 gap-3">
-            <select id="user-year" class="w-full border border-slate-300 rounded-lg p-2 outline-none text-sm bg-white shadow-sm"></select>
-            <select id="user-district" class="w-full border border-slate-300 rounded-lg p-2 outline-none text-sm bg-white shadow-sm"></select>
-          </div>
-        </div>
+      <input type="text" id="user-username" placeholder="帳號/姓名 (不可重複)" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+      <input type="text" id="user-password" placeholder="密碼" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+      <select id="user-role" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="window.toggleUserVendorFields()">
+        <option value="機關/監造">機關/監造 (純瀏覽/派案)</option>
+        <option value="施工廠商">施工廠商 (可編輯案件)</option>
+        <option value="系統管理員">系統管理員 (全權限)</option>
+      </select>
+      <div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border border-amber-200 hidden">
+        <label class="block text-xs text-amber-800 mb-2 font-bold">廠商專屬綁定</label>
+        <label class="block text-xs text-slate-600 mb-1">負責年度</label>
+        <select id="user-year" class="w-full border border-slate-300 rounded-lg p-2 mb-2 outline-none text-sm"></select>
+        <label class="block text-xs text-slate-600 mb-1">合約分區</label>
+        <select id="user-district" class="w-full border border-slate-300 rounded-lg p-2 outline-none text-sm"></select>
       </div>
-      
-      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-100">
-        <button onclick="window.closeModal('user-modal')" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2 rounded-xl font-medium transition-colors text-sm shadow-sm">取消</button>
-        <button onclick="window.saveUser()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors text-sm flex items-center gap-2">
-          <i class="fas fa-check"></i> 儲存設定
-        </button>
+      <div class="flex justify-end space-x-3 mt-4">
+        <button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveUser()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: 年度與分區預算設定 -->
-  <div id="yd-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 data-[show=true]:opacity-100 p-4">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-95 transition-transform duration-300 data-[show=true]:scale-100 border border-slate-200">
-      <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
-        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-map-marked-alt text-emerald-500"></i> 分區合約建檔</h2>
-        <button onclick="window.closeModal('yd-modal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
-      </div>
-      
+  <div id="yd-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm fade-in border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 text-slate-800"><i class="fas fa-file-invoice-dollar mr-2 text-emerald-500"></i>設定年度分區預算</h2>
       <input type="hidden" id="yd-doc-id">
-      <div class="space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">執行年度</label>
-            <input type="text" id="yd-year" placeholder="例: 113" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-slate-50 focus:bg-white text-center font-bold">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">行政分區</label>
-            <input type="text" id="yd-district" placeholder="例: 桃園區" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none text-sm bg-slate-50 focus:bg-white text-center font-bold">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">預算金額上限 (選填)</label>
-          <input type="number" id="yd-budget" placeholder="0" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono bg-white">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5">實際發包契約總金額</label>
-          <input type="number" id="yd-contract" placeholder="0" class="w-full border border-emerald-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono bg-emerald-50 focus:bg-white font-bold text-emerald-800">
-        </div>
-      </div>
       
-      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-slate-100">
-        <button onclick="window.closeModal('yd-modal')" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition-colors text-sm shadow-sm">取消</button>
-        <button onclick="window.saveYearDistrict()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold shadow-md transition-colors text-sm flex items-center gap-2">
-          <i class="fas fa-save"></i> 建立合約
-        </button>
+      <label class="block text-sm font-semibold text-slate-600 mb-1">年度</label>
+      <select id="yd-year" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+      
+      <label class="block text-sm font-semibold text-slate-600 mb-1">合約分區</label>
+      <select id="yd-district" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+      
+      <label class="block text-sm font-semibold text-slate-600 mb-1">預算金額</label>
+      <input type="number" id="yd-budget" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-3 focus:ring-2 focus:ring-emerald-500 outline-none">
+      
+      <label class="block text-sm font-semibold text-slate-600 mb-1">契約金額</label>
+      <input type="number" id="yd-contract" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-emerald-500 outline-none">
+      
+      <div class="flex justify-end space-x-3 mt-2">
+        <button onclick="document.getElementById('yd-modal').classList.add('hidden')" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg shadow-sm">取消</button>
+        <button onclick="window.saveYearDistrict()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-bold shadow-md">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 自訂系統彈窗 (取代原生的 alert 與 confirm) -->
+  <div id="custom-dialog-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[200] flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center border border-slate-200">
+      <div id="custom-dialog-icon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i id="custom-dialog-icon-inner" class="fas fa-info-circle text-3xl"></i>
+      </div>
+      <h2 id="custom-dialog-title" class="text-xl font-bold mb-2 text-slate-800">提示</h2>
+      <p id="custom-dialog-msg" class="text-slate-600 mb-6 text-sm"></p>
+      <div id="custom-dialog-buttons" class="flex justify-center space-x-3">
       </div>
     </div>
   </div>
@@ -705,7 +562,6 @@
     import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // 依據原始提供之設定值
     const myFirebaseConfig = {
       apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88",
       authDomain: "dispatch-work-order.firebaseapp.com",
@@ -719,54 +575,80 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // 全域變數定義
+    // 全域變數
     window.db = db;
     window.currentUser = null;
     window.workOrders = [];
     window.announcements = [];
     window.users = [];
-    window.yearDistricts = [];
+    window.yearDistricts = []; // 合約預算紀錄
+    window.sysYears = [];      // 獨立年度表
+    window.sysZones = [];      // 獨立分區表 (含區域綁定)
     window.currentTab = '全部';
 
+    // 實作非同步對話框，解決瀏覽器或 iFrame 阻擋原生 alert 與 confirm 的問題
+    window.customAlert = (msg) => {
+      return new Promise((resolve) => {
+        document.getElementById('custom-dialog-title').innerText = '系統訊息';
+        document.getElementById('custom-dialog-msg').innerText = msg;
+        document.getElementById('custom-dialog-icon').className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-indigo-100 text-indigo-600';
+        document.getElementById('custom-dialog-icon-inner').className = 'fas fa-info-circle text-3xl';
+        document.getElementById('custom-dialog-buttons').innerHTML = `<button id="btn-dialog-ok" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold w-full shadow-md">確定</button>`;
+        document.getElementById('custom-dialog-modal').classList.remove('hidden');
+        document.getElementById('btn-dialog-ok').onclick = () => { document.getElementById('custom-dialog-modal').classList.add('hidden'); resolve(); };
+      });
+    };
+
+    window.customConfirm = (msg) => {
+      return new Promise((resolve) => {
+        document.getElementById('custom-dialog-title').innerText = '請確認操作';
+        document.getElementById('custom-dialog-msg').innerText = msg;
+        document.getElementById('custom-dialog-icon').className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100 text-amber-600';
+        document.getElementById('custom-dialog-icon-inner').className = 'fas fa-exclamation-triangle text-3xl';
+        document.getElementById('custom-dialog-buttons').innerHTML = `
+          <button id="btn-dialog-cancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium w-1/2">取消</button>
+          <button id="btn-dialog-yes" class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-lg font-bold w-1/2 shadow-md">確定刪除</button>
+        `;
+        document.getElementById('custom-dialog-modal').classList.remove('hidden');
+        document.getElementById('btn-dialog-cancel').onclick = () => { document.getElementById('custom-dialog-modal').classList.add('hidden'); resolve(false); };
+        document.getElementById('btn-dialog-yes').onclick = () => { document.getElementById('custom-dialog-modal').classList.add('hidden'); resolve(true); };
+      });
+    };
+
+    // 覆蓋全局 alert，讓所有舊程式碼裡的 alert() 皆無縫接軌轉換成新版視窗
+    window.alert = (msg) => { window.customAlert(msg); };
+
+    // 字典：編號自動轉換對照表
     const deptMap = { '交工科': '工', '停管科': '停', '公運科': '公', '交安科': '安', '運規科': '規' };
     const distMap = {
       '桃園區':'桃', '蘆竹區':'竹', '龜山區':'龜', '八德區':'德', '中壢區':'中', '大園區':'園',
       '大溪區':'溪', '復興區':'復', '新屋區':'新', '龍潭區':'龍', '平鎮區':'平', '楊梅區':'楊', '觀音區':'觀'
     };
-
-    // Modal UI Helpers
-    window.openModal = (id) => {
-      const el = document.getElementById(id);
-      el.classList.remove('hidden');
-      // Trigger reflow
-      void el.offsetWidth; 
-      el.setAttribute('data-show', 'true');
-    };
-
-    window.closeModal = (id) => {
-      const el = document.getElementById(id);
-      el.removeAttribute('data-show');
-      setTimeout(() => el.classList.add('hidden'), 300); // Wait for transition
-    };
+    const allDistricts = Object.keys(distMap);
 
     // 啟動與登入機制
     signInAnonymously(auth).then(() => {
       fetchInitialData();
-    }).catch(err => {
-      console.error("Firebase Auth Error:", err);
-      // 就算失敗也建立假資料供預覽測試
-      alert("資料庫連線超時或權限錯誤。");
-    });
+    }).catch(err => alert("連線失敗，請檢查網路狀態"));
 
     async function fetchInitialData() {
       onSnapshot(collection(db, "users"), snap => {
         window.users = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        window.updateLoginOptions(); 
+        window.updateLoginOptions();
         if(window.currentUser) window.renderUsers();
+      });
+      onSnapshot(collection(db, "sys_years"), snap => {
+        window.sysYears = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        window.updateAllDropdowns();
+        if(window.currentUser) window.renderSysYears();
+      });
+      onSnapshot(collection(db, "sys_zones"), snap => {
+        window.sysZones = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        window.updateAllDropdowns();
+        if(window.currentUser) window.renderSysZones();
       });
       onSnapshot(collection(db, "yearDistricts"), snap => {
         window.yearDistricts = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        window.updateAllDropdowns();
         if(window.currentUser) window.renderYearDistricts();
       });
       onSnapshot(collection(db, "workOrders"), snap => {
@@ -792,7 +674,7 @@
     window.openLoginModal = () => {
       window.updateLoginOptions();
       document.getElementById('login-password').value = '';
-      window.openModal('login-modal');
+      document.getElementById('login-modal').classList.remove('hidden');
     };
 
     window.login = () => {
@@ -803,24 +685,18 @@
         window.currentUser = { username: '系統管理員', role: '系統管理員' };
       } else {
         const user = window.users.find(x => x.username === u && x.password === p);
-        if (!user) {
-          alert('密碼錯誤，請重新輸入！');
-          return;
-        }
+        if (!user) return alert('密碼錯誤，請重新輸入！');
         window.currentUser = user;
       }
       
-      window.closeModal('login-modal');
+      document.getElementById('login-modal').classList.add('hidden');
       document.getElementById('btn-login-main').classList.add('hidden');
       document.getElementById('btn-logout').classList.remove('hidden');
       document.getElementById('sidebar-user-name').innerText = window.currentUser.username;
       document.getElementById('sidebar-user-role').innerText = window.currentUser.role;
-      document.getElementById('status-indicator').classList.replace('bg-rose-500', 'bg-emerald-500');
       
       const isSysAdmin = window.currentUser.role === '系統管理員';
       document.getElementById('nav-settings').classList.toggle('hidden', !isSysAdmin);
-      document.getElementById('nav-settings-divider').classList.toggle('hidden', !isSysAdmin);
-      
       document.getElementById('btn-export').classList.remove('hidden');
       document.getElementById('btn-export-backup').classList.toggle('hidden', !isSysAdmin);
       document.getElementById('btn-import-backup').classList.toggle('hidden', !isSysAdmin);
@@ -831,51 +707,51 @@
       window.renderWoTable();
       window.renderAnnouncements();
       window.renderStatistics();
-    };
-
-    window.logout = () => { 
-      if(confirm('確定要登出系統嗎？')) {
-        window.currentUser = null; 
-        window.location.reload(); 
+      
+      // 修正：登入後立刻渲染系統設定的所有表格，確保不用新增也能看到既有資料
+      if(isSysAdmin) {
+        window.renderUsers();
+        window.renderSysYears();
+        window.renderSysZones();
+        window.renderYearDistricts();
       }
     };
+
+    window.logout = () => { window.location.reload(); };
 
     window.showSection = (sec) => {
       if (!window.currentUser) return alert("請先登入！");
       ['work-orders', 'announcements', 'statistics', 'settings'].forEach(s => document.getElementById(`section-${s}`)?.classList.add('hidden'));
       document.getElementById(`section-${sec}`)?.classList.remove('hidden');
-      
-      const titles = {'work-orders':'派工單總表', 'announcements':'機關公告與通報', 'statistics':'契約執行統計分析', 'settings':'系統後台設定'};
-      document.getElementById('page-title').innerText = titles[sec];
-      
-      if(window.innerWidth < 768) window.toggleSidebar();
+      document.getElementById('page-title').innerText = {'work-orders':'派工單總表', 'announcements':'公告與通報', 'statistics':'契約執行統計', 'settings':'系統設定'}[sec];
+      if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('drawer-closed')) window.toggleSidebar();
     };
 
     window.toggleSidebar = () => {
       const sb = document.getElementById('sidebar');
       const ov = document.getElementById('sidebar-overlay');
       sb.classList.toggle('drawer-closed');
-      if (sb.classList.contains('drawer-closed')) {
-        ov.classList.add('opacity-0');
-        setTimeout(() => ov.classList.add('hidden'), 300);
-      } else {
-        ov.classList.remove('hidden');
-        setTimeout(() => ov.classList.remove('opacity-0'), 10);
-      }
+      ov.classList.toggle('hidden');
     };
 
     window.updateAllDropdowns = () => {
-      const years = [...new Set(window.yearDistricts.map(y => y.year))].sort().reverse();
-      const districts = [...new Set(window.yearDistricts.map(y => y.district))].sort();
+      const years = window.sysYears.map(y => y.name).sort().reverse();
+      const zones = window.sysZones.map(z => z.name).sort();
       
-      ['wo-year-select', 'user-year', 'stat-year'].forEach(id => {
+      ['wo-year-select', 'user-year', 'stat-year', 'yd-year'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.innerHTML = (id==='stat-year'?'<option value="全部">全部年度</option>':'') + years.map(y => `<option value="${y}">${y}</option>`).join('');
       });
-      ['user-district', 'stat-district', 'announcement-target'].forEach(id => {
+      ['user-district', 'stat-district', 'announcement-target', 'yd-district'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) el.innerHTML = (id==='stat-district'?'<option value="全部">全部分區</option>':'') + (id==='announcement-target'?'<option value="全部">通知所有人(全部)</option>':'') + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+        if(el) el.innerHTML = (id==='stat-district'?'<option value="全部">全部分區</option>':'') + (id==='announcement-target'?'<option value="全部">通知所有人(全部)</option>':'') + zones.map(d => `<option value="${d}">${d}</option>`).join('');
       });
+      
+      // 更新派工單內的行政區下拉選單
+      const distEl = document.getElementById('wo-district');
+      if (distEl && window.currentUser && window.currentUser.role !== '施工廠商') {
+          distEl.innerHTML = allDistricts.map(d => `<option value="${d}">${d}</option>`).join('');
+      }
     };
 
     window.toggleUserVendorFields = () => {
@@ -885,6 +761,7 @@
       else f.classList.add('hidden');
     };
 
+    // 自動編號邏輯與連動
     window.updateWoPrefix = () => {
       const dept = document.getElementById('wo-dept').value || '交工科';
       const batch = document.getElementById('wo-batch').value || '01';
@@ -896,19 +773,14 @@
     window.toggleSourceDetails = () => {
       const s = document.getElementById('wo-source-type').value;
       const c = document.getElementById('wo-source-detail-container');
-      if (s === '議員' || s === '里長') {
-        c.classList.remove('hidden');
-      } else {
-        c.classList.add('hidden');
-        document.getElementById('wo-source-detail').value = '';
-      }
+      if (s === '議員' || s === '里長') c.classList.remove('hidden');
+      else { c.classList.add('hidden'); document.getElementById('wo-source-detail').value = ''; }
     };
 
     window.calcExpectedDate = () => {
       const rd = document.getElementById('wo-recv-date').value;
       if(rd) {
-        let d = new Date(rd); 
-        d.setDate(d.getDate() + 45);
+        let d = new Date(rd); d.setDate(d.getDate() + 45);
         document.getElementById('wo-expected-date').value = d.toISOString().split('T')[0];
       }
     };
@@ -916,11 +788,11 @@
     window.switchTab = (tab) => {
       window.currentTab = tab;
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+        btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('bg-slate-100', 'text-slate-600');
         if(btn.innerText.includes(tab)) {
           btn.classList.remove('bg-slate-100', 'text-slate-600');
-          btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+          btn.classList.add('bg-indigo-600', 'text-white');
         }
       });
       window.renderWoTable();
@@ -932,25 +804,20 @@
       const searchStr = document.getElementById('search-wo').value.toLowerCase();
       const role = window.currentUser.role;
       
-      // 基本過濾 (權限與搜尋字串)
       let filtered = window.workOrders.filter(wo => {
         if(role === '施工廠商' && wo.vendor !== window.currentUser.username) return false;
-        
         const textToSearch = [wo.id, wo.location, wo.village, wo.content, wo.source, wo.sourceDetail, wo.vendor, wo.status].join(' ').toLowerCase();
         if(searchStr && !textToSearch.includes(searchStr)) return false;
         return true;
       });
 
-      // 計算各狀態數量
       const counts = { '全部':0, '辦理中':0, '即將逾期':0, '已逾期':0, '已完工':0 };
       const todayDate = new Date();
-      todayDate.setHours(0,0,0,0); // 正規化為當日凌晨
 
       filtered.forEach(wo => {
         counts['全部']++;
-        if(wo.status === '已完工') {
-          counts['已完工']++;
-        } else {
+        if(wo.status === '已完工') counts['已完工']++;
+        else {
           counts['辦理中']++;
           if(wo.expectedDate) {
             const ed = new Date(wo.expectedDate);
@@ -961,115 +828,65 @@
         }
       });
 
-      // 更新頁籤數字
       ['全部','辦理中','即將逾期','已逾期','已完工'].forEach(t => {
         const cEl = document.getElementById(`count-${t==='全部'?'all':t==='辦理中'?'processing':t==='即將逾期'?'warning':t==='已逾期'?'overdue':'completed'}`);
         if(cEl) cEl.innerText = `(${counts[t]})`;
       });
 
-      // 依據頁籤過濾顯示 (修復了原始邏輯 bug)
       filtered = filtered.filter(wo => {
-        if (window.currentTab === '全部') return true;
-        
-        const isCompleted = wo.status === '已完工';
-        
-        if (window.currentTab === '已完工') return isCompleted;
-        
-        // 以下頁籤均不顯示已完工
-        if (isCompleted) return false; 
-        
-        if (window.currentTab === '辦理中') return true; 
-        
+        if(window.currentTab === '全部') return true;
+        if(window.currentTab === '已完工') return wo.status === '已完工';
+        if(wo.status === '已完工') return false; 
+        if(window.currentTab === '辦理中') return true; 
         const ed = wo.expectedDate ? new Date(wo.expectedDate) : null;
         const diff = ed ? Math.ceil((ed - todayDate)/(1000*60*60*24)) : 999;
-        
-        if (window.currentTab === '已逾期') return diff < 0;
-        if (window.currentTab === '即將逾期') return diff >= 0 && diff <= 10;
+        if(window.currentTab === '已逾期') return diff < 0;
+        if(window.currentTab === '即將逾期') return diff >= 0 && diff <= 10;
         return true;
       });
 
-      // 排序: 新收單排前面
-      filtered.sort((a,b) => new Date(b.recvDate || 0) - new Date(a.recvDate || 0));
-
+      filtered.sort((a,b) => new Date(b.recvDate) - new Date(a.recvDate));
       tbody.innerHTML = '';
+      
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-16 text-center text-slate-500">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-3"><i class="fas fa-search text-2xl text-slate-300"></i></div>
-          <p class="text-base font-medium">沒有符合條件的派工單</p>
-        </td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>沒有符合的資料</td></tr>`;
         return;
       }
 
       filtered.forEach(wo => {
         const ed = wo.expectedDate ? new Date(wo.expectedDate) : null;
         const diff = ed ? Math.ceil((ed - todayDate)/(1000*60*60*24)) : 999;
-        
-        let rowClass = "hover:bg-indigo-50/40 transition-colors group";
-        let statusBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-bold text-white bg-indigo-500 shadow-sm whitespace-nowrap">辦理中</span>`;
-        
-        if(wo.status === '已完工') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 whitespace-nowrap"><i class="fas fa-check mr-1"></i> 已完工</span>`;
-        } else if(ed) {
-          if(diff < 0) {
-            rowClass = "bg-rose-50/30 hover:bg-rose-50/80 transition-colors group border-l-2 border-rose-500";
-            statusBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-bold text-rose-700 bg-rose-100 border border-rose-200 whitespace-nowrap shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> 已逾期</span>`;
-          } else if(diff <= 10) {
-            rowClass = "bg-amber-50/30 hover:bg-amber-50/80 transition-colors group border-l-2 border-amber-400";
-            statusBadge = `<span class="px-2.5 py-1 rounded-md text-xs font-bold text-amber-800 bg-amber-100 border border-amber-200 whitespace-nowrap"><i class="fas fa-clock mr-1"></i> 即將逾期</span>`;
-          }
+        let rowClass = "hover:bg-slate-50 transition-colors";
+        if(wo.status !== '已完工' && ed) {
+          if(diff < 0) rowClass = "bg-rose-50 hover:bg-rose-100 transition-colors";
+          else if(diff <= 10) rowClass = "bg-amber-50 hover:bg-amber-100 transition-colors";
         }
 
         const pAmt = parseFloat(wo.dispatchAmount) || 0;
         const cAmt = parseFloat(wo.completeAmount) || 0;
-        let amtHtml = `<div class="text-xs space-y-1"><div class="text-slate-500">派: $${pAmt.toLocaleString()}</div>`;
-        
-        if (pAmt > 0 && Math.abs(cAmt - pAmt)/pAmt > 0.1) {
-          amtHtml += `<div class="text-rose-600 font-bold bg-rose-50 px-1 py-0.5 rounded inline-block w-full text-left" title="結算落差過大"><i class="fas fa-exclamation-circle text-[10px]"></i> 竣: $${cAmt.toLocaleString()}</div></div>`;
-        } else {
-          amtHtml += `<div class="text-emerald-700 font-medium">竣: $${cAmt.toLocaleString()}</div></div>`;
-        }
+        let amtHtml = `${pAmt} / ${cAmt}`;
+        if (pAmt > 0 && Math.abs(cAmt - pAmt)/pAmt > 0.1) amtHtml = `${pAmt} / <span class="text-rose-600 font-bold"><i class="fas fa-exclamation-triangle"></i> ${cAmt}</span>`;
 
-        const urlIcon = (url, icon, color) => url && url.startsWith('http') 
-          ? `<a href="${url}" target="_blank" class="${color} hover:opacity-70 transition-opacity bg-white p-1.5 rounded-lg shadow-sm border border-slate-100" title="點擊開啟"><i class="${icon} text-base"></i></a>` 
-          : `<span class="text-slate-200 p-1.5"><i class="${icon} text-base"></i></span>`;
-
-        let sourceHtml = `<span class="font-medium text-slate-700">${wo.source || '-'}</span>`;
-        if ((wo.source === '議員' || wo.source === '里長') && wo.sourceDetail) {
-          sourceHtml += `<br><span class="inline-block mt-1 px-1.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] rounded border border-indigo-100 truncate max-w-[100px]">${wo.sourceDetail}</span>`;
-        }
-        
-        let locHtml = `<div class="font-medium text-slate-800 truncate max-w-[180px] sm:max-w-[220px]" title="${wo.location}">${wo.location}</div>`;
-        if (wo.village) {
-          locHtml += `<div class="text-[11px] text-emerald-600 mt-0.5"><i class="fas fa-map-pin mr-0.5"></i> ${wo.village}</div>`;
-        }
+        const urlIcon = (url, icon) => url && url.startsWith('http') ? `<a href="${url}" target="_blank" class="text-indigo-600 hover:text-indigo-800"><i class="${icon} text-lg"></i></a>` : '-';
+        let sourceHtml = wo.source || '-';
+        if ((wo.source === '議員' || wo.source === '里長') && wo.sourceDetail) sourceHtml = `${wo.source}<br><span class="text-xs text-indigo-500">${wo.sourceDetail}</span>`;
+        let locHtml = wo.location;
+        if (wo.village) locHtml += `<br><span class="text-xs text-emerald-600">${wo.village}</span>`;
 
         const tr = document.createElement('tr');
         tr.className = rowClass;
         tr.innerHTML = `
-          <td class="p-4 font-bold text-indigo-700 font-mono text-[13px] whitespace-nowrap">${wo.id}</td>
-          <td class="p-4 text-[11px] text-slate-500 space-y-1 font-mono">
-            <div class="flex justify-between"><span class="w-4">收</span> <span>${wo.recvDate || '-'}</span></div>
-            <div class="flex justify-between"><span class="w-4 text-indigo-400">派</span> <span>${wo.dispatchDate || '-'}</span></div>
-            <div class="flex justify-between border-t border-slate-100 pt-0.5 mt-0.5 font-medium"><span class="w-4 text-amber-500">預</span> <span class="${diff < 0 && wo.status !== '已完工' ? 'text-rose-600 font-bold' : 'text-slate-700'}">${wo.expectedDate || '-'}</span></div>
-          </td>
-          <td class="p-4 text-sm">${sourceHtml}</td>
-          <td class="p-4 text-sm">${locHtml}</td>
-          <td class="p-4">${amtHtml}</td>
-          <td class="p-4">${statusBadge}</td>
-          <td class="p-4">
-            <div class="flex items-center justify-center space-x-1.5">
-              ${urlIcon(wo.docUrl, 'fas fa-file-pdf', 'text-rose-500')} 
-              ${urlIcon(wo.photoUrl, 'fas fa-images', 'text-amber-500')}
-            </div>
-          </td>
-          <td class="p-4 text-sm text-slate-600 font-mono font-medium">${wo.actualDate || '-'}</td>
-          <td class="p-4 text-center">
-            <div class="flex justify-center items-center gap-2">
-              <button onclick="window.openWoModal('${wo.docId}')" class="w-8 h-8 rounded bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50 hover:border-indigo-300 shadow-sm transition-all flex items-center justify-center" title="編輯檢視">
-                <i class="fas fa-pen text-sm"></i>
-              </button>
-              ${role === '系統管理員' ? `<button onclick="window.deleteWo('${wo.docId}')" class="w-8 h-8 rounded bg-white text-rose-500 border border-rose-100 hover:bg-rose-50 hover:border-rose-300 shadow-sm transition-all flex items-center justify-center opacity-0 group-hover:opacity-100" title="刪除"><i class="fas fa-trash-alt text-sm"></i></button>` : ''}
-            </div>
+          <td class="p-3 font-bold text-indigo-700">${wo.id}</td>
+          <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate || '-'}<br>派: ${wo.dispatchDate || '-'}<br>預: <span class="${diff < 0 && wo.status !== '已完工' ? 'text-rose-600 font-bold' : ''}">${wo.expectedDate || '-'}</span></td>
+          <td class="p-3 text-sm">${sourceHtml}</td>
+          <td class="p-3 text-sm max-w-[150px] truncate" title="${wo.location}">${locHtml}</td>
+          <td class="p-3 text-sm">${amtHtml}</td>
+          <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500 shadow-sm'}">${wo.status}</span></td>
+          <td class="p-3 text-center space-x-2">${urlIcon(wo.docUrl, 'fas fa-file-alt')} ${urlIcon(wo.photoUrl, 'fas fa-image')}</td>
+          <td class="p-3 text-sm text-slate-600">${wo.actualDate || '-'}</td>
+          <td class="p-3 text-center">
+            <button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1 transition-colors" title="編輯"><i class="fas fa-edit"></i></button>
+            ${role === '系統管理員' ? `<button onclick="window.deleteWo('${wo.docId}')" class="text-rose-500 hover:text-rose-700 px-2 py-1 transition-colors" title="刪除"><i class="fas fa-trash"></i></button>` : ''}
           </td>
         `;
         tbody.appendChild(tr);
@@ -1078,13 +895,8 @@
 
     window.openWoModal = (docId = null) => {
       document.getElementById('wo-doc-id').value = docId || '';
-      
-      // Reset Form
       const fields = ['wo-dept', 'wo-batch', 'wo-district', 'wo-serial', 'wo-recv-date', 'wo-dispatch-date', 'wo-expected-date', 'wo-source-type', 'wo-source-detail', 'wo-village', 'wo-location', 'wo-content', 'wo-doc-url', 'wo-photo-url', 'wo-actual-date', 'wo-status', 'wo-dispatch-amount', 'wo-complete-amount'];
-      fields.forEach(f => {
-        const el = document.getElementById(f);
-        if(el) el.value = '';
-      });
+      fields.forEach(f => { const el = document.getElementById(f); if(el) el.value = ''; });
       document.querySelectorAll('.wo-attr').forEach(cb => cb.checked = false);
       
       document.getElementById('wo-source-type').value = '一般派工';
@@ -1092,16 +904,16 @@
       
       const vEl = document.getElementById('wo-vendor');
       const yEl = document.getElementById('wo-year-select');
+      const distEl = document.getElementById('wo-district');
       
       if (docId) {
-        document.getElementById('wo-modal-title').innerHTML = '<i class="fas fa-edit text-indigo-500"></i> <span>編輯派工單</span>';
+        document.getElementById('wo-modal-title').innerText = '編輯派工單';
         const wo = window.workOrders.find(w => w.docId === docId);
         
         document.getElementById('wo-dept').value = wo.dept || '交工科';
         document.getElementById('wo-batch').value = wo.batch || '';
-        document.getElementById('wo-district').value = wo.district || '桃園區';
+        if(distEl) distEl.value = wo.district || '桃園區';
         document.getElementById('wo-serial').value = wo.serial || '';
-        
         document.getElementById('wo-recv-date').value = wo.recvDate;
         document.getElementById('wo-dispatch-date').value = wo.dispatchDate;
         document.getElementById('wo-expected-date').value = wo.expectedDate || '';
@@ -1111,10 +923,9 @@
         document.getElementById('wo-location').value = wo.location;
         document.getElementById('wo-content').value = wo.content;
         vEl.value = wo.vendor;
-        yEl.value = wo.year;
+        if(yEl) yEl.value = wo.year;
         
         window.toggleSourceDetails();
-
         document.getElementById('wo-doc-url').value = wo.docUrl || '';
         document.getElementById('wo-photo-url').value = wo.photoUrl || '';
         document.getElementById('wo-actual-date').value = wo.actualDate || '';
@@ -1127,25 +938,31 @@
           if(cb) cb.checked = true;
         });
       } else {
-        document.getElementById('wo-modal-title').innerHTML = '<i class="fas fa-plus-circle text-indigo-500"></i> <span>新增派工單</span>';
+        document.getElementById('wo-modal-title').innerText = '新增派工單';
         document.getElementById('wo-status').value = '辦理中';
         
-        // Auto-fill today for recv date
+        // 預設帶入今日為收單日
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('wo-recv-date').value = todayStr;
         window.calcExpectedDate();
 
         if(window.currentUser.role === '施工廠商') {
           vEl.value = window.currentUser.username;
-          yEl.value = window.currentUser.year || '';
-          document.getElementById('wo-district').value = window.currentUser.district || '桃園區';
+          if(yEl) yEl.value = window.currentUser.year || '';
+          
+          // 廠商只能開他們合約區域的案件
+          const vZone = window.sysZones.find(z => z.name === window.currentUser.district);
+          if (vZone && vZone.regions) {
+            distEl.innerHTML = vZone.regions.map(r => `<option value="${r}">${r}</option>`).join('');
+          }
         } else {
-          vEl.value = '待系統指派 (儲存時抓取)';
+          vEl.value = '待系統自動偵測指派';
+          distEl.innerHTML = allDistricts.map(d => `<option value="${d}">${d}</option>`).join('');
         }
       }
       
       window.updateWoPrefix();
-      window.openModal('wo-modal');
+      document.getElementById('wo-modal').classList.remove('hidden');
     };
 
     window.saveWorkOrder = async () => {
@@ -1155,19 +972,22 @@
       const dist = document.getElementById('wo-district').value;
       const serial = document.getElementById('wo-serial').value;
       const combinedId = `${deptMap[dept]}${batch}-${distMap[dist]}${serial}`;
-      
       const year = document.getElementById('wo-year-select').value;
+      
       let vendor = document.getElementById('wo-vendor').value;
       
-      // Auto-assign vendor logic if creation
+      // 自動分區指派邏輯
+      let zoneName = '未分區';
+      const activeZone = window.sysZones.find(z => z.regions && z.regions.includes(dist));
+      if (activeZone) zoneName = activeZone.name;
+
       if (!docId && window.currentUser.role !== '施工廠商') {
-        const vUser = window.users.find(u => u.role === '施工廠商' && u.year === year && u.district === dist);
+        const vUser = window.users.find(u => u.role === '施工廠商' && u.year === year && u.district === zoneName);
         vendor = vUser ? vUser.username : '無對應合約廠商';
       }
 
       const data = {
-        id: combinedId, dept, batch, district: dist, serial,
-        year, vendor,
+        id: combinedId, dept, batch, district: dist, serial, year, vendor, zone: zoneName,
         recvDate: document.getElementById('wo-recv-date').value,
         dispatchDate: document.getElementById('wo-dispatch-date').value,
         expectedDate: document.getElementById('wo-expected-date').value,
@@ -1186,21 +1006,22 @@
         updatedAt: Date.now()
       };
 
-      if (!data.batch || !data.serial || !data.location) return alert('請填寫完整：派別、序號、與派工地點！');
+      if (!data.batch || !data.serial || !data.location) return alert('請填寫完整編號(派別/編號)與派工地點！');
 
-      try {
-        if (docId) await updateDoc(doc(db, "workOrders", docId), data);
-        else await addDoc(collection(db, "workOrders"), data);
-        window.closeModal('wo-modal');
-      } catch (err) {
-        console.error("Save Error", err);
-        alert("儲存失敗，請檢查網路連線。");
-      }
+      if (docId) await updateDoc(doc(db, "workOrders", docId), data);
+      else await addDoc(collection(db, "workOrders"), data);
+      
+      document.getElementById('wo-modal').classList.add('hidden');
     };
 
-    window.deleteWo = async (docId) => {
-      if(confirm('⚠️ 警告：確定要永久刪除此派工單嗎？此動作無法復原。')) {
-        await deleteDoc(doc(db, "workOrders", docId));
+    window.deleteWo = async (docId) => { 
+      if(await window.customConfirm('確定刪除此派工單？')) {
+        try {
+          await deleteDoc(doc(db, "workOrders", docId));
+        } catch (e) {
+          window.customAlert('刪除失敗：' + e.message);
+          console.error(e);
+        }
       }
     };
 
@@ -1209,96 +1030,41 @@
       const actionDiv = document.getElementById('announcement-actions');
       const role = window.currentUser.role;
       
-      if(role === '施工廠商') {
-        actionDiv.innerHTML = `<button onclick="window.openReportModal()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl shadow-md shadow-emerald-200 transition-all font-medium flex items-center justify-center gap-2"><i class="fas fa-hard-hat"></i> 發布今日通報</button>`;
-      } else {
-        actionDiv.innerHTML = `<button onclick="window.openModal('general-announcement-modal')" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl shadow-md shadow-amber-200 transition-all font-medium flex items-center justify-center gap-2"><i class="fas fa-bullhorn"></i> 發布機關公告</button>`;
-      }
+      if(role === '施工廠商') actionDiv.innerHTML = `<button onclick="window.openReportModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-edit mr-1"></i>發布今日通報</button>`;
+      else actionDiv.innerHTML = `<button onclick="document.getElementById('general-announcement-modal').classList.remove('hidden')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-colors"><i class="fas fa-bullhorn mr-1"></i>發布機關公告</button>`;
 
       const gList = document.getElementById('general-announcements-list');
       const rList = document.getElementById('report-announcements-list');
       gList.innerHTML = ''; rList.innerHTML = '';
 
-      // 機關公告渲染
       let gAnns = window.announcements.filter(a => a.type === 'general');
-      if(role === '施工廠商') {
-        gAnns = gAnns.filter(a => a.target === '全部' || a.target === window.currentUser.district);
-      }
-      
-      if (gAnns.length === 0) gList.innerHTML = `<p class="text-slate-400 text-center py-8 text-sm"><i class="fas fa-inbox block text-2xl mb-2 opacity-50"></i>目前無公告</p>`;
-      
+      if(role === '施工廠商') gAnns = gAnns.filter(a => a.target === '全部' || a.target === window.currentUser.district);
       gAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
-        gList.innerHTML += `
-          <div class="bg-white p-4 rounded-xl border border-amber-100/50 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-            <div class="text-[11px] text-slate-500 flex justify-between items-center mb-3">
-              <span class="flex items-center gap-1"><i class="far fa-clock"></i> ${new Date(a.timestamp).toLocaleString()}</span>
-              <span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded flex items-center gap-1">
-                <i class="fas fa-user-tag"></i> ${a.author} <span class="opacity-50">(${a.target})</span>
-              </span>
-            </div>
-            <div class="font-medium text-slate-700 whitespace-pre-wrap leading-relaxed text-sm">${a.content}</div>
-          </div>`;
+        gList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm"><div class="text-xs text-slate-400 flex justify-between mb-2"><span><i class="fas fa-clock mr-1"></i> ${new Date(a.timestamp).toLocaleString()}</span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">發布者: ${a.author}</span></div><div class="font-medium text-slate-700 whitespace-pre-wrap">${a.content}</div></div>`;
       });
 
-      // 施工通報渲染
       let rAnns = window.announcements.filter(a => a.type === 'report');
-      if(role === '施工廠商') {
-        rAnns = rAnns.filter(a => a.author === window.currentUser.username);
-      }
-      
-      if (rAnns.length === 0) rList.innerHTML = `<p class="text-slate-400 text-center py-8 text-sm"><i class="fas fa-inbox block text-2xl mb-2 opacity-50"></i>尚無廠商通報紀錄</p>`;
-      
+      if(role === '施工廠商') rAnns = rAnns.filter(a => a.author === window.currentUser.username);
       rAnns.sort((a,b) => b.timestamp - a.timestamp).forEach(a => {
-        let wosHtml = a.wos && a.wos.length > 0 ? 
-          `<div class="bg-emerald-50/50 rounded-lg p-3 mt-3 border border-emerald-100/50">
-            <div class="text-[11px] font-bold text-emerald-800 mb-2 uppercase tracking-wide">今日預定施工案件</div>
-            <ul class="list-none space-y-2 text-sm">` + 
-            a.wos.map(w => {
-              const woRef = window.workOrders.find(wx => wx.id === w);
-              const loc = woRef ? woRef.location : '未知地點';
-              return `<li class="flex gap-2 items-start text-slate-700"><i class="fas fa-map-marker-alt text-emerald-400 mt-1 flex-shrink-0"></i> <span><span class="font-bold font-mono text-indigo-700">${w}</span> <br/> <span class="text-xs">${loc}</span></span></li>`;
-            }).join('') + 
-          `</ul></div>` : '';
-          
-        rList.innerHTML += `
-          <div class="bg-white p-4 rounded-xl border border-emerald-100/50 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-             <div class="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
-            <div class="text-[11px] text-slate-500 flex justify-between items-center mb-2 pb-2 border-b border-slate-50">
-              <span class="flex items-center gap-1 font-bold text-slate-700"><i class="far fa-calendar-alt text-emerald-500"></i> ${a.date}</span>
-              <span class="font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                 <i class="fas fa-hard-hat text-[10px]"></i> ${a.author}
-              </span>
-            </div>
-            ${wosHtml}
-            ${a.note ? `<div class="mt-3 text-sm text-slate-600 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 border-l-2 border-l-slate-300"><span class="block text-[11px] font-bold text-slate-400 mb-1">補充備註</span>${a.note}</div>` : ''}
-          </div>`;
+        let wosHtml = a.wos && a.wos.length > 0 ? `<ul class="list-disc pl-5 mt-2 text-indigo-600 text-sm space-y-1">` + a.wos.map(w => `<li>${w}</li>`).join('') + `</ul>` : '';
+        rList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm"><div class="text-xs text-slate-400 flex justify-between mb-2 border-b border-slate-100 pb-2"><span><i class="fas fa-calendar-day mr-1"></i> 通報日期: ${a.date}</span><span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${a.author}</span></div>${wosHtml}<div class="mt-2 text-sm text-slate-600 whitespace-pre-wrap">${a.note || '無補充事項'}</div></div>`;
       });
     };
 
     window.openReportModal = () => {
       const today = new Date().toISOString().split('T')[0];
       const existing = window.announcements.find(a => a.type === 'report' && a.date === today && a.author === window.currentUser.username);
-      
       const vendorWOs = window.workOrders.filter(wo => wo.vendor === window.currentUser.username && wo.status !== '已完工');
       
       const listDiv = document.getElementById('report-wo-list');
-      if (vendorWOs.length === 0) {
-        listDiv.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm">目前無「辦理中」之案件可供選擇</div>';
-      } else {
-        listDiv.innerHTML = vendorWOs.map(wo => `
-          <label class="flex items-start space-x-3 p-3 hover:bg-emerald-50/50 rounded-lg cursor-pointer report-wo-item border border-transparent hover:border-emerald-100 transition-colors">
-            <input type="checkbox" value="${wo.id}" class="report-wo-cb mt-0.5 w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500" ${existing?.wos?.includes(wo.id) ? 'checked' : ''}>
-            <div class="flex flex-col text-sm text-slate-700">
-              <b class="text-indigo-700 font-mono">${wo.id}</b>
-              <span class="text-xs text-slate-500 mt-0.5 line-clamp-2">${wo.location}</span>
-            </div>
-          </label>
-        `).join('');
-      }
+      listDiv.innerHTML = vendorWOs.map(wo => `
+        <label class="flex items-center space-x-3 p-3 hover:bg-emerald-50 cursor-pointer report-wo-item border-b border-slate-100 transition-colors">
+          <input type="checkbox" value="${wo.id}" class="report-wo-cb w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500" ${existing?.wos?.includes(wo.id) ? 'checked' : ''}>
+          <span class="text-sm text-slate-700"><b class="text-indigo-700">${wo.id}</b> - ${wo.location}</span>
+        </label>
+      `).join('');
 
       document.getElementById('report-search').value = '';
-      
       if(existing) {
         document.getElementById('report-note').value = existing.note || '';
         document.getElementById('btn-delete-report').classList.remove('hidden');
@@ -1308,7 +1074,7 @@
         document.getElementById('btn-delete-report').classList.add('hidden');
         window.currentReportId = null;
       }
-      window.openModal('report-modal');
+      document.getElementById('report-modal').classList.remove('hidden');
     };
 
     window.filterReportWOs = () => {
@@ -1321,31 +1087,33 @@
     window.saveReport = async () => {
       const selected = Array.from(document.querySelectorAll('.report-wo-cb:checked')).map(cb => cb.value);
       const note = document.getElementById('report-note').value;
-      if(selected.length === 0 && !note.trim()) return alert("請勾選至少一件施工案件，或填寫補充說明！");
-      
+      if(selected.length === 0 && !note.trim()) return alert("請勾選案件或填寫說明！");
       const today = new Date().toISOString().split('T')[0];
       const data = { type: 'report', date: today, author: window.currentUser.username, wos: selected, note: note, timestamp: Date.now() };
 
       if(window.currentReportId) await updateDoc(doc(db, "announcements", window.currentReportId), data);
       else await addDoc(collection(db, "announcements"), data);
-      
-      window.closeModal('report-modal');
+      document.getElementById('report-modal').classList.add('hidden');
     };
 
     window.deleteReport = async () => {
-      if(confirm('確定要撤銷今日的通報紀錄嗎？') && window.currentReportId) {
-        await deleteDoc(doc(db, "announcements", window.currentReportId));
-        window.closeModal('report-modal');
+      if(window.currentReportId && await window.customConfirm('確定要刪除今日通報嗎？')) {
+        try {
+          await deleteDoc(doc(db, "announcements", window.currentReportId));
+          document.getElementById('report-modal').classList.add('hidden');
+        } catch (e) {
+          window.customAlert('刪除失敗：' + e.message);
+          console.error(e);
+        }
       }
     };
 
     window.saveGeneralAnnouncement = async () => {
       const t = document.getElementById('announcement-target').value;
       const c = document.getElementById('announcement-content').value;
-      if(!c) return alert("請填寫公告內容！");
-      
+      if(!c) return alert("請填寫內容！");
       await addDoc(collection(db, "announcements"), { type: 'general', target: t, content: c, author: window.currentUser.username, timestamp: Date.now() });
-      window.closeModal('general-announcement-modal');
+      document.getElementById('general-announcement-modal').classList.add('hidden');
     };
 
     window.renderStatistics = () => {
@@ -1354,7 +1122,6 @@
       const sDist = document.getElementById('stat-district').value;
       const sDept = document.getElementById('stat-dept').value;
       const sBatch = document.getElementById('stat-batch').value.trim();
-
       const container = document.getElementById('stat-results');
       container.innerHTML = '';
 
@@ -1364,16 +1131,19 @@
       });
 
       if(targetYD.length === 0) {
-        container.innerHTML = `
-          <div class="p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 border-dashed">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-3"><i class="fas fa-folder-open text-2xl text-slate-300"></i></div>
-            <p class="text-base font-medium">查無符合條件之合約預算資料</p>
-          </div>`;
+        container.innerHTML = '<div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>沒有符合的年度分區合約資料</div>';
         return;
       }
 
       targetYD.forEach(yd => {
-        let wos = window.workOrders.filter(w => w.year === yd.year && w.district === yd.district);
+        let wos = window.workOrders.filter(w => {
+          if (w.year !== yd.year) return false;
+          if (w.zone) return w.zone === yd.district; // 優先使用 zone 屬性
+          // 若為舊資料，檢查 district(行政區) 是否包含在該 zone 裡
+          const zoneRef = window.sysZones.find(z => z.name === yd.district);
+          if (zoneRef && zoneRef.regions && w.district) return zoneRef.regions.includes(w.district);
+          return false;
+        });
         
         let filteredWos = wos;
         if(sDept !== '全部') filteredWos = filteredWos.filter(w => w.dept === sDept);
@@ -1381,66 +1151,30 @@
 
         const dTotal = filteredWos.reduce((sum, w) => sum + (parseFloat(w.dispatchAmount)||0), 0);
         const cTotal = filteredWos.reduce((sum, w) => sum + (parseFloat(w.completeAmount)||0), 0);
-        
         const contract = parseFloat(yd.contract)||1;
         const dpct = Math.min(100, (dTotal/contract*100)).toFixed(1);
         const cpct = Math.min(100, (cTotal/contract*100)).toFixed(1);
 
-        const filterHint = (sDept!=='全部' || sBatch!=='') 
-          ? `<div class="mt-4 text-[13px] text-indigo-700 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100 flex items-center gap-2"><i class="fas fa-filter text-indigo-400"></i> <span>已套用過濾：<b class="bg-white px-1.5 py-0.5 rounded text-xs border border-indigo-100">${sDept}</b> ${sBatch?`<b class="bg-white px-1.5 py-0.5 rounded text-xs border border-indigo-100">派別:${sBatch}</b>`:''} (共包含 ${filteredWos.length} 件派工單)</span></div>` 
-          : '';
+        const filterHint = (sDept!=='全部' || sBatch!=='') ? `<div class="mt-3 text-sm text-indigo-700 bg-indigo-50 p-2 rounded-lg border border-indigo-100 flex items-center"><i class="fas fa-filter mr-2"></i>過濾條件：${sDept} ${sBatch?'派別:'+sBatch:''} (包含 ${filteredWos.length} 件)</div>` : '';
 
         container.innerHTML += `
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10 group-hover:bg-indigo-50/30 transition-colors"></div>
-            
-            <h4 class="font-bold text-xl text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
-              <i class="fas fa-chart-pie text-indigo-500"></i>
-              ${yd.year} 年度 - ${yd.district}
-            </h4>
-            
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm z-10 relative">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
-                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">預算金額</span>
-                <span class="font-bold text-xl text-slate-700 font-mono">$${Number(yd.budget).toLocaleString()}</span>
-              </div>
-              <div class="bg-white shadow-sm p-4 rounded-xl border border-indigo-100 flex flex-col justify-center relative overflow-hidden">
-                <div class="absolute left-0 top-0 w-1 h-full bg-indigo-400"></div>
-                <span class="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-1">契約總金額</span>
-                <span class="font-bold text-xl text-indigo-700 font-mono">$${Number(yd.contract).toLocaleString()}</span>
-              </div>
-              <div class="bg-white shadow-sm p-4 rounded-xl border border-sky-100 flex flex-col justify-center relative overflow-hidden">
-                <div class="absolute left-0 top-0 w-1 h-full bg-sky-400"></div>
-                <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider mb-1">累計派工預估</span>
-                <span class="font-bold text-xl text-sky-800 font-mono">$${dTotal.toLocaleString()}</span>
-              </div>
-              <div class="bg-white shadow-sm p-4 rounded-xl border border-emerald-100 flex flex-col justify-center relative overflow-hidden">
-                <div class="absolute left-0 top-0 w-1 h-full bg-emerald-400"></div>
-                <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mb-1">累計實際竣工結算</span>
-                <span class="font-bold text-xl text-emerald-800 font-mono">$${cTotal.toLocaleString()}</span>
-              </div>
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-lg text-indigo-900 border-b border-slate-100 pb-3 mb-4"><i class="fas fa-chart-pie mr-2 text-indigo-500"></i>${yd.year} 年度 - ${yd.district}</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2 text-sm">
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500">預算金額: <br><span class="font-bold text-xl text-slate-700">${yd.budget}</span></div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-500">契約金額: <br><span class="font-bold text-xl text-indigo-600">${yd.contract}</span></div>
+              <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-indigo-700 shadow-inner">派工總計: <br><span class="font-bold text-xl">${dTotal}</span></div>
+              <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-800 shadow-inner">竣工總計: <br><span class="font-bold text-xl">${cTotal}</span></div>
             </div>
-            
             ${filterHint}
-            
-            <div class="space-y-5 mt-6 bg-slate-50/50 p-5 rounded-xl border border-slate-100 z-10 relative">
+            <div class="space-y-4 mt-5 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div>
-                <div class="flex justify-between text-xs mb-2 font-bold text-slate-600">
-                  <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-sky-500"></div> 派工執行進度 (${dpct}%)</span>
-                  <span class="font-mono text-sky-700">$${dTotal.toLocaleString()} / $${Number(yd.contract).toLocaleString()}</span>
-                </div>
-                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden relative">
-                  <div class="bg-gradient-to-r from-sky-400 to-sky-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: ${dpct}%"></div>
-                </div>
+                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>派工執行進度 (${dpct}%)</span><span>${dTotal} / ${yd.contract}</span></div>
+                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="bg-indigo-500 h-3 rounded-full transition-all duration-500" style="width: ${dpct}%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-xs mb-2 font-bold text-slate-600">
-                  <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> 竣工結算進度 (${cpct}%)</span>
-                  <span class="font-mono text-emerald-700">$${cTotal.toLocaleString()} / $${Number(yd.contract).toLocaleString()}</span>
-                </div>
-                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden relative">
-                  <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-out delay-300" style="width: ${cpct}%"></div>
-                </div>
+                <div class="flex justify-between text-xs mb-1.5 font-semibold text-slate-600"><span>竣工結算進度 (${cpct}%)</span><span>${cTotal} / ${yd.contract}</span></div>
+                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner overflow-hidden"><div class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: ${cpct}%"></div></div>
               </div>
             </div>
           </div>
@@ -1448,27 +1182,97 @@
       });
     };
 
+    // 獨立年度管理
+    window.renderSysYears = () => {
+      const safeYears = [...window.sysYears].filter(y => y && y.name).sort((a,b)=>String(b.name).localeCompare(String(a.name)));
+      document.getElementById('sys-year-table-body').innerHTML = safeYears.map(y => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-slate-700 text-sm">${y.name}</td>
+          <td class="p-3 text-center"><button type="button" onclick="window.deleteSysYear('${y.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1" title="刪除"><i class="fas fa-trash"></i></button></td>
+        </tr>
+      `).join('');
+    };
+
+    window.openSysYearModal = () => {
+      document.getElementById('sys-year-name').value = '';
+      document.getElementById('sys-year-modal').classList.remove('hidden');
+    };
+
+    window.saveSysYear = async () => {
+      const name = document.getElementById('sys-year-name').value.trim();
+      if(!name) return alert('年度不可空白！');
+      if(window.sysYears.find(y => y.name === name)) return alert('此年度已存在！');
+      await addDoc(collection(db, "sys_years"), { name });
+      document.getElementById('sys-year-modal').classList.add('hidden');
+    };
+
+    window.deleteSysYear = async (docId) => { 
+      if(await window.customConfirm('確定要刪除此年度嗎？')) {
+        try {
+          await deleteDoc(doc(db, "sys_years", docId));
+        } catch (e) {
+          window.customAlert('刪除失敗，請檢查權限或連線：' + e.message);
+          console.error(e);
+        }
+      }
+    };
+
+    // 獨立分區與行政區綁定管理
+    window.renderSysZones = () => {
+      const safeZones = [...window.sysZones].filter(z => z && z.name).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+      document.getElementById('sys-zone-table-body').innerHTML = safeZones.map(z => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-slate-700">${z.name}</td>
+          <td class="p-3 text-xs text-slate-600">
+            <div class="flex flex-wrap gap-1">${(z.regions||[]).map(r => `<span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600">${r}</span>`).join('')}</div>
+          </td>
+          <td class="p-3 text-center"><button type="button" onclick="window.deleteSysZone('${z.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1" title="刪除"><i class="fas fa-trash"></i></button></td>
+        </tr>
+      `).join('');
+    };
+
+    window.openSysZoneModal = () => {
+      document.getElementById('sys-zone-name').value = '';
+      const c = document.getElementById('sys-zone-regions-container');
+      c.innerHTML = allDistricts.map(d => `
+        <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1 rounded border border-slate-200 hover:border-purple-300 transition-colors">
+          <input type="checkbox" class="sys-zone-region w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500" value="${d}">
+          <span class="text-xs text-slate-700">${d}</span>
+        </label>
+      `).join('');
+      document.getElementById('sys-zone-modal').classList.remove('hidden');
+    };
+
+    window.saveSysZone = async () => {
+      const name = document.getElementById('sys-zone-name').value.trim();
+      if(!name) return alert('分區名稱不可空白！');
+      if(window.sysZones.find(z => z.name === name)) return alert('此分區名稱已存在！');
+      const selected = Array.from(document.querySelectorAll('.sys-zone-region:checked')).map(cb => cb.value);
+      if(selected.length < 2) return alert('請為該分區至少選擇 2 個涵蓋的行政區！');
+      await addDoc(collection(db, "sys_zones"), { name, regions: selected });
+      document.getElementById('sys-zone-modal').classList.add('hidden');
+    };
+
+    window.deleteSysZone = async (docId) => { 
+      if(await window.customConfirm('確定要刪除此分區綁定設定嗎？')) {
+        try {
+          await deleteDoc(doc(db, "sys_zones", docId));
+        } catch (e) {
+          window.customAlert('刪除失敗，請檢查權限或連線：' + e.message);
+          console.error(e);
+        }
+      }
+    };
+
+    // 帳號管理
     window.renderUsers = () => {
       document.getElementById('user-table-body').innerHTML = window.users.map(u => `
-        <tr class="hover:bg-slate-50/80 transition-colors">
-          <td class="p-4 font-bold text-slate-700 flex items-center gap-2">
-            <div class="w-6 h-6 rounded bg-slate-100 text-slate-400 flex items-center justify-center text-[10px]"><i class="fas fa-user"></i></div>
-            ${u.username}
-          </td>
-          <td class="p-4 text-slate-400 font-mono text-[11px] group relative cursor-help">
-            •••••• <span class="absolute left-1/2 -top-6 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">${u.password}</span>
-          </td>
-          <td class="p-4">
-            <span class="px-2.5 py-1 rounded-md text-xs font-bold border ${u.role==='系統管理員'?'bg-indigo-50 text-indigo-700 border-indigo-200':u.role==='施工廠商'?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-slate-50 text-slate-600 border-slate-200'}">
-              ${u.role}
-            </span>
-          </td>
-          <td class="p-4 text-xs font-medium text-slate-500">
-            ${u.role==='施工廠商' ? `<span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">${u.year} - ${u.district}</span>` : '<span class="opacity-30">-</span>'}
-          </td>
-          <td class="p-4 text-center">
-            <button onclick="window.deleteUser('${u.docId}')" class="w-8 h-8 rounded text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors" title="刪除帳號"><i class="fas fa-trash-alt"></i></button>
-          </td>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-slate-700">${u.username}</td>
+          <td class="p-3 text-slate-500 font-mono text-xs">${u.password}</td>
+          <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium ${u.role==='系統管理員'?'bg-indigo-100 text-indigo-700':u.role==='施工廠商'?'bg-emerald-100 text-emerald-700':'bg-slate-200 text-slate-700'}">${u.role}</span></td>
+          <td class="p-3 text-sm text-slate-600">${u.role==='施工廠商'?`${u.year} - ${u.district}`:'-'}</td>
+          <td class="p-3 text-center"><button type="button" onclick="window.deleteUser('${u.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1"><i class="fas fa-trash"></i></button></td>
         </tr>
       `).join('');
     };
@@ -1479,7 +1283,7 @@
       document.getElementById('user-password').value = '';
       document.getElementById('user-role').value = '機關/監造';
       window.toggleUserVendorFields();
-      window.openModal('user-modal');
+      document.getElementById('user-modal').classList.remove('hidden');
     };
 
     window.saveUser = async () => {
@@ -1487,69 +1291,79 @@
       const p = document.getElementById('user-password').value;
       const r = document.getElementById('user-role').value;
       if(!u || !p) return alert('帳號密碼不可空白！');
-      
       const data = { username: u, password: p, role: r, year: document.getElementById('user-year').value, district: document.getElementById('user-district').value };
       await addDoc(collection(db, "users"), data);
-      window.closeModal('user-modal');
+      document.getElementById('user-modal').classList.add('hidden');
     };
 
-    window.deleteUser = async (docId) => { if(confirm('確定刪除此帳號？')) await deleteDoc(doc(db, "users", docId)); };
+    window.deleteUser = async (docId) => { 
+      if(await window.customConfirm('確定要刪除此帳號嗎？')) {
+        try {
+          await deleteDoc(doc(db, "users", docId));
+        } catch (e) {
+          window.customAlert('刪除失敗：' + e.message);
+        }
+      }
+    };
 
+    // 合約預算建檔
     window.renderYearDistricts = () => {
       document.getElementById('yd-table-body').innerHTML = window.yearDistricts.map(y => `
-        <tr class="hover:bg-slate-50/80 transition-colors">
-          <td class="p-4 font-bold text-slate-700 text-center w-16">
-            <div class="bg-slate-100 px-2 py-1 rounded border border-slate-200 text-xs">${y.year}</div>
-          </td>
-          <td class="p-4 font-bold text-slate-700">${y.district}</td>
-          <td class="p-4 text-right font-mono text-sm text-slate-500">$${Number(y.budget).toLocaleString()}</td>
-          <td class="p-4 text-right font-mono text-sm text-emerald-600 font-bold">$${Number(y.contract).toLocaleString()}</td>
-          <td class="p-4 text-center">
-            <button onclick="window.deleteYearDistrict('${y.docId}')" class="w-8 h-8 rounded text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors" title="刪除設定"><i class="fas fa-trash-alt"></i></button>
-          </td>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-slate-700">${y.year}</td>
+          <td class="p-3 font-medium text-slate-600">${y.district}</td>
+          <td class="p-3 text-right text-slate-600">${y.budget}</td>
+          <td class="p-3 text-right text-indigo-600 font-bold">${y.contract}</td>
+          <td class="p-3 text-center"><button type="button" onclick="window.deleteYearDistrict('${y.docId}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1"><i class="fas fa-trash"></i></button></td>
         </tr>
       `).join('');
     };
 
     window.openYearDistrictModal = () => {
       document.getElementById('yd-doc-id').value = '';
-      document.getElementById('yd-year').value = '';
-      document.getElementById('yd-district').value = '';
       document.getElementById('yd-budget').value = '';
       document.getElementById('yd-contract').value = '';
-      window.openModal('yd-modal');
+      document.getElementById('yd-modal').classList.remove('hidden');
     };
 
     window.saveYearDistrict = async () => {
       const y = document.getElementById('yd-year').value;
       const d = document.getElementById('yd-district').value;
-      if(!y || !d) return alert('年度與分區不可空白！');
+      if(!y || !d) return alert('請確認是否已建立年度與分區！');
       const data = { year: y, district: d, budget: document.getElementById('yd-budget').value, contract: document.getElementById('yd-contract').value };
       await addDoc(collection(db, "yearDistricts"), data);
-      window.closeModal('yd-modal');
+      document.getElementById('yd-modal').classList.add('hidden');
     };
 
-    window.deleteYearDistrict = async (docId) => { if(confirm('確定刪除此合約設定？')) await deleteDoc(doc(db, "yearDistricts", docId)); };
+    window.deleteYearDistrict = async (docId) => { 
+      if(await window.customConfirm('確定要刪除此設定嗎？')) {
+        try {
+          await deleteDoc(doc(db, "yearDistricts", docId));
+        } catch (e) {
+          window.customAlert('刪除失敗：' + e.message);
+        }
+      }
+    };
 
-    // 匯出 Excel 與 JSON 備份
+    // 匯出與備份
     window.exportToExcel = () => {
-      if(window.workOrders.length === 0) return alert('目前沒有資料可匯出');
+      if(window.workOrders.length === 0) return alert('沒有資料可匯出');
       const ws = XLSX.utils.json_to_sheet(window.workOrders.map(w => ({
         '派工單編號': w.id, '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '廠商流水號': w.serial,
         '狀態': w.status, '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
         '案件來源': w.source, '來源詳細(服務處)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
-        '負責廠商': w.vendor, '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
+        '負責合約分區': w.zone || '舊資料無分區', '負責廠商': w.vendor, '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
         '派工單連結': w.docUrl, '照片連結': w.photoUrl
       })));
-      XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), ws, "派工單總表"), `派工單總表_${new Date().toISOString().split('T')[0]}.xlsx`);
+      XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), ws, "派工單"), `派工單總表_${Date.now()}.xlsx`);
     };
 
     window.exportBackup = () => {
-      const data = { wo: window.workOrders, users: window.users, yd: window.yearDistricts, ann: window.announcements };
+      const data = { wo: window.workOrders, users: window.users, yd: window.yearDistricts, sys_years: window.sysYears, sys_zones: window.sysZones, ann: window.announcements };
       const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `派工系統完整備份_${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `派工系統完整備份_${Date.now()}.json`;
       a.click();
     };
 
@@ -1560,10 +1374,8 @@
       reader.onload = async (ev) => {
         try {
           const data = JSON.parse(ev.target.result);
-          alert('⚠️ 檔案讀取成功！\n基於雲端安全限制，如需執行大量資料覆寫至 Firebase，請聯繫系統開發者使用 Admin SDK 匯入。');
-        } catch(err) { 
-          alert('備份檔解析失敗，請確認是否為本系統匯出之 JSON 格式檔案。'); 
-        }
+          alert('讀取成功，但基於雲端安全限制，請聯繫開發者進行大量資料覆寫。');
+        } catch(err) { alert('備份檔解析失敗。'); }
       };
       reader.readAsText(file);
     };
