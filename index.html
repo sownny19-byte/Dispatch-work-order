@@ -891,7 +891,7 @@
         const pAmt = parseFloat(wo.dispatchAmount) || 0; const cAmt = parseFloat(wo.completeAmount) || 0;
         const urlIcon = (url, icon) => url?.startsWith('http') ? `<a href="${url}" target="_blank" class="text-indigo-600 hover:text-indigo-800 p-1"><i class="${icon} text-lg"></i></a>` : '-';
         
-        tr = document.createElement('tr'); tr.className = rowClass;
+        const tr = document.createElement('tr'); tr.className = rowClass;
         tr.innerHTML = `
           <td class="p-4 font-bold text-indigo-700">${wo.id}</td>
           <td class="p-4 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&wo.status!=='已完工'?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
