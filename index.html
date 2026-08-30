@@ -669,7 +669,7 @@
     };
 
     window.openAdvSearchModal = () => { window.updateAdvDistricts(); document.getElementById('adv-search-modal').classList.remove('hidden'); };
-    window.clearAdvSearch = () => { window.advSearchActive = false; document.getElementById('adv-search-indicator').classList.add('hidden'); ['adv-year','adv-zone','adv-district','adv-source','adv-vendor','adv-status','adv-date-start','adv-date-end','adv-batch'].forEach(id=>document.getElementById(id).value=''); window.renderWoTable(); };
+    window.clearAdvSearch = () => { window.advSearchActive = false; document.getElementById('adv-search-indicator').classList.add('hidden'); ['adv-year','adv-zone','adv-district','adv-source','adv-vendor','adv-status','adv-date-start','adv-date-end','adv-batch'].forEach(id=>document.getElementById(id).value=''); document.querySelectorAll('.adv-attr').forEach(cb=>cb.checked=false); window.renderWoTable(); };
     window.applyAdvSearch = () => { window.advSearchActive = true; document.getElementById('adv-search-indicator').classList.remove('hidden'); document.getElementById('adv-search-modal').classList.add('hidden'); window.renderWoTable(); };
 
     window.renderWoTable = () => {
@@ -688,6 +688,8 @@
           const sb = document.getElementById('adv-batch').value; if(sb && wo.batch !== sb) return false;
           const ds = document.getElementById('adv-date-start').value; const de = document.getElementById('adv-date-end').value;
           if(ds && wo.recvDate < ds) return false; if(de && wo.recvDate > de) return false;
+          const advAttrs = Array.from(document.querySelectorAll('.adv-attr:checked')).map(cb=>cb.value);
+          if(advAttrs.length > 0 && (!wo.attributes || !advAttrs.every(a => wo.attributes.includes(a)))) return false;
         } return true;
       });
 
