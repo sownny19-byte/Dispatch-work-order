@@ -16,10 +16,7 @@
     .hidden { display: none !important; }
     .fade-in { animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .drawer-open { transform: translateX(0); }
-    .drawer-closed { transform: translateX(-100%); }
     .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
-    /* 自訂 Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -106,6 +103,8 @@
                 <th class="p-3 font-semibold">收單/派工/預計完工</th>
                 <th class="p-3 font-semibold">案件來源</th>
                 <th class="p-3 font-semibold">派工地點</th>
+                <!-- 新增：派工內容說明 -->
+                <th class="p-3 font-semibold max-w-xs">內容說明</th>
                 <th class="p-3 font-semibold">金額 (派/竣)</th>
                 <th class="p-3 font-semibold">狀態</th>
                 <th class="p-3 text-center font-semibold">單/照/圖</th>
@@ -114,7 +113,7 @@
               </tr>
             </thead>
             <tbody id="wo-table-body" class="divide-y divide-slate-100">
-              <tr><td colspan="9" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
+              <tr><td colspan="10" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
             </tbody>
           </table>
         </div>
@@ -164,7 +163,7 @@
           </div>
         </div>
         <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200">
-          <h3 class="font-bold text-lg mb-4 text-slate-700 flex items-center"><i class="fas fa-layer-group mr-2 text-emerald-500"></i>道路考評數量統計 (僅統計已完工)</h3>
+          <h3 class="font-bold text-lg mb-4 text-slate-700 flex items-center"><i class="fas fa-layer-group mr-2 text-emerald-500"></i>道路考評數量統計 (僅統計已完工) <span class="text-xs text-slate-400 font-normal ml-2">※ 點擊數字可查看相關派工單明細並匯出</span></h3>
           <div id="eval-dashboard-results"></div>
         </div>
       </section>
@@ -214,7 +213,7 @@
       <div class="p-5 flex-1 bg-white">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">年度</label><select id="adv-search-year" class="w-full border p-2 rounded-lg outline-none"><option value="">全部年度</option></select></div>
-          <div><label class="block text-sm font-semibold text-slate-600 mb-1">分區 (快速過濾行政區)</label><select id="adv-search-zone" class="w-full border p-2 rounded-lg outline-none" onchange="window.updateAdvSearchDistricts()"><option value="">全部分區</option></select></div>
+          <div><label class="block text-sm font-semibold text-slate-600 mb-1">分區 (自動過濾行政區)</label><select id="adv-search-zone" class="w-full border p-2 rounded-lg outline-none" onchange="window.updateAdvSearchDistricts()"><option value="">全部分區</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">派工科室</label><select id="adv-search-dept" class="w-full border p-2 rounded-lg outline-none"><option value="">全部科室</option><option value="交工科">交工科</option><option value="停管科">停管科</option><option value="公運科">公運科</option><option value="交安科">交安科</option><option value="運規科">運規科</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">行政區</label><select id="adv-search-district" class="w-full border p-2 rounded-lg outline-none"><option value="">全部行政區</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商</label><select id="adv-search-vendor" class="w-full border p-2 rounded-lg outline-none"><option value="">全部廠商</option></select></div>
@@ -223,9 +222,8 @@
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">派別 (包含文字)</label><input type="text" id="adv-search-batch" placeholder="例如: 01" class="w-full border p-2 rounded-lg outline-none"></div>
           <div class="col-span-1 sm:col-span-2"><label class="block text-sm font-semibold text-slate-600 mb-1">收單日期區間</label><div class="flex space-x-2"><input type="date" id="adv-search-date-start" class="w-full border p-2 rounded-lg outline-none"><span class="text-slate-400 mt-2">至</span><input type="date" id="adv-search-date-end" class="w-full border p-2 rounded-lg outline-none"></div></div>
           
-          <!-- 屬性勾選 -->
           <div class="col-span-1 sm:col-span-2 mt-2 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
-            <label class="block text-sm font-bold text-indigo-800 mb-2">要求包含屬性 (可複選)</label>
+            <label class="block text-sm font-bold text-indigo-800 mb-2">要求包含屬性 (可複選，需全部符合)</label>
             <div class="flex flex-wrap gap-3 text-sm">
               <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="新設項目"><span>新設項目</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="學校周邊500m內"><span>學校周邊500m內</span></label>
@@ -242,7 +240,7 @@
   </div>
 
   <div id="wo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-4xl max-h-[90vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-5xl max-h-[90vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
       <div class="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-20"><h2 class="text-xl font-bold text-indigo-800" id="wo-modal-title">新增派工單</h2><button onclick="document.getElementById('wo-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button></div>
       <div class="p-5 overflow-y-auto flex-1 bg-slate-50/50">
         <input type="hidden" id="wo-doc-id">
@@ -322,6 +320,35 @@
     </div>
   </div>
 
+  <!-- 新增：考評項目點擊後的明細清單 Modal -->
+  <div id="eval-detail-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-4xl max-h-[90vh] flex flex-col fade-in border border-slate-200">
+      <div class="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0">
+        <h2 class="text-xl font-bold text-emerald-800" id="eval-detail-title"><i class="fas fa-list-alt mr-2"></i>考評項目明細</h2>
+        <button onclick="document.getElementById('eval-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-0 overflow-auto flex-1 bg-white">
+        <table class="w-full text-left text-sm border-collapse whitespace-nowrap">
+          <thead class="bg-slate-100 text-slate-600 sticky top-0 border-b shadow-sm z-10">
+            <tr>
+              <th class="p-3">派工單編號</th>
+              <th class="p-3">行政區</th>
+              <th class="p-3">派工地點</th>
+              <th class="p-3">廠商</th>
+              <th class="p-3">完工日期</th>
+              <th class="p-3 text-right">考評數量</th>
+            </tr>
+          </thead>
+          <tbody id="eval-detail-body" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="p-4 border-t bg-slate-50 flex justify-between items-center sticky bottom-0">
+         <div class="text-sm text-slate-600 font-bold" id="eval-detail-total"></div>
+         <button onclick="window.exportEvalDetailExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-colors"><i class="fas fa-file-excel mr-2"></i>匯出EXCEL</button>
+      </div>
+    </div>
+  </div>
+
   <div id="report-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-lg flex flex-col fade-in">
       <div class="p-4 border-b bg-emerald-50 flex justify-between rounded-t-xl"><h2 class="text-xl font-bold text-emerald-800"><i class="fas fa-hard-hat mr-2"></i>發布今日施工通報</h2><button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button></div>
@@ -339,7 +366,7 @@
     <div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4 text-amber-800"><i class="fas fa-bullhorn mr-2"></i>發布系統公告</h2><select id="announcement-target" class="w-full border p-2 mb-3 rounded-lg outline-none"><option value="全部">通知所有人 (全部)</option></select><textarea id="announcement-content" rows="4" class="w-full border p-2 mb-4 rounded-lg outline-none" placeholder="請輸入公告內容..."></textarea><div class="flex justify-end space-x-3"><button onclick="document.getElementById('general-announcement-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveGeneralAnnouncement()" class="bg-amber-600 text-white px-4 py-2 rounded-lg font-bold">發布公告</button></div></div>
   </div>
 
-  <!-- 年度/分區/預算/帳號設定 Modal -->
+  <!-- 系統設定 Modals -->
   <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in"><h2 class="text-xl font-bold mb-4">新增年度</h2><input type="text" id="sys-year-input" placeholder="例如: 113" class="w-full border p-2 mb-4 rounded-lg outline-none"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-year-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysYear()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4">新增分區設定</h2><input type="hidden" id="sys-zone-id"><input type="text" id="sys-zone-name" placeholder="分區名稱" class="w-full border p-2 mb-3 rounded-lg"><div class="grid grid-cols-3 gap-2 text-sm bg-slate-50 p-3 rounded-lg border mb-4" id="zone-district-cbs"><label><input type="checkbox" value="桃園區" class="mr-1">桃園區</label><label><input type="checkbox" value="龜山區" class="mr-1">龜山區</label><label><input type="checkbox" value="八德區" class="mr-1">八德區</label><label><input type="checkbox" value="蘆竹區" class="mr-1">蘆竹區</label><label><input type="checkbox" value="大園區" class="mr-1">大園區</label><label><input type="checkbox" value="中壢區" class="mr-1">中壢區</label><label><input type="checkbox" value="平鎮區" class="mr-1">平鎮區</label><label><input type="checkbox" value="楊梅區" class="mr-1">楊梅區</label><label><input type="checkbox" value="龍潭區" class="mr-1">龍潭區</label><label><input type="checkbox" value="大溪區" class="mr-1">大溪區</label><label><input type="checkbox" value="復興區" class="mr-1">復興區</label><label><input type="checkbox" value="觀音區" class="mr-1">觀音區</label><label><input type="checkbox" value="新屋區" class="mr-1">新屋區</label></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysZone()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4">新增帳號</h2><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><input type="text" id="user-password" placeholder="密碼" class="w-full border p-2 mb-3 rounded-lg"><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
@@ -347,6 +374,7 @@
   <div id="eval-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in border"><h2 class="text-xl font-bold mb-4 text-indigo-800">編輯考評項目</h2><input type="hidden" id="eval-item-id"><label class="block text-sm font-semibold mb-1">分類標籤</label><select id="eval-item-category" class="w-full border p-2 mb-3 rounded-lg"></select><label class="block text-sm font-semibold mb-1">項目名稱</label><input type="text" id="eval-item-name" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-sm font-semibold mb-1">單位</label><input type="text" id="eval-item-unit" class="w-full border p-2 mb-4 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('eval-item-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveEvalItem()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-category-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-amber-800">考評分類管理</h2><button onclick="document.getElementById('eval-category-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500"><i class="fas fa-times text-xl"></i></button></div><div class="flex space-x-2 mb-4"><input type="text" id="eval-category-name" placeholder="新分類名稱" class="w-full border p-2 rounded-lg"><button onclick="window.saveEvalCategory()" class="bg-amber-500 text-white px-4 py-2 rounded-lg">新增</button></div><div id="eval-category-list" class="space-y-2 max-h-48 overflow-y-auto bg-slate-50 p-2 rounded-lg border"></div></div></div>
 
+  <!-- 自訂 Alert 與 Confirm 彈窗 -->
   <div id="custom-alert" class="fixed inset-0 z-[200] flex items-center justify-center hidden bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl p-6 w-80 text-center fade-in border border-slate-100">
       <div id="custom-alert-icon" class="text-4xl mb-3"></div><h3 id="custom-alert-msg" class="text-lg font-bold text-slate-800 mb-5 whitespace-pre-wrap"></h3>
@@ -365,11 +393,9 @@
     import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // --- 防偽冒與版權宣告機制 (Sownny) ---
     console.log("%c⚠️ 系統版權宣告", "color: #e11d48; font-size: 28px; font-weight: bold; text-shadow: 1px 1px 2px #000;");
     console.log("%c此「派工管理系統」由 Sownny 獨立開發設計。\n版權所有 © 2026 Sownny. All Rights Reserved.\n\n嚴禁未經授權之複製、盜用、修改或商業用途。違者必究！", "color: #334155; font-size: 14px; padding: 10px; border-left: 4px solid #4f46e5; background: #f8fafc;");
 
-    // 主動防竄改偵測器：檢查浮水印是否被移除或隱藏
     setInterval(() => {
       const wm = document.getElementById('sownny-copyright-watermark');
       const isTampered = !wm || wm.innerText.indexOf('Sownny') === -1 || getComputedStyle(wm).display === 'none' || getComputedStyle(wm).opacity == 0 || getComputedStyle(wm).visibility === 'hidden';
@@ -383,8 +409,7 @@
           </div>
         `;
       }
-    }, 5000); // 每 5 秒檢查一次
-    // ------------------------------------
+    }, 5000);
 
     const app = initializeApp({ apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88", authDomain: "dispatch-work-order.firebaseapp.com", projectId: "dispatch-work-order", storageBucket: "dispatch-work-order.firebasestorage.app" });
     const db = getFirestore(app); const auth = getAuth(app); window.db = db;
@@ -452,17 +477,17 @@
     window.updateDropdowns = () => {
       const yrs = [...window.sysYears].sort((a,b)=>((b.name||'').localeCompare(a.name||'')));
       const zns = [...window.sysZones].sort((a,b)=>((a.name||'').localeCompare(b.name||'')));
-      ['wo-year-select','user-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = yrs.map(y=>`<option value="${y.name}">${y.name}</option>`).join('');});
-      ['adv-search-year','stat-year','eval-stat-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部年度</option>`+yrs.map(y=>`<option value="${y.name}">${y.name}</option>`).join('');});
-      ['user-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = zns.map(z=>`<option value="${z.name}">${z.name}</option>`).join('');});
-      ['adv-search-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部分區</option>`+zns.map(z=>`<option value="${z.name}">${z.name}</option>`).join('');});
+      ['wo-year-select','user-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = yrs.map(y=>`<option value="${y.name||''}">${y.name||'無名稱'}</option>`).join('');});
+      ['adv-search-year','stat-year','eval-stat-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部年度</option>`+yrs.map(y=>`<option value="${y.name||''}">${y.name||'無名稱'}</option>`).join('');});
+      ['user-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = zns.map(z=>`<option value="${z.name||''}">${z.name||'無名稱'}</option>`).join('');});
+      ['adv-search-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部分區</option>`+zns.map(z=>`<option value="${z.name||''}">${z.name||'無名稱'}</option>`).join('');});
       
       const woDist = document.getElementById('wo-district'); if(woDist) woDist.innerHTML = defaultDistricts.map(d=>`<option value="${d}">${d}</option>`).join('');
       const adDist = document.getElementById('adv-search-district'); if(adDist) adDist.innerHTML = `<option value="">全部行政區</option>` + defaultDistricts.map(d=>`<option value="${d}">${d}</option>`).join('');
       
       ['stat-district','eval-stat-district'].forEach(id => {
         const el = document.getElementById(id); 
-        if(el) el.innerHTML = `<option value="">全部分區/行政區</option>` + zns.map(z=>`<option value="${z.name}">[區] ${z.name}</option>`).join('') + defaultDistricts.map(d=>`<option value="${d}">${d}</option>`).join('');
+        if(el) el.innerHTML = `<option value="">全部分區/行政區</option>` + zns.map(z=>`<option value="${z.name||''}">[區] ${z.name||'無名稱'}</option>`).join('') + defaultDistricts.map(d=>`<option value="${d}">${d}</option>`).join('');
       });
       const adVen = document.getElementById('adv-search-vendor'); if(adVen) adVen.innerHTML = `<option value="">全部廠商</option>` + window.users.filter(u=>u.role==='施工廠商').map(u=>`<option value="${u.username}">${u.username}</option>`).join('');
     };
@@ -545,7 +570,7 @@
 
       window.currentExportData = filtered; 
       tbody.innerHTML = '';
-      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
+      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
 
       filtered.forEach(wo => {
         const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - today)/86400000) : 999;
@@ -562,6 +587,7 @@
           <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&wo.status!=='已完工'?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
           <td class="p-3 text-sm">${wo.source||'-'}${wo.sourceDetail?`<br><span class="text-xs text-indigo-500">${wo.sourceDetail}</span>`:''}</td>
           <td class="p-3 text-sm max-w-[150px] truncate" title="${wo.location}">${wo.location}${wo.village?`<br><span class="text-xs text-emerald-600">${wo.village}</span>`:''}</td>
+          <td class="p-3 text-sm max-w-[150px] truncate text-slate-500" title="${wo.content||''}">${wo.content||'-'}</td>
           <td class="p-3 text-sm">${amtHtml}</td>
           <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500'}">${wo.status}</span></td>
           <td class="p-3 text-center space-x-2">${uIcon(wo.docUrl,'fas fa-file-alt','text-indigo-600')} ${uIcon(wo.photoUrl,'fas fa-image','text-amber-500')} ${uIcon(wo.asbuiltUrl,'fas fa-ruler-combined','text-emerald-600')}</td>
@@ -581,10 +607,13 @@
       if(id) {
         document.getElementById('wo-modal-title').innerText = '編輯派工單'; const wo = window.workOrders.find(w=>w.docId===id);
         document.getElementById('wo-dept').value = wo.dept||'交工科'; document.getElementById('wo-batch').value = wo.batch||''; document.getElementById('wo-district').value = wo.district||'桃園區'; document.getElementById('wo-serial').value = wo.serial||'';
-        ['recvDate','dispatchDate','expectedDate','dispatcher','source','sourceDetail','village','location','content','docUrl','photoUrl','asbuiltUrl','actualDate','status','dispatchAmount','completeAmount','year','vendor','schoolName'].forEach(k=>{
-          const el = document.getElementById(`wo-${k.replace(/[A-Z]/g, l=>'-'+l.toLowerCase()).replace('-name','')}`);
+        
+        ['recvDate','dispatchDate','expectedDate','dispatcher','source','sourceDetail','village','location','content','docUrl','photoUrl','asbuiltUrl','actualDate','status','dispatchAmount','completeAmount','year','vendor'].forEach(k=>{
+          const el = document.getElementById(`wo-${k.replace(/[A-Z]/g, l=>'-'+l.toLowerCase())}`);
           if(el) el.value = wo[k] || '';
         });
+        document.getElementById('wo-school-name').value = wo.schoolName || '';
+        
         window.toggleSourceDetails();
         if(wo.attributes) wo.attributes.forEach(a=>{const cb=document.querySelector(`.wo-attr[value="${a}"]`); if(cb) cb.checked=true;});
         window.toggleSchoolInput(); if(wo.evalData) Object.assign(evData, wo.evalData);
@@ -690,9 +719,62 @@
       for(const [cat, items] of Object.entries(grouped)) {
         if(items.length===0) continue;
         html += `<div class="mb-4"><h4 class="font-bold text-slate-700 mb-2 border-b border-indigo-200 inline-block pb-1"><i class="fas fa-tag text-indigo-500 mr-2 text-sm"></i>${cat}</h4><div class="grid grid-cols-2 md:grid-cols-5 gap-4">`;
-        html += items.map(i => `<div class="bg-white border p-3 rounded-xl text-center shadow-sm"><div class="text-slate-600 font-bold text-sm mb-1">${i.name}</div><div class="text-2xl font-black text-emerald-600">${sums[i.docId].toLocaleString()}</div><div class="text-xs text-slate-400">單位: ${i.unit}</div></div>`).join(''); html += `</div></div>`;
+        html += items.map(i => `<div class="bg-white border p-3 rounded-xl text-center shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-pointer group" onclick="window.openEvalDetail('${i.docId}', '${yr}', '${dst}')"><div class="text-slate-600 font-bold text-sm mb-1 group-hover:text-emerald-700 transition-colors">${i.name}</div><div class="text-2xl font-black text-emerald-600 group-hover:scale-110 transition-transform">${sums[i.docId].toLocaleString()}</div><div class="text-xs text-slate-400 mt-1">單位: ${i.unit}</div></div>`).join(''); 
+        html += `</div></div>`;
       }
       document.getElementById('eval-dashboard-results').innerHTML = html || '<div class="text-slate-500 text-sm">暫無已完工的考評數據</div>';
+    };
+
+    window.currentEvalDetailData = [];
+    window.currentEvalDetailName = '';
+
+    window.openEvalDetail = (itemId, yr, dst) => {
+      const item = window.evalItems.find(i => i.docId === itemId);
+      if(!item) return;
+      window.currentEvalDetailName = item.name;
+      
+      let wos = window.workOrders.filter(w => w.status === '已完工' && w.evalData && w.evalData[itemId] && parseFloat(w.evalData[itemId]) > 0);
+      if(yr) wos = wos.filter(w => w.year === yr);
+      if(dst && dst.startsWith('[區] ')) { 
+        const z = window.sysZones.find(x => x.name === dst.replace('[區] ', '')); 
+        if(z) wos = wos.filter(w => z.districts.includes(w.district)); 
+      }
+      else if(dst) wos = wos.filter(w => w.district === dst);
+
+      window.currentEvalDetailData = wos.map(w => ({
+         id: w.id, district: w.district, location: w.location, vendor: w.vendor, actualDate: w.actualDate, value: parseFloat(w.evalData[itemId])
+      })).sort((a,b) => new Date(b.actualDate||0) - new Date(a.actualDate||0));
+
+      document.getElementById('eval-detail-title').innerHTML = `<i class="fas fa-list-alt mr-2 text-emerald-600"></i>考評明細：${item.name}`;
+      
+      const tbody = document.getElementById('eval-detail-body');
+      let total = 0;
+      tbody.innerHTML = window.currentEvalDetailData.map(d => {
+        total += d.value;
+        return `<tr class="hover:bg-slate-50 transition-colors"><td class="p-3 font-bold text-indigo-700">${d.id}</td><td class="p-3">${d.district||'-'}</td><td class="p-3 truncate max-w-xs" title="${d.location}">${d.location}</td><td class="p-3 text-slate-600">${d.vendor||'-'}</td><td class="p-3 text-sm">${d.actualDate||'-'}</td><td class="p-3 text-right font-bold text-emerald-600 text-lg">${d.value}</td></tr>`;
+      }).join('');
+      
+      if(window.currentEvalDetailData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無相關派工單明細</td></tr>`;
+      }
+
+      document.getElementById('eval-detail-total').innerText = `共包含 ${window.currentEvalDetailData.length} 件派工單 / 數量總計: ${total} ${item.unit}`;
+      document.getElementById('eval-detail-modal').classList.remove('hidden');
+    };
+
+    window.exportEvalDetailExcel = () => {
+       if(!window.currentEvalDetailData || window.currentEvalDetailData.length === 0) return window.customAlert('沒有資料可匯出', 'error');
+       const ws = XLSX.utils.json_to_sheet(window.currentEvalDetailData.map(d => ({
+         '派工單編號': d.id,
+         '行政區': d.district,
+         '派工地點': d.location,
+         '施工廠商': d.vendor,
+         '完工日期': d.actualDate,
+         '考評數量': d.value
+       })));
+       const wb = XLSX.utils.book_new(); 
+       XLSX.utils.book_append_sheet(wb, ws, "數量明細"); 
+       XLSX.writeFile(wb, `${window.currentEvalDetailName}_明細匯出_${Date.now()}.xlsx`);
     };
 
     window.renderSysYears = () => { document.getElementById('sys-year-body').innerHTML = [...window.sysYears].sort((a,b)=>((b.name||'').localeCompare(a.name||''))).map(y => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${y.name||'無名稱'}</td><td class="p-3 text-center"><button onclick="window.deleteSysYear('${y.docId}')" class="text-rose-400 hover:text-rose-600"><i class="fas fa-trash"></i></button></td></tr>`).join(''); };
@@ -724,7 +806,9 @@
         '屬性': (w.attributes||[]).join(', '), '學校名稱': w.schoolName || '', '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
         '派工單連結': w.docUrl, '照片連結': w.photoUrl, '竣工圖連結': w.asbuiltUrl
       })));
-      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "派工單篩選結果"); XLSX.writeFile(wb, `派工系統匯出_${Date.now()}.xlsx`);
+      const wb = XLSX.utils.book_new(); 
+      XLSX.utils.book_append_sheet(wb, ws, "派工單篩選結果"); 
+      XLSX.writeFile(wb, `派工系統匯出_${Date.now()}.xlsx`);
     };
   </script>
 </body>
