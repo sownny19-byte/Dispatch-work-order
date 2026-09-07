@@ -81,7 +81,7 @@
           <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
             <button onclick="window.switchTab('全部')" class="tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all">全部 <span id="count-all">(0)</span></button>
             <button onclick="window.switchTab('辦理中')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">辦理中 <span id="count-processing">(0)</span></button>
-            <button onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">即將逾期 <span id="count-warning">(0)</span></button>
+            <button onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">即轉逾期 <span id="count-warning">(0)</span></button>
             <button onclick="window.switchTab('已逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已逾期 <span id="count-overdue">(0)</span></button>
             <button onclick="window.switchTab('已完工')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已完工 <span id="count-completed">(0)</span></button>
           </div>
@@ -218,7 +218,22 @@
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">行政區</label><select id="adv-search-district" class="w-full border p-2 rounded-lg outline-none"><option value="">全部行政區</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商</label><select id="adv-search-vendor" class="w-full border p-2 rounded-lg outline-none"><option value="">全部廠商</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">案件狀態</label><select id="adv-search-status" class="w-full border p-2 rounded-lg outline-none"><option value="">全部狀態</option><option value="辦理中">辦理中</option><option value="已完工">已完工</option></select></div>
-          <div><label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label><select id="adv-search-source" class="w-full border p-2 rounded-lg outline-none"><option value="">全部來源</option><option value="一般派工">一般派工</option><option value="市政信箱">市政信箱</option><option value="議員">議員</option><option value="里長">里長</option><option value="A1">A1</option><option value="A2">A2</option><option value="緊急派工">緊急派工</option></select></div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label>
+            <select id="adv-search-source" class="w-full border p-2 rounded-lg outline-none">
+              <option value="">全部來源</option>
+              <option value="一般派工">一般派工</option>
+              <option value="市政信箱">市政信箱</option>
+              <option value="立法委員、議員及其他民代">立法委員、議員及其他民代</option>
+              <option value="里長">里長</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="緊急派工">緊急派工</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">派別 (包含文字)</label><input type="text" id="adv-search-batch" placeholder="例如: 01" class="w-full border p-2 rounded-lg outline-none"></div>
           <div class="col-span-1 sm:col-span-2"><label class="block text-sm font-semibold text-slate-600 mb-1">收單日期區間</label><div class="flex space-x-2"><input type="date" id="adv-search-date-start" class="w-full border p-2 rounded-lg outline-none"><span class="text-slate-400 mt-2">至</span><input type="date" id="adv-search-date-end" class="w-full border p-2 rounded-lg outline-none"></div></div>
           
@@ -265,8 +280,18 @@
           </div>
           
           <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label><select id="wo-source-type" class="w-full border p-2 mb-2 rounded-lg outline-none" onchange="window.toggleSourceDetails()"><option value="一般派工">一般派工</option><option value="市政信箱">市政信箱</option><option value="議員">議員</option><option value="里長">里長</option><option value="A1">A1</option><option value="A2">A2</option><option value="緊急派工">緊急派工</option></select>
-            <div id="wo-source-detail-container" class="hidden mb-3"><label class="block text-xs font-semibold text-indigo-600 mb-1">服務處 / 單位名稱</label><input type="text" id="wo-source-detail" class="w-full border border-indigo-300 bg-indigo-50 p-2 rounded-lg outline-none"></div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label>
+            <select id="wo-source-type" class="w-full border p-2 mb-2 rounded-lg outline-none" onchange="window.toggleSourceDetails()">
+              <option value="一般派工">一般派工</option>
+              <option value="市政信箱">市政信箱</option>
+              <option value="立法委員、議員及其他民代">立法委員、議員及其他民代</option>
+              <option value="里長">里長</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="緊急派工">緊急派工</option>
+              <option value="其他">其他</option>
+            </select>
+            <div id="wo-source-detail-container" class="hidden mb-3"><label class="block text-xs font-semibold text-indigo-600 mb-1">服務處 / 單位名稱 / 其他說明</label><input type="text" id="wo-source-detail" class="w-full border border-indigo-300 bg-indigo-50 p-2 rounded-lg outline-none"></div>
             <label class="block text-sm font-semibold text-slate-600 mb-1">年度</label><select id="wo-year-select" class="w-full border p-2 mb-3 rounded-lg outline-none" onchange="window.autoDetectVendor()"></select>
             <label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商 (自動偵測)</label><input type="text" id="wo-vendor" class="w-full border p-2 rounded-lg bg-slate-100 text-slate-500" readonly>
           </div>
@@ -515,7 +540,7 @@
     };
 
     window.updateWoPrefix = () => { const dept=document.getElementById('wo-dept').value||'交工科', batch=document.getElementById('wo-batch').value||'01', dist=document.getElementById('wo-district').value||'桃園區', serial=document.getElementById('wo-serial').value||'01'; document.getElementById('wo-preview-id').innerText = `${deptMap[dept]}${batch}-${distMap[dist]||dist[0]}${serial}`; window.autoDetectVendor(); };
-    window.toggleSourceDetails = () => { const s=document.getElementById('wo-source-type').value, c=document.getElementById('wo-source-detail-container'); if(['議員','里長'].includes(s)) c.classList.remove('hidden'); else {c.classList.add('hidden'); document.getElementById('wo-source-detail').value='';} };
+    window.toggleSourceDetails = () => { const s=document.getElementById('wo-source-type').value, c=document.getElementById('wo-source-detail-container'); if(['立法委員、議員及其他民代','里長','其他'].includes(s)) c.classList.remove('hidden'); else {c.classList.add('hidden'); document.getElementById('wo-source-detail').value='';} };
     window.calcExpectedDate = () => { const rd=document.getElementById('wo-recv-date').value; if(rd){let d=new Date(rd); d.setDate(d.getDate()+45); document.getElementById('wo-expected-date').value=d.toISOString().split('T')[0];} };
     window.switchTab = (tab) => { window.currentTab = tab; document.querySelectorAll('.tab-btn').forEach(btn => { btn.className = btn.innerText.includes(tab) ? "tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all" : "tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all"; }); window.renderWoTable(); };
     window.toggleSchoolInput = () => { const cb = document.querySelector('.wo-attr[value="學校周邊500m內"]'); const c = document.getElementById('wo-school-container'); if(cb && cb.checked) c.classList.remove('hidden'); else { c.classList.add('hidden'); document.getElementById('wo-school-name').value = ''; } };
@@ -861,7 +886,7 @@
       const ws = XLSX.utils.json_to_sheet(window.currentExportData.map(w => ({
         '派工單編號': w.id, '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '廠商流水號': w.serial, '負責廠商': w.vendor,
         '狀態': w.status, '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
-        '案件來源': w.source, '來源詳細(服務處)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
+        '案件來源': w.source, '來源詳細(服務處/說明)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
         '屬性': (w.attributes||[]).join(', '), '學校名稱': w.schoolName || '', '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
         '派工單連結': w.docUrl, '照片連結': w.photoUrl, '竣工圖連結': w.asbuiltUrl
       })));
