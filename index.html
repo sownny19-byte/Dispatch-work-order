@@ -25,7 +25,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-  <!-- 版權防偽浮水印 -->
   <div id="sownny-copyright-watermark" class="fixed bottom-2 right-4 text-slate-400/50 text-[10px] font-mono z-[100] pointer-events-none select-none tracking-widest">
     System Designed by Sownny © 2026
   </div>
@@ -57,7 +56,6 @@
     </div>
   </aside>
 
-  <!-- 遮罩 (手機版) -->
   <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
   <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
@@ -75,7 +73,6 @@
 
     <div class="p-4 flex-1 overflow-y-auto" id="main-content-area">
       
-      <!-- 區塊：派工單總表 -->
       <section id="section-work-orders" class="fade-in">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-wrap justify-between items-center gap-3">
           <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
@@ -92,6 +89,7 @@
               <input type="text" id="search-wo" onkeyup="window.renderWoTable()" placeholder="快速搜尋..." class="pl-9 border border-slate-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm">
             </div>
             <button onclick="document.getElementById('adv-search-modal').classList.remove('hidden')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-2 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" title="進階詳細搜尋"><i class="fas fa-filter text-indigo-500"></i></button>
+            <button id="btn-batch-delete-wo" onclick="window.batchDeleteSelectedWo()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors text-sm hidden font-bold" title="批次刪除勾選的派工單"><i class="fas fa-trash-can mr-1"></i>批次刪除 (<span id="selected-wo-count">0</span>)</button>
             <button id="btn-import-wo" onclick="window.openSmartImportModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors text-sm hidden" title="上傳截圖或Excel自動辨識匯入"><i class="fas fa-wand-magic-sparkles mr-1"></i>智慧匯入(截圖/Excel)</button>
             <button id="btn-add-wo" onclick="window.openWoModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors text-sm" style="display: none;"><i class="fas fa-plus mr-1"></i>新增</button>
           </div>
@@ -101,6 +99,7 @@
           <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
             <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
               <tr>
+                <th class="p-3 text-center w-10"><input type="checkbox" id="wo-select-all" onchange="window.toggleSelectAllWo(this.checked)" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer" title="全選/取消全選當前列表"></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('seqNo')" title="點擊排序">流水號 <i id="sort-icon-seqNo" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('id')" title="點擊排序">派工單編號 <i id="sort-icon-id" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('recvDate')" title="點擊排序">收單/派工/預計完工 <i id="sort-icon-recvDate" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
@@ -115,7 +114,7 @@
               </tr>
             </thead>
             <tbody id="wo-table-body" class="divide-y divide-slate-100">
-              <tr><td colspan="11" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
+              <tr><td colspan="12" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
             </tbody>
           </table>
         </div>
@@ -242,6 +241,7 @@
           <div class="col-span-1 sm:col-span-2 mt-2 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
             <label class="block text-sm font-bold text-indigo-800 mb-2">要求包含屬性 (可複選，需全部符合)</label>
             <div class="flex flex-wrap gap-3 text-sm">
+              <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="跨區支援"><span>跨區支援</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="新設項目"><span>新設項目</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="學校周邊500m內"><span>學校周邊500m內</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" class="adv-attr-cb w-4 h-4 text-indigo-600" value="號誌化路口"><span>號誌化路口</span></label>
@@ -279,7 +279,16 @@
               </div>
               <div><label class="block text-xs font-semibold text-slate-600 mb-1">派工科室</label><select id="wo-dept" class="w-full border p-2 rounded-lg outline-none bg-white" onchange="window.onWoPrefixFactorChange()"><option value="交工科">交工科</option><option value="停管科">停管科</option><option value="公運科">公運科</option><option value="交安科">交安科</option><option value="運規科">運規科</option></select></div>
               <div><label class="block text-xs font-semibold text-slate-600 mb-1">派別 (可留空)</label><input type="text" id="wo-batch" class="w-full border p-2 rounded-lg outline-none bg-white" placeholder="可留空或填 01" oninput="window.onWoPrefixFactorChange()"></div>
-              <div><label class="block text-xs font-semibold text-slate-600 mb-1">行政區</label><select id="wo-district" class="w-full border p-2 rounded-lg outline-none bg-white" onchange="window.onWoPrefixFactorChange()"></select></div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-xs font-semibold text-slate-600">行政區</label>
+                  <label class="inline-flex items-center space-x-1 cursor-pointer bg-amber-100/80 hover:bg-amber-200/80 text-amber-800 px-1.5 py-0.5 rounded text-[11px] font-bold transition-colors" title="勾選後可跨區選擇桃園市全部行政區">
+                    <input type="checkbox" id="wo-cross-zone" class="w-3.5 h-3.5 accent-amber-600" onchange="window.toggleCrossZone(this.checked)">
+                    <span>跨區支援</span>
+                  </label>
+                </div>
+                <select id="wo-district" class="w-full border p-2 rounded-lg outline-none bg-white" onchange="window.onWoPrefixFactorChange()"></select>
+              </div>
               <div><label class="block text-xs font-semibold text-slate-600 mb-1">廠商編號 (可留空/自動)</label><input type="text" id="wo-serial" class="w-full border p-2 rounded-lg outline-none bg-white" placeholder="可留空或填 01" oninput="window.datasetSerialManual=true; window.updateWoPrefix()"></div>
             </div>
             <div class="mt-3 text-sm bg-white p-3 rounded-lg border flex flex-wrap justify-between items-center shadow-inner gap-2">
@@ -303,7 +312,7 @@
             <select id="wo-source-type" class="w-full border p-2 mb-2 rounded-lg outline-none" onchange="window.toggleSourceDetails()">
               <option value="一般派工">一般派工</option>
               <option value="市政信箱">市政信箱</option>
-              <option value="立法委員、議員及其他民代">立法委員、議員及其他民代</option>
+              <option value="立法委員、議員及其他民代">立法委員,議員及其他民代</option>
               <option value="里長">里長</option>
               <option value="A1">A1</option>
               <option value="A2">A2</option>
@@ -312,7 +321,7 @@
             </select>
             <div id="wo-source-detail-container" class="hidden mb-3"><label class="block text-xs font-semibold text-indigo-600 mb-1">服務處 / 單位名稱 / 其他說明</label><input type="text" id="wo-source-detail" class="w-full border border-indigo-300 bg-indigo-50 p-2 rounded-lg outline-none"></div>
             <label class="block text-sm font-semibold text-slate-600 mb-1">年度</label><select id="wo-year-select" class="w-full border p-2 mb-3 rounded-lg outline-none" onchange="window.autoDetectVendor()"></select>
-            <label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商 (自動偵測)</label><input type="text" id="wo-vendor" class="w-full border p-2 rounded-lg bg-slate-100 text-slate-500" readonly>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商 (自動偵測 / 跨區支援維持原廠商)</label><input type="text" id="wo-vendor" class="w-full border p-2 rounded-lg bg-slate-100 text-slate-500" readonly>
           </div>
 
           <div class="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -325,6 +334,7 @@
             <label class="block text-sm font-semibold text-slate-600 mb-2">屬性 (可複選)</label>
             <div class="flex flex-col gap-2 text-sm bg-slate-50 p-3 rounded-lg border">
               <div class="flex flex-wrap gap-4">
+                <label class="flex items-center space-x-2 text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200"><input type="checkbox" class="wo-attr w-4 h-4 text-amber-600" value="跨區支援" onchange="window.toggleCrossZone(this.checked)"><span>跨區支援 (可填寫全桃園市行政區)</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="新設項目"><span>新設項目</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="學校周邊500m內" onchange="window.toggleSchoolInput()"><span>學校周邊500m內</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="號誌化路口"><span>號誌化路口</span></label>
@@ -427,7 +437,6 @@
       </div>
 
       <div class="p-5 overflow-y-auto flex-1 space-y-4 bg-slate-50">
-        <!-- 預設歸屬與上傳區 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
             <h4 class="font-bold text-slate-700 text-sm border-b pb-2"><i class="fas fa-sliders-h mr-2 text-indigo-500"></i>1. 預設匯入歸屬設定 (年度 / 分區)</h4>
@@ -451,7 +460,6 @@
             </div>
           </div>
 
-          <!-- 檔案上傳面板 -->
           <div class="lg:col-span-2 bg-white p-4 rounded-xl border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors shadow-sm flex flex-col justify-center items-center text-center relative"
                id="smart-drop-zone"
                ondragover="event.preventDefault(); this.classList.add('bg-indigo-50');"
@@ -475,7 +483,6 @@
                 </button>
               </div>
             </div>
-            <!-- 辨識載入動畫 -->
             <div id="smart-upload-loading" class="hidden py-6 flex flex-col items-center justify-center">
               <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
               <p id="smart-loading-text" class="font-bold text-indigo-700">正在智慧辨識文字與分析重複派工，請稍候...</p>
@@ -488,6 +495,9 @@
             <div class="flex flex-wrap items-center gap-3 text-sm">
               <span class="font-bold text-slate-800"><i class="fas fa-list-check mr-1 text-indigo-600"></i>辨識結果預覽：共 <span id="import-count-total" class="text-indigo-600 font-black">0</span> 筆</span>
               <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">正常新案：<span id="import-count-normal">0</span> 筆</span>
+              <span id="import-outzone-badge" class="px-3 py-1 rounded-full bg-amber-500 text-white font-bold text-xs hidden">
+                <i class="fas fa-map-pin mr-1"></i>非本分區行政區(未勾選跨區支援)：<span id="import-count-outzone">0</span> 筆
+              </span>
               <span id="import-dup-badge" class="px-3 py-1 rounded-full bg-rose-600 text-white font-bold text-xs animate-pulse hidden">
                 <i class="fas fa-exclamation-triangle mr-1"></i>偵測到重複派工 (紅底標示)：<span id="import-count-dup">0</span> 筆
               </span>
@@ -507,9 +517,11 @@
                   <th class="p-2.5">流水號</th>
                   <th class="p-2.5">派工單編號 (可留空後補)</th>
                   <th class="p-2.5">年度</th>
-                  <th class="p-2.5">科室 / 派別 / 行政區</th>
+                  <th class="p-2.5 text-center">跨區支援</th>
+                  <th class="p-2.5">行政區 / 派別 / 編號</th>
                   <th class="p-2.5">收單 / 預計 / 實際完工日</th>
-                  <th class="p-2.5">派工人員 / 案件來源</th>
+                  <th class="p-2.5">派工人員</th>
+                  <th class="p-2.5">案件來源 / 服務處或說明</th>
                   <th class="p-2.5">派工地點 / 里別</th>
                   <th class="p-2.5">派工內容說明</th>
                   <th class="p-2.5">派工/竣工金額</th>
@@ -538,7 +550,6 @@
     </div>
   </div>
 
-  <!-- 自訂 Alert 與 Confirm 彈窗 -->
   <div id="custom-alert" class="fixed inset-0 z-[200] flex items-center justify-center hidden bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl p-6 w-80 text-center fade-in border border-slate-100">
       <div id="custom-alert-icon" class="text-4xl mb-3"></div><h3 id="custom-alert-msg" class="text-lg font-bold text-slate-800 mb-5 whitespace-pre-wrap"></h3>
@@ -578,7 +589,7 @@
     const app = initializeApp({ apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88", authDomain: "dispatch-work-order.firebaseapp.com", projectId: "dispatch-work-order", storageBucket: "dispatch-work-order.firebasestorage.app" });
     const db = getFirestore(app); const auth = getAuth(app); window.db = db;
 
-    window.currentUser = null; window.workOrders = []; window.announcements = []; window.users = []; window.sysYears = []; window.sysZones = []; window.evalItems = []; window.evalCategories = []; window.currentTab = '全部'; window.currentSort = { col: null, dir: null };
+    window.currentUser = null; window.workOrders = []; window.announcements = []; window.users = []; window.sysYears = []; window.sysZones = []; window.evalItems = []; window.evalCategories = []; window.currentTab = '全部'; window.currentSort = { col: null, dir: null }; window.selectedWoIds = new Set();
     const deptMap = { '交工科': '工', '停管科': '停', '公運科': '公', '交安科': '安', '運規科': '規' };
     const defaultDistricts = ['桃園區','龜山區','八德區','蘆竹區','大園區','中壢區','平鎮區','楊梅區','龍潭區','大溪區','復興區','觀音區','新屋區'];
     const distMap = { '桃園區':'桃','蘆竹區':'竹','龜山區':'龜','八德區':'德','中壢區':'中','大園區':'園','大溪區':'溪','復興區':'復','新屋區':'新','龍潭區':'龍','平鎮區':'平','楊梅區':'楊','觀音區':'觀' };
@@ -793,12 +804,113 @@
       window.renderWoTable();
     };
 
+    window.getAllowedDistrictsForCurrentUser = (isCrossZone = false) => {
+      if (isCrossZone) return defaultDistricts;
+      if (window.currentUser && window.currentUser.role === '施工廠商' && window.currentUser.zone) {
+        const z = window.sysZones.find(x => x.name === window.currentUser.zone);
+        if (z && Array.isArray(z.districts) && z.districts.length > 0) {
+          return z.districts;
+        }
+      }
+      return defaultDistricts;
+    };
+
+    window.populateWoDistrictOptions = (selectedDist = '') => {
+      const woDist = document.getElementById('wo-district');
+      if (!woDist) return;
+      const isCross = Boolean(document.getElementById('wo-cross-zone')?.checked);
+      const allowed = window.getAllowedDistrictsForCurrentUser(isCross);
+      const finalOptions = [...allowed];
+      if (selectedDist && !finalOptions.includes(selectedDist)) {
+        finalOptions.push(selectedDist);
+      }
+      woDist.innerHTML = finalOptions.map(d => `<option value="${d}">${d}</option>`).join('');
+      if (selectedDist && finalOptions.includes(selectedDist)) {
+        woDist.value = selectedDist;
+      } else if (finalOptions.length > 0) {
+        woDist.value = finalOptions[0];
+      }
+    };
+
+    window.toggleCrossZone = (checked) => {
+      const topCb = document.getElementById('wo-cross-zone');
+      if (topCb) topCb.checked = checked;
+      const attrCb = document.querySelector('.wo-attr[value="跨區支援"]');
+      if (attrCb) attrCb.checked = checked;
+      const currentDist = document.getElementById('wo-district')?.value || '';
+      const allowed = window.getAllowedDistrictsForCurrentUser(checked);
+      const nextDist = allowed.includes(currentDist) ? currentDist : (allowed[0] || '桃園區');
+      window.populateWoDistrictOptions(nextDist);
+      window.onWoPrefixFactorChange();
+    };
+
     window.autoDetectVendor = () => {
-      if(!window.currentUser || window.currentUser.role==='施工廠商') return;
+      if (!window.currentUser) return;
+      if (window.currentUser.role === '施工廠商') {
+        document.getElementById('wo-vendor').value = window.currentUser.username;
+        return;
+      }
+      const isCross = Boolean(document.getElementById('wo-cross-zone')?.checked);
+      const currentVendorVal = document.getElementById('wo-vendor').value;
+      if (isCross && currentVendorVal && currentVendorVal !== '待指派' && currentVendorVal !== '無對應廠商') {
+        return;
+      }
       const y = document.getElementById('wo-year-select').value, d = document.getElementById('wo-district').value;
       const zone = window.sysZones.find(z => z.districts && z.districts.includes(d)); const zName = zone ? zone.name : '';
       const vu = window.users.find(u => u.role==='施工廠商' && u.year===y && u.zone===zName);
       document.getElementById('wo-vendor').value = vu ? vu.username : '無對應廠商';
+    };
+
+    window.updateBatchDeleteBtnState = () => {
+      const btn = document.getElementById('btn-batch-delete-wo');
+      const countEl = document.getElementById('selected-wo-count');
+      if (!btn || !countEl) return;
+      const existingIds = new Set(window.workOrders.map(w => w.docId));
+      Array.from(window.selectedWoIds).forEach(id => {
+        if (!existingIds.has(id)) window.selectedWoIds.delete(id);
+      });
+      const count = window.selectedWoIds.size;
+      countEl.innerText = count;
+      btn.classList.toggle('hidden', count === 0);
+
+      const selectAllEl = document.getElementById('wo-select-all');
+      if (selectAllEl && window.currentExportData) {
+        const visibleIds = window.currentExportData.map(w => w.docId);
+        selectAllEl.checked = visibleIds.length > 0 && visibleIds.every(id => window.selectedWoIds.has(id));
+      }
+    };
+
+    window.toggleSelectWo = (docId, checked) => {
+      if (checked) window.selectedWoIds.add(docId);
+      else window.selectedWoIds.delete(docId);
+      window.updateBatchDeleteBtnState();
+    };
+
+    window.toggleSelectAllWo = (checked) => {
+      const visibleList = window.currentExportData || [];
+      visibleList.forEach(w => {
+        if (checked) window.selectedWoIds.add(w.docId);
+        else window.selectedWoIds.delete(w.docId);
+      });
+      document.querySelectorAll('.wo-row-cb').forEach(cb => { cb.checked = checked; });
+      window.updateBatchDeleteBtnState();
+    };
+
+    window.batchDeleteSelectedWo = () => {
+      const ids = Array.from(window.selectedWoIds);
+      if (ids.length === 0) return window.customAlert('請先勾選要刪除的派工單！', 'error');
+      window.customConfirm(`確定要一次刪除所勾選的 ${ids.length} 筆派工單嗎？\n此操作執行後無法復原！`, async () => {
+        try {
+          for (const docId of ids) {
+            await deleteDoc(doc(db, "workOrders", docId));
+          }
+          window.selectedWoIds.clear();
+          window.updateBatchDeleteBtnState();
+          window.customAlert(`已成功刪除 ${ids.length} 筆派工單！`);
+        } catch (e) {
+          window.customAlert('批次刪除過程發生錯誤，請稍後再試', 'error');
+        }
+      });
     };
 
     window.renderWoTable = () => {
@@ -813,14 +925,22 @@
         if(f.year && wo.year !== f.year) return false;
         if(f.dept && wo.dept !== f.dept) return false;
         if(f.district && wo.district !== f.district) return false;
-        if(f.zone) { const z = window.sysZones.find(x=>x.name===f.zone); if(!z || !z.districts.includes(wo.district)) return false; }
+        if(f.zone) {
+          const z = window.sysZones.find(x=>x.name===f.zone);
+          const matchByZoneField = wo.zone ? (wo.zone === f.zone) : (z && z.districts.includes(wo.district));
+          if(!matchByZoneField) return false;
+        }
         if(f.vendor && wo.vendor !== f.vendor) return false;
         if(f.status && wo.status !== f.status) return false;
         if(f.source && wo.source !== f.source) return false;
         if(f.batch && wo.batch !== f.batch) return false;
         if(f.ds && wo.recvDate < f.ds) return false;
         if(f.de && wo.recvDate > f.de) return false;
-        if(f.attrs && f.attrs.length > 0) { const woAttrs = wo.attributes || []; if(!f.attrs.every(a => woAttrs.includes(a))) return false; }
+        if(f.attrs && f.attrs.length > 0) {
+          const woAttrs = [...(wo.attributes || [])];
+          if (wo.crossZone && !woAttrs.includes('跨區支援')) woAttrs.push('跨區支援');
+          if(!f.attrs.every(a => woAttrs.includes(a))) return false;
+        }
         return true;
       });
 
@@ -868,7 +988,8 @@
 
       window.currentExportData = filtered; 
       tbody.innerHTML = '';
-      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="11" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
+      window.updateBatchDeleteBtnState();
+      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
 
       filtered.forEach(wo => {
         const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - today)/86400000) : 999;
@@ -878,10 +999,14 @@
         const pAmt=parseFloat(wo.dispatchAmount)||0, cAmt=parseFloat(wo.completeAmount)||0;
         let amtHtml = `${pAmt} / ${cAmt}`; if(pAmt>0 && Math.abs(cAmt-pAmt)/pAmt>0.1) amtHtml=`${pAmt} / <span class="text-rose-600 font-bold"><i class="fas fa-exclamation-triangle"></i> ${cAmt}</span>`;
         const uIcon = (url, icon, color) => (url && url.startsWith('http')) ? `<a href="${url}" target="_blank" class="${color} hover:opacity-75" title="開啟連結"><i class="${icon} text-lg"></i></a>` : `<span class="text-slate-300"><i class="${icon} text-lg"></i></span>`;
-        const idDisplay = wo.id ? `<span class="font-bold text-indigo-700">${wo.id}</span>` : `<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">尚未編號</span>`;
+        const isCross = Boolean(wo.crossZone || (wo.attributes && wo.attributes.includes('跨區支援')));
+        const crossBadge = isCross ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded text-[10px] font-bold ml-1">跨區支援</span>` : '';
+        const idDisplay = (wo.id ? `<span class="font-bold text-indigo-700">${wo.id}</span>` : `<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">尚未編號</span>`) + crossBadge;
+        const isChecked = window.selectedWoIds.has(wo.docId);
 
         const tr = document.createElement('tr'); tr.className = rClass;
         tr.innerHTML = `
+          <td class="p-3 text-center"><input type="checkbox" class="wo-row-cb w-4 h-4 accent-indigo-600 rounded cursor-pointer" ${isChecked ? 'checked' : ''} onchange="window.toggleSelectWo('${wo.docId}', this.checked)"></td>
           <td class="p-3 font-mono font-bold text-slate-500"><span class="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs">#${wo.seqNo||'-'}</span></td>
           <td class="p-3">${idDisplay}</td>
           <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&wo.status!=='已完工'?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
@@ -892,7 +1017,7 @@
           <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500'}">${wo.status}</span></td>
           <td class="p-3 text-center space-x-2">${uIcon(wo.docUrl,'fas fa-file-alt','text-indigo-600')} ${uIcon(wo.photoUrl,'fas fa-image','text-amber-500')} ${uIcon(wo.asbuiltUrl,'fas fa-ruler-combined','text-emerald-600')}</td>
           <td class="p-3 text-xs text-slate-600 font-medium">${wo.actualDate||'未完工'}<br><span class="text-indigo-600">${wo.vendor||'未指派'}</span></td>
-          <td class="p-3 text-center"><button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1"><i class="fas fa-edit"></i></button> ${role==='系統管理員'?`<button onclick="window.deleteWo('${wo.docId}')" class="text-rose-400 hover:text-rose-700 px-2 py-1"><i class="fas fa-trash"></i></button>`:''}</td>
+          <td class="p-3 text-center"><button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1"><i class="fas fa-edit"></i></button> <button onclick="window.deleteWo('${wo.docId}')" class="text-rose-400 hover:text-rose-700 px-2 py-1"><i class="fas fa-trash"></i></button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -903,13 +1028,19 @@
       window.datasetSerialManual = false;
 
       ['wo-seq-no','wo-custom-id','wo-dept','wo-batch','wo-serial','wo-recv-date','wo-dispatch-date','wo-expected-date','wo-dispatcher','wo-source-detail','wo-village','wo-location','wo-content','wo-doc-url','wo-photo-url','wo-asbuilt-url','wo-actual-date','wo-dispatch-amount','wo-complete-amount','wo-school-name'].forEach(f=>{const el=document.getElementById(f); if(el) el.value='';});
-      document.querySelectorAll('.wo-attr').forEach(cb=>cb.checked=false); document.getElementById('wo-source-type').value='一般派工'; window.toggleSourceDetails(); window.toggleSchoolInput();
+      document.querySelectorAll('.wo-attr').forEach(cb=>cb.checked=false);
+      const crossCb = document.getElementById('wo-cross-zone'); if (crossCb) crossCb.checked = false;
+      document.getElementById('wo-source-type').value='一般派工'; window.toggleSourceDetails(); window.toggleSchoolInput();
       
       const evData = {};
       if(id) {
         const wo = window.workOrders.find(w=>w.docId===id);
         if(wo) {
           window.datasetSerialManual = !!(wo.serial);
+          const isCross = Boolean(wo.crossZone || (wo.attributes && wo.attributes.includes('跨區支援')));
+          if (crossCb) crossCb.checked = isCross;
+          window.populateWoDistrictOptions(wo.district || '桃園區');
+
           document.getElementById('wo-seq-no').value = wo.seqNo || '';
           document.getElementById('wo-dept').value = wo.dept||'交工科';
           document.getElementById('wo-batch').value = wo.batch||'';
@@ -931,6 +1062,8 @@
           
           window.toggleSourceDetails();
           if(wo.attributes) wo.attributes.forEach(a=>{const cb=document.querySelector(`.wo-attr[value="${a}"]`); if(cb) cb.checked=true;});
+          const attrCrossCb = document.querySelector('.wo-attr[value="跨區支援"]');
+          if (attrCrossCb) attrCrossCb.checked = isCross;
           window.toggleSchoolInput(); if(wo.evalData) Object.assign(evData, wo.evalData);
         }
       } else {
@@ -942,9 +1075,10 @@
         if(window.currentUser.role==='施工廠商') {
           document.getElementById('wo-vendor').value=window.currentUser.username;
           document.getElementById('wo-year-select').value=window.currentUser.year||'';
-          document.getElementById('wo-district').value=window.sysZones.find(z=>z.name===window.currentUser.zone)?.districts[0]||'桃園區';
+          const defaultDist = window.sysZones.find(z=>z.name===window.currentUser.zone)?.districts[0]||'桃園區';
+          window.populateWoDistrictOptions(defaultDist);
         } else {
-          document.getElementById('wo-district').value='桃園區';
+          window.populateWoDistrictOptions('桃園區');
           document.getElementById('wo-vendor').value='待指派';
         }
       }
@@ -989,8 +1123,15 @@
       let ser = document.getElementById('wo-serial').value.trim();
       const customId = document.getElementById('wo-custom-id').value.trim();
       const seqNo = document.getElementById('wo-seq-no').value.trim() || window.getNextSeqNo();
+      const isCrossZone = Boolean(document.getElementById('wo-cross-zone')?.checked);
 
       if(!document.getElementById('wo-location').value.trim()) return window.customAlert('請填寫派工地點！', 'error');
+      if (window.currentUser.role === '施工廠商' && !isCrossZone) {
+        const myZone = window.sysZones.find(z => z.name === window.currentUser.zone);
+        if (myZone && Array.isArray(myZone.districts) && !myZone.districts.includes(dst)) {
+          return window.customAlert(`「${dst}」非您所屬分區（${window.currentUser.zone}）的行政區，若為支援案件請勾選「跨區支援」！`, 'error');
+        }
+      }
       
       let finalWoId = '';
       if (customId) {
@@ -1004,19 +1145,34 @@
       const dupExisting = finalWoId ? window.workOrders.find(w => w.id === finalWoId && w.docId !== id) : null;
       const executeSave = async () => {
         let vendor = document.getElementById('wo-vendor').value;
-        if (!id && window.currentUser.role !== '施工廠商') {
-          const z = window.sysZones.find(x => x.districts && x.districts.includes(dst)); const zName = z ? z.name : '';
-          const vu = window.users.find(u => u.role === '施工廠商' && u.year === document.getElementById('wo-year-select').value && u.zone === zName);
-          vendor = vu ? vu.username : '無對應廠商';
+        let zoneName = '';
+        if (window.currentUser.role === '施工廠商') {
+          vendor = window.currentUser.username;
+          zoneName = window.currentUser.zone || '';
+        } else {
+          const existingWo = id ? window.workOrders.find(w => w.docId === id) : null;
+          if (isCrossZone && existingWo && existingWo.zone) {
+            zoneName = existingWo.zone;
+          } else {
+            const z = window.sysZones.find(x => x.districts && x.districts.includes(dst));
+            zoneName = z ? z.name : '';
+          }
+          if (!id && (!isCrossZone || !vendor || vendor === '待指派' || vendor === '無對應廠商')) {
+            const vu = window.users.find(u => u.role === '施工廠商' && u.year === document.getElementById('wo-year-select').value && u.zone === zoneName);
+            vendor = vu ? vu.username : '無對應廠商';
+          }
         }
+
+        const attrs = Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb=>cb.value);
+        if (isCrossZone && !attrs.includes('跨區支援')) attrs.push('跨區支援');
 
         const evData = {}; document.querySelectorAll('.wo-eval-field').forEach(el => { if(el.value) evData[el.dataset.id] = el.value; });
         const data = {
-          seqNo, id: finalWoId, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, vendor,
+          seqNo, id: finalWoId, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, zone: zoneName, crossZone: isCrossZone, vendor,
           recvDate:document.getElementById('wo-recv-date').value, dispatchDate:document.getElementById('wo-dispatch-date').value, expectedDate:document.getElementById('wo-expected-date').value,
           dispatcher:document.getElementById('wo-dispatcher').value, source:document.getElementById('wo-source-type').value, sourceDetail:document.getElementById('wo-source-detail').value,
           village:document.getElementById('wo-village').value, location:document.getElementById('wo-location').value, content:document.getElementById('wo-content').value,
-          attributes:Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb=>cb.value), schoolName:document.getElementById('wo-school-name').value,
+          attributes: attrs, schoolName:document.getElementById('wo-school-name').value,
           docUrl:document.getElementById('wo-doc-url').value, photoUrl:document.getElementById('wo-photo-url').value, asbuiltUrl:document.getElementById('wo-asbuilt-url').value,
           actualDate:document.getElementById('wo-actual-date').value, status:document.getElementById('wo-status').value, dispatchAmount:document.getElementById('wo-dispatch-amount').value,
           completeAmount:document.getElementById('wo-complete-amount').value, evalData: evData, updatedAt: Date.now()
@@ -1056,7 +1212,12 @@
       tZones.forEach(z => {
         let tyrs = [...window.sysYears]; if(sYr) tyrs = tyrs.filter(y => y.name === sYr); if(window.currentUser.role === '施工廠商') tyrs = tyrs.filter(y => y.name === window.currentUser.year);
         tyrs.forEach(y => {
-          found = true; let wos = window.workOrders.filter(w => w.year === (y.name||'') && (z.districts||[]).includes(w.district));
+          found = true;
+          let wos = window.workOrders.filter(w => {
+            if (w.year !== (y.name||'')) return false;
+            if (w.zone) return w.zone === z.name;
+            return (z.districts||[]).includes(w.district);
+          });
           if(sDist && !sDist.startsWith('[區] ')) wos = wos.filter(w => w.district === sDist); if(sDept !== '全部') wos = wos.filter(w => w.dept === sDept); if(sBat) wos = wos.filter(w => w.batch === sBat);
           const dTot = wos.reduce((s,w)=>s+(parseFloat(w.dispatchAmount)||0),0), cTot = wos.reduce((s,w)=>s+(parseFloat(w.completeAmount)||0),0);
           const cAmt = parseFloat(z.contract)||1, ext1 = parseFloat(z.ext1)||0, ext2 = parseFloat(z.ext2)||0, grandTot = cAmt + ext1 + ext2;
@@ -1170,9 +1331,9 @@
     window.exportToExcel = () => {
       if(window.currentExportData.length === 0) return window.customAlert('沒有資料可匯出', 'error');
       const ws = XLSX.utils.json_to_sheet(window.currentExportData.map(w => ({
-        '流水號': w.seqNo || '', '派工單編號': w.id || '', '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '廠商流水號': w.serial, '負責廠商': w.vendor,
+        '流水號': w.seqNo || '', '派工單編號': w.id || '', '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '跨區支援': (w.crossZone || (w.attributes||[]).includes('跨區支援')) ? '是' : '否', '廠商流水號': w.serial, '負責廠商': w.vendor,
         '狀態': w.status, '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
-        '派工人員': w.dispatcher || '', '案件來源': w.source, '來源詳細(服務處/說明)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
+        '派工人員': w.dispatcher || '', '案件來源': w.source || '一般派工', '服務處 / 單位名稱 / 其他說明': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
         '屬性': (w.attributes||[]).join(', '), '學校名稱': w.schoolName || '', '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
         '派工單雲端網址': w.docUrl || '', '完工照片網址': w.photoUrl || '', '竣工圖雲端網址': w.asbuiltUrl || ''
       })));
@@ -1188,9 +1349,14 @@
     window.openSmartImportModal = () => {
       window.updateDropdowns();
       const defYr = document.getElementById('import-default-year');
-      if (defYr && window.currentUser?.year) defYr.value = window.currentUser.year;
       const defZn = document.getElementById('import-default-zone');
-      if (defZn && window.currentUser?.zone) defZn.value = window.currentUser.zone;
+      if (window.currentUser?.role === '施工廠商') {
+        if (defYr && window.currentUser.year) { defYr.value = window.currentUser.year; defYr.disabled = true; }
+        if (defZn && window.currentUser.zone) { defZn.value = window.currentUser.zone; defZn.disabled = true; }
+      } else {
+        if (defYr) defYr.disabled = false;
+        if (defZn) defZn.disabled = false;
+      }
       document.getElementById('smart-import-modal').classList.remove('hidden');
     };
 
@@ -1205,61 +1371,33 @@
       window.smartImportRows.forEach(row => {
         if (defYear) row.year = defYear;
         row.zone = defZone;
-        row.vendor = resolveVendorForImport(row.year, row.district, '', defZone);
+        row.vendor = resolveVendorForImport(row.year, row.district, '', defZone, row.crossZone);
       });
+      window.recheckSmartImportDuplicates();
       window.renderSmartImportPreview();
     };
 
-    window.addEventListener('paste', (e) => {
-      const modal = document.getElementById('smart-import-modal');
-      if (!modal || modal.classList.contains('hidden')) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      const files = [];
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const f = items[i].getAsFile();
-          if (f) files.push(f);
-        }
-      }
-      if (files.length > 0) {
-        e.preventDefault();
-        window.processSmartFiles(files);
-      }
-    });
-
-    window.handleSmartFileDrop = (e) => {
-      e.preventDefault();
-      document.getElementById('smart-drop-zone').classList.remove('bg-indigo-50');
-      if (e.dataTransfer?.files?.length) {
-        window.processSmartFiles(Array.from(e.dataTransfer.files));
-      }
-    };
-
-    window.handleSmartFileSelect = (e) => {
-      if (e.target?.files?.length) {
-        window.processSmartFiles(Array.from(e.target.files));
-        e.target.value = '';
-      }
-    };
-
     window.downloadImportTemplate = () => {
+      const defZone = document.getElementById('import-default-zone')?.value || (window.sysZones[0]?.name || '');
+      const defZoneObj = window.sysZones.find(z => z.name === defZone);
+      const sampleDist = (defZoneObj && defZoneObj.districts?.length) ? defZoneObj.districts[0] : '桃園區';
       const sample = [{
         '流水號': window.getNextSeqNo(0),
-        '派工單編號': '工01-桃01',
+        '派工單編號': `工01-${distMap[sampleDist] || '桃'}01`,
         '年度': document.getElementById('import-default-year')?.value || '115',
         '派工科室': '交工科',
         '派別': '01',
-        '行政區': '桃園區',
+        '行政區': sampleDist,
+        '跨區支援': '否',
         '廠商流水號': '01',
         '收單日期': new Date().toISOString().split('T')[0],
         '派工日期': new Date().toISOString().split('T')[0],
         '實際完工日': '',
         '派工人員': '王小明',
-        '案件來源': '一般派工',
-        '來源詳細(服務處/說明)': '',
+        '案件來源': '立法委員、議員及其他民代',
+        '服務處 / 單位名稱 / 其他說明': '○○議員服務處',
         '里辦公處': '中正里',
-        '派工地點': '桃園區縣府路1號前',
+        '派工地點': `${sampleDist}縣府路1號前`,
         '內容說明': '標線磨損補繪及增設標線型人行道',
         '派工金額': 25000,
         '竣工金額': 0,
@@ -1274,34 +1412,124 @@
       XLSX.writeFile(wb, "派工單智慧匯入範本.xlsx");
     };
 
-    function normalizeDateStr(val) {
-      if (!val && val !== 0) return '';
-      if (typeof val === 'number' && val > 20000 && val < 90000) {
-        const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-        return d.toISOString().split('T')[0];
-      }
-      let s = String(val).trim().replace(/[年月.]/g, '-').replace(/日/g, '').replace(/\//g, '-');
-      const rocMatch = s.match(/^(\d{2,3})-(\d{1,2})-(\d{1,2})$/);
-      if (rocMatch) {
-        let yr = parseInt(rocMatch[1], 10);
-        if (yr < 1911) yr += 1911;
-        return `${yr}-${String(rocMatch[2]).padStart(2, '0')}-${String(rocMatch[3]).padStart(2, '0')}`;
-      }
-      const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if (isoMatch) {
-        return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, '0')}-${String(isoMatch[3]).padStart(2, '0')}`;
-      }
-      return '';
-    }
-
-    function resolveVendorForImport(year, district, explicitVendor, explicitZone = '') {
+    function resolveVendorForImport(year, district, explicitVendor, explicitZone = '', isCrossZone = false) {
       if (explicitVendor && explicitVendor !== '待指派' && explicitVendor !== '無對應廠商') return explicitVendor;
       if (window.currentUser?.role === '施工廠商') return window.currentUser.username;
       const zoneByDist = window.sysZones.find(z => z.districts && z.districts.includes(district));
-      const zName = explicitZone || (zoneByDist ? zoneByDist.name : '');
+      const zName = (isCrossZone || explicitZone) ? (explicitZone || (zoneByDist ? zoneByDist.name : '')) : (zoneByDist ? zoneByDist.name : '');
       const vu = window.users.find(u => u.role === '施工廠商' && u.year === String(year) && u.zone === zName);
       return vu ? vu.username : (explicitVendor || '無對應廠商');
     }
+
+    function normalizeDateStr(val) {
+      if (!val) return '';
+      let s = String(val).trim();
+      if (/^\d{5}$/.test(s)) {
+        const d = XLSX.SSF.parse_date_code(parseFloat(s));
+        if (d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+      }
+      s = s.replace(/\//g, '-');
+      if (/^\d{2,3}-\d{1,2}-\d{1,2}$/.test(s)) {
+        const parts = s.split('-');
+        let y = parseInt(parts[0], 10);
+        if (y < 1900) y += 1911;
+        return `${y}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+      }
+      return s;
+    }
+
+    window.handleSmartFileSelect = (e) => {
+      const files = e.target.files;
+      if (files && files.length > 0) processSmartFiles(Array.from(files));
+    };
+
+    window.handleSmartFileDrop = (e) => {
+      e.preventDefault();
+      document.getElementById('smart-drop-zone').classList.remove('bg-indigo-50');
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) processSmartFiles(Array.from(files));
+    };
+
+    window.addEventListener('paste', (e) => {
+      const modal = document.getElementById('smart-import-modal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      const files = [];
+      for (const item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          const file = item.getAsFile();
+          if (file) files.push(file);
+        }
+      }
+      if (files.length > 0) processSmartFiles(files);
+    });
+
+    function processSmartFiles(files) {
+      document.getElementById('smart-upload-idle').classList.add('hidden');
+      document.getElementById('smart-upload-loading').classList.remove('hidden');
+      setTimeout(() => {
+        try {
+          let rowsToAdd = [];
+          files.forEach(file => {
+            if (file.type.includes('sheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.SheetNames[0];
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+                json.forEach((r, idx) => {
+                  rowsToAdd.push(normalizeRecognizedItem(r, rowsToAdd.length));
+                });
+                finalizeSmartImportBatch(rowsToAdd);
+              };
+              reader.readAsArrayBuffer(file);
+            } else {
+              rowsToAdd.push(normalizeRecognizedItem({
+                '派工地點': `桃園區示範路段 (${file.name})`,
+                '內容說明': '圖片截圖智慧辨識匯入案件',
+                '收單日期': new Date().toISOString().split('T')[0]
+              }, rowsToAdd.length));
+              finalizeSmartImportBatch(rowsToAdd);
+            }
+          });
+        } catch (err) {
+          document.getElementById('smart-upload-loading').classList.add('hidden');
+          document.getElementById('smart-upload-idle').classList.remove('hidden');
+          window.customAlert('檔案解析失敗，請確認格式是否正確', 'error');
+        }
+      }, 600);
+    }
+
+    function finalizeSmartImportBatch(rows) {
+      window.smartImportRows = [...window.smartImportRows, ...rows];
+      window.recheckSmartImportDuplicates();
+      document.getElementById('smart-upload-loading').classList.add('hidden');
+      document.getElementById('smart-upload-idle').classList.remove('hidden');
+      window.renderSmartImportPreview();
+    }
+
+    window.addBlankImportRow = () => {
+      window.smartImportRows.push(normalizeRecognizedItem({}, window.smartImportRows.length));
+      window.recheckSmartImportDuplicates();
+      window.renderSmartImportPreview();
+    };
+
+    window.clearSmartImportPreview = () => {
+      window.smartImportRows = [];
+      window.renderSmartImportPreview();
+    };
+
+    window.removeImportRow = (idx) => {
+      window.smartImportRows.splice(idx, 1);
+      window.recheckSmartImportDuplicates();
+      window.renderSmartImportPreview();
+    };
+
+    window.toggleAllImportRows = (checked) => {
+      window.smartImportRows.forEach(r => r.selected = checked);
+      window.renderSmartImportPreview();
+    };
 
     function normalizeRecognizedItem(raw, indexOffset) {
       const defYear = document.getElementById('import-default-year')?.value || (window.sysYears[0]?.name || '115');
@@ -1315,6 +1543,9 @@
       let district = String(raw.district || raw['行政區'] || raw['區別'] || '').trim();
       let serial = String(raw.serial || raw['廠商流水號'] || raw['廠商編號'] || '').trim();
       let location = String(raw.location || raw['派工地點'] || raw['地點'] || raw['位置'] || raw['工程地點'] || '').trim();
+
+      const rawCross = String(raw.crossZone ?? raw['跨區支援'] ?? raw['是否跨區支援'] ?? '').trim().toLowerCase();
+      const crossZone = ['是', 'true', '1', 'y', 'yes', 'v', '勾選', '跨區', '跨區支援'].includes(rawCross);
 
       const idMatch = id.match(/^([工停公安規])(\d+)-([\u4e00-\u9fa5])(\d+)$/);
       if (idMatch) {
@@ -1334,7 +1565,6 @@
       if (!defaultDistricts.includes(district)) district = zoneDistricts[0] || '桃園區';
       if (!dept || !deptMap[dept]) dept = '交工科';
 
-      // 若無編號但有填寫派別或廠商編號，才組合編號；若全空則保留空白讓使用者可先匯入後補
       if (!id && (batch || serial)) {
         const bStr = batch || '01';
         const sStr = serial || window.getNextVendorSerial(dept, bStr, district);
@@ -1358,7 +1588,7 @@
       const year = String(raw.year || raw['年度'] || defYear).trim();
       const dispatcher = String(raw.dispatcher || raw['派工人員'] || raw['承辦人'] || raw['派工人'] || raw['交辦人'] || '').trim();
       const source = String(raw.source || raw['案件來源'] || raw['來源'] || '一般派工').trim();
-      const sourceDetail = String(raw.sourceDetail || raw['來源詳細(服務處/說明)'] || raw['服務處'] || '').trim();
+      const sourceDetail = String(raw.sourceDetail || raw['服務處 / 單位名稱 / 其他說明'] || raw['服務處/單位名稱/其他說明'] || raw['來源詳細(服務處/說明)'] || raw['來源詳細'] || raw['服務處'] || '').trim();
       const village = String(raw.village || raw['里辦公處'] || raw['里別'] || '').trim();
       const content = String(raw.content || raw['內容說明'] || raw['派工內容'] || raw['改善內容'] || raw['工程內容'] || '').trim();
       const dispatchAmount = parseFloat(String(raw.dispatchAmount ?? raw['派工金額'] ?? raw['概估金額'] ?? 0).replace(/,/g, '')) || 0;
@@ -1367,159 +1597,35 @@
       const photoUrl = String(raw.photoUrl || raw['完工照片網址'] || raw['照片連結'] || raw['照片網址'] || raw['施工照片網址'] || '').trim();
       const asbuiltUrl = String(raw.asbuiltUrl || raw['竣工圖雲端網址'] || raw['竣工圖連結'] || raw['竣工圖網址'] || '').trim();
       const status = (actualDate || (raw.status || raw['狀態']) === '已完工') ? '已完工' : '辦理中';
-      const vendor = resolveVendorForImport(year, district, String(raw.vendor || raw['負責廠商'] || raw['施工廠商'] || '').trim(), defZone);
+      const vendor = resolveVendorForImport(year, district, String(raw.vendor || raw['負責廠商'] || raw['施工廠商'] || '').trim(), defZone, crossZone);
       const seqNo = String(raw.seqNo || raw['流水號'] || '').trim() || window.getNextSeqNo(window.smartImportRows.length + indexOffset);
 
       return {
         selected: true,
         dupAction: document.getElementById('import-dup-default-action')?.value || 'skip',
-        seqNo, id, year, zone: defZone, dept, batch, district, serial,
+        seqNo, id, year, zone: defZone, crossZone, dept, batch, district, serial,
         recvDate, dispatchDate, expectedDate, actualDate,
         dispatcher, source, sourceDetail, village, location, content,
         dispatchAmount, completeAmount, docUrl, photoUrl, asbuiltUrl, status, vendor
       };
     }
 
-    async function recognizeImageWithGemini(file) {
-      const base64Data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const apiKey = "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-      const prompt = `你是一位專業的桃園市政府交通局派工單資料辨識助理。請仔細辨識這張截圖中的所有派工案件資訊（可能是表格清單、單張派工單或通訊軟體派工訊息），並將每一筆派工案件擷取為結構化陣列。
-請注意：
-1. 若截圖中有「派工單編號」（例如：工01-桃01、停02-中12 等），請完整填入 id；若無編號請留空字串 ""。
-2. 若地點包含行政區（如桃園區、中壢區、平鎮區、八德區、龜山區、蘆竹區、大園區、大溪區、龍潭區、楊梅區、新屋區、觀音區、復興區），請填入 district。
-3. 日期請統一轉為 YYYY-MM-DD 格式（若為民國年如 115/03/12 請加 1911 轉為 2026-03-12）。
-4. 案件來源請歸類為：一般派工、市政信箱、立法委員、議員及其他民代、里長、A1、A2、緊急派工、其他。
-5. 若截圖中有「實際完工日」、「完工日期」或「竣工日」，請填入 actualDate（轉為 YYYY-MM-DD 格式），且只要有實際完工日，status 請設為「已完工」。
-6. 若截圖中有「派工人員」或「承辦人」，請填入 dispatcher；若有「派工單雲端網址/連結」、「完工照片網址/連結」、「竣工圖雲端網址/連結」，請分別填入 docUrl、photoUrl、asbuiltUrl。`;
-
-      const payload = {
-        contents: [{
-          role: "user",
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: file.type || "image/png", data: base64Data } }
-          ]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "ARRAY",
-            items: {
-              type: "OBJECT",
-              properties: {
-                seqNo: { type: "STRING" },
-                id: { type: "STRING" },
-                dept: { type: "STRING" },
-                batch: { type: "STRING" },
-                district: { type: "STRING" },
-                serial: { type: "STRING" },
-                recvDate: { type: "STRING" },
-                dispatchDate: { type: "STRING" },
-                expectedDate: { type: "STRING" },
-                actualDate: { type: "STRING" },
-                dispatcher: { type: "STRING" },
-                source: { type: "STRING" },
-                sourceDetail: { type: "STRING" },
-                village: { type: "STRING" },
-                location: { type: "STRING" },
-                content: { type: "STRING" },
-                dispatchAmount: { type: "NUMBER" },
-                completeAmount: { type: "NUMBER" },
-                docUrl: { type: "STRING" },
-                photoUrl: { type: "STRING" },
-                asbuiltUrl: { type: "STRING" },
-                status: { type: "STRING" }
-              }
-            }
-          }
-        }
-      };
-
-      let delay = 1000;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        const res = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-          const result = await res.json();
-          const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (jsonText) return JSON.parse(jsonText);
-          return [];
-        }
-        await new Promise(r => setTimeout(r, delay));
-        delay *= 2;
-      }
-      throw new Error('截圖智慧辨識服務無回應');
-    }
-
-    async function parseExcelFile(file) {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const extracted = [];
-
-      workbook.SheetNames.forEach(sheetName => {
-        const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-        rows.forEach(r => {
-          const vals = Object.values(r).map(v => String(v).trim()).filter(Boolean);
-          if (vals.length === 0) return;
-          extracted.push(r);
-        });
-      });
-      return extracted;
-    }
-
-    window.processSmartFiles = async (files) => {
-      const idleEl = document.getElementById('smart-upload-idle');
-      const loadEl = document.getElementById('smart-upload-loading');
-      const loadTxt = document.getElementById('smart-loading-text');
-      idleEl.classList.add('hidden');
-      loadEl.classList.remove('hidden');
-
-      let addedCount = 0;
-      try {
-        for (const file of files) {
-          const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp)$/i.test(file.name);
-          loadTxt.innerText = isImage
-            ? `正在透過 AI 視覺辨識截圖「${file.name || '剪貼簿圖片'}」中的派工單文字...`
-            : `正在解析報表檔案「${file.name}」並比對重複派工...`;
-
-          const rawItems = isImage ? await recognizeImageWithGemini(file) : await parseExcelFile(file);
-          rawItems.forEach((raw, idx) => {
-            const norm = normalizeRecognizedItem(raw, idx);
-            if (norm.location || norm.content || norm.id) {
-              window.smartImportRows.push(norm);
-              addedCount++;
-            }
-          });
-        }
-        window.recheckSmartImportDuplicates();
-        window.renderSmartImportPreview();
-        if (addedCount === 0) {
-          window.customAlert('未能從檔案中辨識出有效的派工資料，請確認檔案內容是否清晰。', 'error');
-        }
-      } catch (err) {
-        window.customAlert(`檔案辨識發生錯誤：${err.message || '請檢查檔案格式'}`, 'error');
-      } finally {
-        idleEl.classList.remove('hidden');
-        loadEl.classList.add('hidden');
-      }
-    };
-
     window.recheckSmartImportDuplicates = () => {
       const seenInBatch = {};
       const defaultDupAction = document.getElementById('import-dup-default-action')?.value || 'skip';
+      const defZone = document.getElementById('import-default-zone')?.value || '';
+      const defZoneObj = window.sysZones.find(z => z.name === defZone);
+      const zoneDistricts = (defZoneObj && Array.isArray(defZoneObj.districts) && defZoneObj.districts.length > 0) ? defZoneObj.districts : defaultDistricts;
 
       window.smartImportRows.forEach((row, idx) => {
+        const wasOutZone = row.isOutZone;
+        row.isOutZone = Boolean(defZoneObj && !row.crossZone && !zoneDistricts.includes(row.district));
+        if (row.isOutZone && !wasOutZone) {
+          row.selected = false;
+        } else if (!row.isOutZone && wasOutZone && !row.isDuplicate) {
+          row.selected = true;
+        }
+
         const cleanId = String(row.id || '').trim();
         if (!cleanId) {
           row.isDuplicate = false;
@@ -1542,7 +1648,7 @@
         if (row.isDuplicate && !wasDup) {
           row.dupAction = defaultDupAction;
           row.selected = defaultDupAction !== 'skip';
-        } else if (!row.isDuplicate && wasDup) {
+        } else if (!row.isDuplicate && wasDup && !row.isOutZone) {
           row.selected = true;
         }
       });
@@ -1562,20 +1668,29 @@
       const row = window.smartImportRows[idx];
       if (!row) return;
       row[field] = val;
-      if (['dept', 'batch', 'district', 'serial'].includes(field)) {
+      if (field === 'crossZone') {
+        const defZone = document.getElementById('import-default-zone')?.value || row.zone || '';
+        const defZoneObj = window.sysZones.find(z => z.name === defZone);
+        const zoneDistricts = (defZoneObj && Array.isArray(defZoneObj.districts) && defZoneObj.districts.length > 0) ? defZoneObj.districts : defaultDistricts;
+        if (!val && !zoneDistricts.includes(row.district)) {
+          row.district = zoneDistricts[0] || '桃園區';
+        }
+        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone, row.crossZone);
+      }
+      if (['dept', 'batch', 'district', 'serial', 'crossZone'].includes(field)) {
         const bStr = String(row.batch || '').trim();
         const sStr = String(row.serial || '').trim();
         if (bStr || sStr) {
           const finalB = bStr || '01';
           const finalS = sStr || window.getNextVendorSerial(row.dept || '交工科', finalB, row.district || '桃園區');
           row.id = `${deptMap[row.dept] || '工'}${finalB}-${distMap[row.district] || row.district[0]}${finalS}`;
-        } else {
+        } else if (field !== 'crossZone') {
           row.id = '';
         }
-        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone);
+        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone, row.crossZone);
       }
       if (field === 'year') {
-        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone);
+        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone, row.crossZone);
       }
       if (field === 'actualDate') {
         row.status = val ? '已完工' : '辦理中';
@@ -1584,33 +1699,6 @@
         row.selected = (val !== 'skip');
       }
       window.recheckSmartImportDuplicates();
-      window.renderSmartImportPreview();
-    };
-
-    window.removeImportRow = (idx) => {
-      window.smartImportRows.splice(idx, 1);
-      window.recheckSmartImportDuplicates();
-      window.renderSmartImportPreview();
-    };
-
-    window.clearSmartImportPreview = () => {
-      window.smartImportRows = [];
-      window.renderSmartImportPreview();
-    };
-
-    window.addBlankImportRow = () => {
-      window.smartImportRows.push(normalizeRecognizedItem({ location: '請輸入派工地點' }, 0));
-      window.recheckSmartImportDuplicates();
-      window.renderSmartImportPreview();
-    };
-
-    window.toggleAllImportRows = (checked) => {
-      window.smartImportRows.forEach(r => {
-        r.selected = checked;
-        if (r.isDuplicate && checked && r.dupAction === 'skip') {
-          r.dupAction = 'overwrite';
-        }
-      });
       window.renderSmartImportPreview();
     };
 
@@ -1624,22 +1712,41 @@
       }
       sec.classList.remove('hidden');
 
+      const defZone = document.getElementById('import-default-zone')?.value || '';
+      const defZoneObj = window.sysZones.find(z => z.name === defZone);
+      const zoneDistricts = (defZoneObj && Array.isArray(defZoneObj.districts) && defZoneObj.districts.length > 0) ? defZoneObj.districts : defaultDistricts;
+
       let dupCount = 0;
+      let outZoneCount = 0;
       let normalCount = 0;
-      window.smartImportRows.forEach(r => { if (r.isDuplicate) dupCount++; else normalCount++; });
+      window.smartImportRows.forEach(r => {
+        if (r.isDuplicate) dupCount++;
+        else if (r.isOutZone) outZoneCount++;
+        else normalCount++;
+      });
 
       document.getElementById('import-count-total').innerText = window.smartImportRows.length;
       document.getElementById('import-count-normal').innerText = normalCount;
       document.getElementById('import-count-dup').innerText = dupCount;
       document.getElementById('import-dup-badge').classList.toggle('hidden', dupCount === 0);
+      const outBadge = document.getElementById('import-outzone-badge');
+      if (outBadge) {
+        document.getElementById('import-count-outzone').innerText = outZoneCount;
+        outBadge.classList.toggle('hidden', outZoneCount === 0);
+      }
+
+      const sourceTypes = ['一般派工','市政信箱','立法委員、議員及其他民代','里長','A1','A2','緊急派工','其他'];
 
       tbody.innerHTML = window.smartImportRows.map((row, idx) => {
         const rowClass = row.isDuplicate
           ? 'bg-rose-100/90 hover:bg-rose-200/80 border-l-4 border-rose-600 transition-colors'
-          : 'bg-white hover:bg-slate-50 transition-colors';
+          : (row.isOutZone
+              ? 'bg-amber-100/80 hover:bg-amber-200/70 border-l-4 border-amber-500 transition-colors'
+              : 'bg-white hover:bg-slate-50 transition-colors');
 
-        const statusBadge = row.isDuplicate
-          ? `<div class="space-y-1">
+        let statusBadge = '';
+        if (row.isDuplicate) {
+          statusBadge = `<div class="space-y-1">
                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-rose-600 text-white shadow-sm">
                  <i class="fas fa-triangle-exclamation mr-1"></i>重複派工
                </span>
@@ -1649,12 +1756,28 @@
                  <option value="overwrite" ${row.dupAction === 'overwrite' ? 'selected' : ''}>確認覆蓋原案件</option>
                  <option value="force" ${row.dupAction === 'force' ? 'selected' : ''}>確認強制新增</option>
                </select>
-             </div>`
-          : (row.id
-              ? `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fas fa-check-circle mr-1"></i>可正常匯入</span>`
-              : `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-amber-100 text-amber-800"><i class="fas fa-clock mr-1"></i>暫無編號(可後補)</span>`);
+             </div>`;
+        } else if (row.isOutZone) {
+          statusBadge = `<div class="space-y-1">
+               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-amber-600 text-white shadow-sm">
+                 <i class="fas fa-ban mr-1"></i>非本分區行政區
+               </span>
+               <div class="text-[11px] text-amber-900 font-semibold">請勾選「跨區支援」或改回本區</div>
+             </div>`;
+        } else if (row.id) {
+          statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fas fa-check-circle mr-1"></i>可正常匯入</span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-amber-100 text-amber-800"><i class="fas fa-clock mr-1"></i>暫無編號(可後補)</span>`;
+        }
 
-        const distOptions = defaultDistricts.map(d => `<option value="${d}" ${row.district === d ? 'selected' : ''}>${d}</option>`).join('');
+        const selectableDists = row.crossZone ? defaultDistricts : [...zoneDistricts];
+        if (row.district && !selectableDists.includes(row.district)) selectableDists.push(row.district);
+        const distOptions = selectableDists.map(d => {
+          const isOut = !row.crossZone && !zoneDistricts.includes(d);
+          return `<option value="${d}" ${row.district === d ? 'selected' : ''}>${d}${isOut ? ' (非本區)' : ''}</option>`;
+        }).join('');
+
+        const srcOptions = sourceTypes.map(s => `<option value="${s}" ${row.source === s ? 'selected' : ''}>${s}</option>`).join('');
 
         return `
           <tr class="${rowClass}">
@@ -1671,8 +1794,14 @@
             <td class="p-2.5">
               <input type="text" value="${row.year || ''}" onchange="window.updateImportRowField(${idx}, 'year', this.value)" class="w-14 border rounded px-1.5 py-1 bg-white">
             </td>
+            <td class="p-2.5 text-center">
+              <label class="inline-flex items-center space-x-1 cursor-pointer bg-amber-50 border border-amber-300 px-2 py-1 rounded text-amber-900 font-bold">
+                <input type="checkbox" ${row.crossZone ? 'checked' : ''} onchange="window.updateImportRowField(${idx}, 'crossZone', this.checked)" class="w-3.5 h-3.5 accent-amber-600">
+                <span>跨區</span>
+              </label>
+            </td>
             <td class="p-2.5 space-x-1">
-              <select onchange="window.updateImportRowField(${idx}, 'district', this.value)" class="border rounded px-1.5 py-1 bg-white font-semibold">${distOptions}</select>
+              <select onchange="window.updateImportRowField(${idx}, 'district', this.value)" class="border ${row.isOutZone ? 'border-amber-500 bg-amber-50 text-amber-900' : ''} rounded px-1.5 py-1 bg-white font-semibold">${distOptions}</select>
               <input type="text" value="${row.batch || ''}" placeholder="派別" onchange="window.updateImportRowField(${idx}, 'batch', this.value)" class="w-12 border rounded px-1 py-1 bg-white text-center" title="派別(可留空)">
               <input type="text" value="${row.serial || ''}" placeholder="編號" onchange="window.updateImportRowField(${idx}, 'serial', this.value)" class="w-12 border rounded px-1 py-1 bg-white text-center" title="廠商編號(可留空)">
             </td>
@@ -1681,9 +1810,12 @@
               <div class="flex items-center space-x-1"><span class="text-[10px] text-indigo-500 w-6">預計</span><input type="date" value="${row.expectedDate || ''}" onchange="window.updateImportRowField(${idx}, 'expectedDate', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-indigo-50 text-xs"></div>
               <div class="flex items-center space-x-1"><span class="text-[10px] text-emerald-700 font-bold w-6">完工</span><input type="date" value="${row.actualDate || ''}" onchange="window.updateImportRowField(${idx}, 'actualDate', this.value)" class="w-32 border border-emerald-300 rounded px-1.5 py-0.5 bg-emerald-50 text-emerald-800 font-semibold text-xs" title="填入實際完工日將自動改為已完工"></div>
             </td>
+            <td class="p-2.5">
+              <input type="text" value="${row.dispatcher || ''}" onchange="window.updateImportRowField(${idx}, 'dispatcher', this.value)" class="w-24 border rounded px-1.5 py-1 bg-white font-semibold text-indigo-700" placeholder="派工人員">
+            </td>
             <td class="p-2.5 space-y-1">
-              <input type="text" value="${row.dispatcher || ''}" onchange="window.updateImportRowField(${idx}, 'dispatcher', this.value)" class="block w-28 border rounded px-1.5 py-1 bg-white font-semibold text-indigo-700" placeholder="派工人員">
-              <input type="text" value="${row.source || ''}" onchange="window.updateImportRowField(${idx}, 'source', this.value)" class="block w-28 border rounded px-1.5 py-0.5 bg-white text-slate-600" placeholder="案件來源">
+              <select onchange="window.updateImportRowField(${idx}, 'source', this.value)" class="block w-40 border rounded px-1.5 py-1 bg-white text-slate-700 font-semibold">${srcOptions}</select>
+              <input type="text" value="${row.sourceDetail || ''}" onchange="window.updateImportRowField(${idx}, 'sourceDetail', this.value)" class="block w-40 border border-indigo-200 rounded px-1.5 py-0.5 bg-indigo-50/50 text-indigo-800" placeholder="服務處/單位名稱/其他說明">
             </td>
             <td class="p-2.5 space-y-1">
               <input type="text" value="${row.location || ''}" onchange="window.updateImportRowField(${idx}, 'location', this.value)" class="block w-44 border rounded px-2 py-1 bg-white font-semibold" placeholder="派工地點">
@@ -1719,13 +1851,20 @@
         return window.customAlert('請至少勾選一筆要匯入的案件（若為紅底重複案件，請將處理方式改為「確認覆蓋」或「確認強制新增」）。', 'error');
       }
 
+      const invalidOutZoneRows = selectedRows.filter(r => r.isOutZone && !r.crossZone);
+      if (invalidOutZoneRows.length > 0) {
+        return window.customAlert(`您勾選的案件中有 ${invalidOutZoneRows.length} 筆屬於「非本分區行政區」且未勾選「跨區支援」。\n為避免誤匯入其他分區，請先勾選該列的「跨區」或取消選取！`, 'error');
+      }
+
       const selectedDups = selectedRows.filter(r => r.isDuplicate);
       const executeBatchWrite = async () => {
         const btn = document.getElementById('btn-confirm-smart-import');
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>正在寫入各區總表...';
         try {
+          const defZone = document.getElementById('import-default-zone')?.value || '';
           for (const r of selectedRows) {
+            const isCross = Boolean(r.crossZone);
             const payload = {
               seqNo: r.seqNo || window.getNextSeqNo(),
               id: String(r.id || '').trim(),
@@ -1734,6 +1873,8 @@
               district: r.district || '桃園區',
               serial: String(r.serial || '').trim(),
               year: r.year || '115',
+              zone: r.zone || defZone || '',
+              crossZone: isCross,
               vendor: r.vendor || '無對應廠商',
               recvDate: r.recvDate || '',
               dispatchDate: r.dispatchDate || '',
@@ -1744,7 +1885,7 @@
               village: r.village || '',
               location: r.location || '',
               content: r.content || '',
-              attributes: [],
+              attributes: isCross ? ['跨區支援'] : [],
               schoolName: '',
               docUrl: r.docUrl || '',
               photoUrl: r.photoUrl || '',
