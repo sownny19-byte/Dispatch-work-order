@@ -92,6 +92,7 @@
               <input type="text" id="search-wo" onkeyup="window.renderWoTable()" placeholder="快速搜尋..." class="pl-9 border border-slate-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm">
             </div>
             <button onclick="document.getElementById('adv-search-modal').classList.remove('hidden')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-2 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" title="進階詳細搜尋"><i class="fas fa-filter text-indigo-500"></i></button>
+            <button id="btn-import-wo" onclick="window.openSmartImportModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors text-sm hidden" title="上傳截圖或Excel自動辨識匯入"><i class="fas fa-wand-magic-sparkles mr-1"></i>智慧匯入(截圖/Excel)</button>
             <button id="btn-add-wo" onclick="window.openWoModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md whitespace-nowrap transition-colors text-sm" style="display: none;"><i class="fas fa-plus mr-1"></i>新增</button>
           </div>
         </div>
@@ -100,6 +101,7 @@
           <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
             <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
               <tr>
+                <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('seqNo')" title="點擊排序">流水號 <i id="sort-icon-seqNo" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('id')" title="點擊排序">派工單編號 <i id="sort-icon-id" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('recvDate')" title="點擊排序">收單/派工/預計完工 <i id="sort-icon-recvDate" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
                 <th class="p-3 font-semibold cursor-pointer group hover:bg-slate-100 transition-colors" onclick="window.handleSort('source')" title="點擊排序">案件來源 <i id="sort-icon-source" class="fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity"></i></th>
@@ -113,7 +115,7 @@
               </tr>
             </thead>
             <tbody id="wo-table-body" class="divide-y divide-slate-100">
-              <tr><td colspan="10" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
+              <tr><td colspan="11" class="p-8 text-center text-slate-500"><i class="fas fa-inbox text-4xl mb-3 text-slate-300 block"></i>請先登入以檢視資料</td></tr>
             </tbody>
           </table>
         </div>
@@ -262,14 +264,27 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           
           <div class="col-span-1 sm:col-span-2 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 shadow-sm">
-            <label class="block text-sm font-bold text-indigo-900 mb-3"><i class="fas fa-barcode mr-2"></i>自動派工單編號系統</label>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div><label class="block text-xs font-semibold text-slate-600 mb-1">派工科室</label><select id="wo-dept" class="w-full border p-2 rounded-lg outline-none" onchange="window.updateWoPrefix()"><option value="交工科">交工科</option><option value="停管科">停管科</option><option value="公運科">公運科</option><option value="交安科">交安科</option><option value="運規科">運規科</option></select></div>
-              <div><label class="block text-xs font-semibold text-slate-600 mb-1">派別 (數字)</label><input type="text" id="wo-batch" class="w-full border p-2 rounded-lg outline-none" placeholder="01" onkeyup="window.updateWoPrefix()"></div>
-              <div><label class="block text-xs font-semibold text-slate-600 mb-1">行政區</label><select id="wo-district" class="w-full border p-2 rounded-lg outline-none" onchange="window.updateWoPrefix()"></select></div>
-              <div><label class="block text-xs font-semibold text-slate-600 mb-1">廠商編號 (數字)</label><input type="text" id="wo-serial" class="w-full border p-2 rounded-lg outline-none" placeholder="01" onkeyup="window.updateWoPrefix()"></div>
+            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+              <label class="text-sm font-bold text-indigo-900"><i class="fas fa-barcode mr-2"></i>自動流水號與派工單編號系統</label>
+              <span class="text-xs text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full font-medium">流水號與編號預設依序自動生成，亦可直接手動修改</span>
             </div>
-            <div class="mt-3 text-sm bg-white p-3 rounded-lg border flex justify-between shadow-inner"><span class="text-slate-500 font-medium">組合結果：</span><span id="wo-preview-id" class="font-bold text-xl text-indigo-600">工01-桃01</span></div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">總表流水號 (可自訂)</label>
+                <input type="text" id="wo-seq-no" class="w-full border border-indigo-300 bg-white p-2 rounded-lg outline-none font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500" placeholder="例如: 001">
+              </div>
+              <div><label class="block text-xs font-semibold text-slate-600 mb-1">派工科室</label><select id="wo-dept" class="w-full border p-2 rounded-lg outline-none bg-white" onchange="window.onWoPrefixFactorChange()"><option value="交工科">交工科</option><option value="停管科">停管科</option><option value="公運科">公運科</option><option value="交安科">交安科</option><option value="運規科">運規科</option></select></div>
+              <div><label class="block text-xs font-semibold text-slate-600 mb-1">派別 (數字)</label><input type="text" id="wo-batch" class="w-full border p-2 rounded-lg outline-none bg-white" placeholder="01" onkeyup="window.onWoPrefixFactorChange()"></div>
+              <div><label class="block text-xs font-semibold text-slate-600 mb-1">行政區</label><select id="wo-district" class="w-full border p-2 rounded-lg outline-none bg-white" onchange="window.onWoPrefixFactorChange()"></select></div>
+              <div><label class="block text-xs font-semibold text-slate-600 mb-1">廠商編號 (自動/可改)</label><input type="text" id="wo-serial" class="w-full border p-2 rounded-lg outline-none bg-white" placeholder="01" oninput="window.datasetSerialManual=true; window.updateWoPrefix()"></div>
+            </div>
+            <div class="mt-3 text-sm bg-white p-3 rounded-lg border flex flex-wrap justify-between items-center shadow-inner gap-2">
+              <div><span class="text-slate-500 font-medium">派工單編號組合結果 (亦可直接改下方框)：</span></div>
+              <div class="flex items-center space-x-2">
+                <span id="wo-preview-id" class="font-bold text-xl text-indigo-600">工01-桃01</span>
+                <input type="text" id="wo-custom-id" class="border border-slate-300 rounded px-2 py-1 text-sm font-bold text-indigo-700 w-36 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="自訂編號覆蓋(選填)" title="若填寫此欄，將優先以此自訂派工單編號儲存">
+              </div>
+            </div>
           </div>
 
           <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -397,6 +412,130 @@
   <div id="eval-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in border"><h2 class="text-xl font-bold mb-4 text-indigo-800">編輯考評項目</h2><input type="hidden" id="eval-item-id"><label class="block text-sm font-semibold mb-1">分類標籤</label><select id="eval-item-category" class="w-full border p-2 mb-3 rounded-lg"></select><label class="block text-sm font-semibold mb-1">項目名稱</label><input type="text" id="eval-item-name" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-sm font-semibold mb-1">單位</label><input type="text" id="eval-item-unit" class="w-full border p-2 mb-4 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('eval-item-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveEvalItem()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-category-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-amber-800">考評分類管理</h2><button onclick="document.getElementById('eval-category-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500"><i class="fas fa-times text-xl"></i></button></div><div class="flex space-x-2 mb-4"><input type="text" id="eval-category-name" placeholder="新分類名稱" class="w-full border p-2 rounded-lg"><button onclick="window.saveEvalCategory()" class="bg-amber-500 text-white px-4 py-2 rounded-lg">新增</button></div><div id="eval-category-list" class="space-y-2 max-h-48 overflow-y-auto bg-slate-50 p-2 rounded-lg border"></div></div></div>
 
+  <!-- 智慧辨識匯入彈窗 (支援截圖 OCR 與 Excel/CSV 解析 + 重複派工紅底標示確認) -->
+  <div id="smart-import-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[120] flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-6xl max-h-[92vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
+      <div class="p-4 border-b bg-slate-900 text-white flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-wand-magic-sparkles text-amber-400 text-xl"></i>
+          <h2 class="text-lg font-bold">智慧辨識與批次匯入總表 (支援派工截圖 / Excel / CSV)</h2>
+        </div>
+        <button onclick="window.closeSmartImportModal()" class="text-slate-400 hover:text-rose-400 text-2xl"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="p-5 overflow-y-auto flex-1 space-y-4 bg-slate-50">
+        <!-- 預設歸屬與上傳區 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-700 text-sm border-b pb-2"><i class="fas fa-sliders-h mr-2 text-indigo-500"></i>1. 預設匯入歸屬設定 (年度 / 分區)</h4>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">匯入年度</label>
+                <select id="import-default-year" class="w-full border rounded-lg p-2 bg-slate-50 outline-none" onchange="window.onImportDefaultScopeChange()"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">匯入分區</label>
+                <select id="import-default-zone" class="w-full border rounded-lg p-2 bg-slate-50 outline-none" onchange="window.onImportDefaultScopeChange()"></select>
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-semibold text-slate-500 mb-1">重複派工預設處理</label>
+                <select id="import-dup-default-action" class="w-full border border-rose-300 rounded-lg p-2 bg-rose-50 text-rose-800 font-bold outline-none" onchange="window.applyBatchDupAction(this.value)">
+                  <option value="skip">預設略過不匯入 (需手動勾選確認)</option>
+                  <option value="overwrite">覆蓋更新既有派工單</option>
+                  <option value="force">仍強制新增為新案件</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 檔案上傳面板 -->
+          <div class="lg:col-span-2 bg-white p-4 rounded-xl border-2 border-dashed border-indigo-300 hover:border-indigo-500 transition-colors shadow-sm flex flex-col justify-center items-center text-center relative"
+               id="smart-drop-zone"
+               ondragover="event.preventDefault(); this.classList.add('bg-indigo-50');"
+               ondragleave="this.classList.remove('bg-indigo-50');"
+               ondrop="window.handleSmartFileDrop(event)">
+            <input type="file" id="smart-file-input" accept=".xlsx,.xls,.csv,image/*" multiple class="hidden" onchange="window.handleSmartFileSelect(event)">
+            <div id="smart-upload-idle" class="py-3">
+              <div class="flex justify-center space-x-4 text-3xl mb-2">
+                <i class="fas fa-file-excel text-emerald-600"></i>
+                <i class="fas fa-camera text-indigo-600"></i>
+                <i class="fas fa-file-csv text-amber-500"></i>
+              </div>
+              <p class="font-bold text-slate-700 text-base">拖曳檔案至此、按 <kbd class="px-2 py-0.5 bg-slate-200 rounded text-xs font-mono">Ctrl+V</kbd> 貼上截圖，或點擊下方按鈕上傳</p>
+              <p class="text-xs text-slate-500 mt-1">支援格式：Excel (`.xlsx`, `.xls`)、CSV (`.csv`)、派工表單或群組通報截圖 (`.png`, `.jpg`, `.webp`)</p>
+              <div class="mt-3 flex flex-wrap justify-center gap-2">
+                <button onclick="document.getElementById('smart-file-input').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition-colors">
+                  <i class="fas fa-folder-open mr-1"></i>選擇截圖或 Excel 檔案
+                </button>
+                <button onclick="window.downloadImportTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <i class="fas fa-download mr-1"></i>下載標準範本 Excel
+                </button>
+              </div>
+            </div>
+            <!-- 辨識載入動畫 -->
+            <div id="smart-upload-loading" class="hidden py-6 flex flex-col items-center justify-center">
+              <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+              <p id="smart-loading-text" class="font-bold text-indigo-700">正在智慧辨識文字與分析重複派工，請稍候...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 辨識結果統計與重複派工警示列 -->
+        <div id="smart-preview-section" class="hidden space-y-3">
+          <div class="flex flex-wrap justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm gap-2">
+            <div class="flex flex-wrap items-center gap-3 text-sm">
+              <span class="font-bold text-slate-800"><i class="fas fa-list-check mr-1 text-indigo-600"></i>辨識結果預覽：共 <span id="import-count-total" class="text-indigo-600 font-black">0</span> 筆</span>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">正常新案：<span id="import-count-normal">0</span> 筆</span>
+              <span id="import-dup-badge" class="px-3 py-1 rounded-full bg-rose-600 text-white font-bold text-xs animate-pulse hidden">
+                <i class="fas fa-exclamation-triangle mr-1"></i>偵測到重複派工 (紅底標示)：<span id="import-count-dup">0</span> 筆
+              </span>
+            </div>
+            <div class="flex items-center space-x-2 text-xs">
+              <button onclick="window.addBlankImportRow()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border px-3 py-1.5 rounded-lg font-bold"><i class="fas fa-plus mr-1"></i>手動加一列</button>
+              <button onclick="window.clearSmartImportPreview()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg font-bold"><i class="fas fa-trash-alt mr-1"></i>清空列表</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto max-h-[46vh]">
+            <table class="w-full text-left border-collapse whitespace-nowrap text-xs">
+              <thead class="bg-slate-100 text-slate-700 sticky top-0 z-10 border-b shadow-sm">
+                <tr>
+                  <th class="p-2.5 text-center"><input type="checkbox" id="import-select-all" checked onchange="window.toggleAllImportRows(this.checked)" class="w-4 h-4"></th>
+                  <th class="p-2.5">檢核狀態 / 重複處理</th>
+                  <th class="p-2.5">流水號</th>
+                  <th class="p-2.5">派工單編號 (判別依據)</th>
+                  <th class="p-2.5">年度</th>
+                  <th class="p-2.5">科室 / 派別 / 行政區</th>
+                  <th class="p-2.5">收單 / 預計 / 實際完工日</th>
+                  <th class="p-2.5">派工人員 / 案件來源</th>
+                  <th class="p-2.5">派工地點 / 里別</th>
+                  <th class="p-2.5">派工內容說明</th>
+                  <th class="p-2.5">派工/竣工金額</th>
+                  <th class="p-2.5">雲端網址 (單/照/圖)</th>
+                  <th class="p-2.5">對應廠商 / 狀態</th>
+                  <th class="p-2.5 text-center">移除</th>
+                </tr>
+              </thead>
+              <tbody id="smart-preview-tbody" class="divide-y divide-slate-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t bg-white flex flex-wrap justify-between items-center gap-3 sticky bottom-0 z-20">
+        <div class="text-xs text-slate-500">
+          <i class="fas fa-info-circle text-indigo-500 mr-1"></i>提示：系統會自動以「派工單編號」比對是否重複派工。標示為<span class="bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded mx-1">紅色底色</span>者代表重複案件，請確認處理方式後再匯入。
+        </div>
+        <div class="flex space-x-3">
+          <button onclick="window.closeSmartImportModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 rounded-lg font-bold">取消</button>
+          <button id="btn-confirm-smart-import" onclick="window.confirmSmartImport()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-md disabled:opacity-50">
+            <i class="fas fa-check-double mr-1"></i>確認匯入各區總表
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 自訂 Alert 與 Confirm 彈窗 -->
   <div id="custom-alert" class="fixed inset-0 z-[200] flex items-center justify-center hidden bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl p-6 w-80 text-center fade-in border border-slate-100">
@@ -450,7 +589,23 @@
       onSnapshot(collection(db, "users"), snap => { window.users = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateLoginOptions(); if(window.currentUser) window.renderUsers(); });
       onSnapshot(collection(db, "sysYears"), snap => { window.sysYears = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysYears(); });
       onSnapshot(collection(db, "sysZones"), snap => { window.sysZones = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysZones(); });
-      onSnapshot(collection(db, "workOrders"), snap => { window.workOrders = snap.docs.map(d=>({docId:d.id, ...d.data()})); if(window.currentUser) { window.renderWoTable(); window.renderStatistics(); window.renderEvalDashboard(); } });
+      onSnapshot(collection(db, "workOrders"), snap => {
+        const rawList = snap.docs.map(d=>({docId:d.id, ...d.data()}));
+        // 依收單日與編號排序，為尚未設定流水號的舊案件自動產生穩定預設流水號
+        const sortedForSeq = [...rawList].sort((a, b) => {
+          const dA = a.recvDate ? new Date(a.recvDate).getTime() : 0;
+          const dB = b.recvDate ? new Date(b.recvDate).getTime() : 0;
+          if (dA !== dB) return dA - dB;
+          return (a.id || '').localeCompare(b.id || '');
+        });
+        sortedForSeq.forEach((item, idx) => {
+          if (!item.seqNo || String(item.seqNo).trim() === '') {
+            item.seqNo = String(idx + 1).padStart(3, '0');
+          }
+        });
+        window.workOrders = rawList;
+        if(window.currentUser) { window.renderWoTable(); window.renderStatistics(); window.renderEvalDashboard(); }
+      });
       onSnapshot(collection(db, "announcements"), snap => { window.announcements = snap.docs.map(d=>({docId:d.id, ...d.data()})); if(window.currentUser) window.renderAnnouncements(); });
       onSnapshot(collection(db, "evalCategories"), snap => {
         window.evalCategories = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
@@ -486,6 +641,7 @@
 
       document.getElementById('btn-export').classList.remove('hidden');
       document.getElementById('btn-add-wo').style.display = window.currentUser.role==='機關/監造' ? 'none' : 'flex';
+      document.getElementById('btn-import-wo').classList.remove('hidden');
       window.showSection('work-orders'); window.updateDropdowns(); window.renderWoTable(); window.renderAnnouncements(); window.renderStatistics(); window.renderSysYears(); window.renderSysZones(); window.renderUsers(); window.renderEvalAdmin(); window.renderEvalDashboard();
     };
     window.logout = () => { window.currentUser = null; location.reload(); };
@@ -504,9 +660,9 @@
     window.updateDropdowns = () => {
       const yrs = [...window.sysYears].sort((a,b)=>((b.name||'').localeCompare(a.name||'')));
       const zns = [...window.sysZones].sort((a,b)=>((a.name||'').localeCompare(b.name||'')));
-      ['wo-year-select','user-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = yrs.map(y=>`<option value="${y.name||''}">${y.name||'無名稱'}</option>`).join('');});
+      ['wo-year-select','user-year','import-default-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = yrs.map(y=>`<option value="${y.name||''}">${y.name||'無名稱'}</option>`).join('');});
       ['adv-search-year','stat-year','eval-stat-year'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部年度</option>`+yrs.map(y=>`<option value="${y.name||''}">${y.name||'無名稱'}</option>`).join('');});
-      ['user-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = zns.map(z=>`<option value="${z.name||''}">${z.name||'無名稱'}</option>`).join('');});
+      ['user-zone','import-default-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = zns.map(z=>`<option value="${z.name||''}">${z.name||'無名稱'}</option>`).join('');});
       ['adv-search-zone'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML = `<option value="">全部分區</option>`+zns.map(z=>`<option value="${z.name||''}">${z.name||'無名稱'}</option>`).join('');});
       
       const woDist = document.getElementById('wo-district'); if(woDist) woDist.innerHTML = defaultDistricts.map(d=>`<option value="${d}">${d}</option>`).join('');
@@ -539,6 +695,40 @@
       window.currentAdvFilter = {}; window.updateAdvSearchDistricts(); window.renderWoTable();
     };
 
+    // 計算下一筆總表流水號 (預設依據現有最大流水號+1，3位數補零，如 001, 002)
+    window.getNextSeqNo = (offset = 0) => {
+      let maxNum = 0;
+      window.workOrders.forEach(w => {
+        const num = parseInt(String(w.seqNo || '').replace(/\D/g, ''), 10);
+        if (!isNaN(num) && num > maxNum) maxNum = num;
+      });
+      const next = Math.max(maxNum, window.workOrders.length) + 1 + offset;
+      return String(next).padStart(3, '0');
+    };
+
+    // 依據科室、派別、行政區自動計算下一筆廠商編號
+    window.getNextVendorSerial = (dept, batch, dist) => {
+      let maxSerial = 0;
+      window.workOrders.forEach(w => {
+        if ((w.dept || '交工科') === dept && (w.batch || '01') === batch && (w.district || '桃園區') === dist) {
+          const sNum = parseInt(String(w.serial || '').replace(/\D/g, ''), 10);
+          if (!isNaN(sNum) && sNum > maxSerial) maxSerial = sNum;
+        }
+      });
+      return String(maxSerial + 1).padStart(2, '0');
+    };
+
+    window.onWoPrefixFactorChange = () => {
+      const isNew = !document.getElementById('wo-doc-id').value;
+      if (isNew && !window.datasetSerialManual) {
+        const dept = document.getElementById('wo-dept').value || '交工科';
+        const batch = document.getElementById('wo-batch').value || '01';
+        const dist = document.getElementById('wo-district').value || '桃園區';
+        document.getElementById('wo-serial').value = window.getNextVendorSerial(dept, batch, dist);
+      }
+      window.updateWoPrefix();
+    };
+
     window.updateWoPrefix = () => { const dept=document.getElementById('wo-dept').value||'交工科', batch=document.getElementById('wo-batch').value||'01', dist=document.getElementById('wo-district').value||'桃園區', serial=document.getElementById('wo-serial').value||'01'; document.getElementById('wo-preview-id').innerText = `${deptMap[dept]}${batch}-${distMap[dist]||dist[0]}${serial}`; window.autoDetectVendor(); };
     window.toggleSourceDetails = () => { const s=document.getElementById('wo-source-type').value, c=document.getElementById('wo-source-detail-container'); if(['立法委員、議員及其他民代','里長','其他'].includes(s)) c.classList.remove('hidden'); else {c.classList.add('hidden'); document.getElementById('wo-source-detail').value='';} };
     window.calcExpectedDate = () => { const rd=document.getElementById('wo-recv-date').value; if(rd){let d=new Date(rd); d.setDate(d.getDate()+45); document.getElementById('wo-expected-date').value=d.toISOString().split('T')[0];} };
@@ -551,7 +741,7 @@
         else { window.currentSort.col = null; window.currentSort.dir = null; }
       } else { window.currentSort.col = col; window.currentSort.dir = 'asc'; }
       
-      const cols = ['id', 'recvDate', 'source', 'location', 'content', 'dispatchAmount', 'status', 'vendor'];
+      const cols = ['seqNo', 'id', 'recvDate', 'source', 'location', 'content', 'dispatchAmount', 'status', 'vendor'];
       cols.forEach(c => {
         const icon = document.getElementById(`sort-icon-${c}`);
         if(icon) icon.className = (window.currentSort.col === c) ? (window.currentSort.dir === 'asc' ? 'fas fa-sort-up text-indigo-500 ml-1' : 'fas fa-sort-down text-indigo-500 ml-1') : 'fas fa-sort text-slate-300 opacity-50 group-hover:opacity-100 ml-1 transition-opacity';
@@ -573,7 +763,7 @@
       
       let filtered = window.workOrders.filter(wo => {
         if(role==='施工廠商' && wo.vendor!==window.currentUser.username) return false;
-        if(q && ![wo.id, wo.location, wo.village, wo.content, wo.vendor].join(' ').toLowerCase().includes(q)) return false;
+        if(q && ![wo.seqNo, wo.id, wo.location, wo.village, wo.content, wo.vendor].join(' ').toLowerCase().includes(q)) return false;
         
         const f = window.currentAdvFilter;
         if(f.year && wo.year !== f.year) return false;
@@ -617,6 +807,8 @@
           
           if (['dispatchAmount', 'completeAmount'].includes(window.currentSort.col)) {
              cmp = (parseFloat(valA)||0) - (parseFloat(valB)||0);
+          } else if (window.currentSort.col === 'seqNo') {
+             cmp = String(valA).localeCompare(String(valB), undefined, { numeric: true });
           } else {
              cmp = String(valA).localeCompare(String(valB));
           }
@@ -627,12 +819,12 @@
         const dateB = b.recvDate ? new Date(b.recvDate).getTime() : 0;
         if (dateA !== dateB) return dateA - dateB;
         
-        return (a.id||'').localeCompare(b.id||'');
+        return (a.id||'').localeCompare(b.id||'', undefined, { numeric: true });
       });
 
       window.currentExportData = filtered; 
       tbody.innerHTML = '';
-      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
+      if(filtered.length===0) return tbody.innerHTML = `<tr><td colspan="11" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無符合資料</td></tr>`;
 
       filtered.forEach(wo => {
         const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - today)/86400000) : 999;
@@ -645,6 +837,7 @@
         
         const tr = document.createElement('tr'); tr.className = rClass;
         tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-500"><span class="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs">#${wo.seqNo||'-'}</span></td>
           <td class="p-3 font-bold text-indigo-700">${wo.id}</td>
           <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&wo.status!=='已完工'?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
           <td class="p-3 text-sm">${wo.source||'-'}${wo.sourceDetail?`<br><span class="text-xs text-indigo-500">${wo.sourceDetail}</span>`:''}</td>
@@ -662,20 +855,28 @@
 
     window.openWoModal = (id = null, isReadonly = false) => {
       document.getElementById('wo-doc-id').value = id||'';
+      window.datasetSerialManual = !!id;
 
-      ['wo-dept','wo-batch','wo-serial','wo-recv-date','wo-dispatch-date','wo-expected-date','wo-dispatcher','wo-source-detail','wo-village','wo-location','wo-content','wo-doc-url','wo-photo-url','wo-asbuilt-url','wo-actual-date','wo-dispatch-amount','wo-complete-amount','wo-school-name'].forEach(f=>{const el=document.getElementById(f); if(el) el.value='';});
+      ['wo-seq-no','wo-custom-id','wo-dept','wo-batch','wo-serial','wo-recv-date','wo-dispatch-date','wo-expected-date','wo-dispatcher','wo-source-detail','wo-village','wo-location','wo-content','wo-doc-url','wo-photo-url','wo-asbuilt-url','wo-actual-date','wo-dispatch-amount','wo-complete-amount','wo-school-name'].forEach(f=>{const el=document.getElementById(f); if(el) el.value='';});
       document.querySelectorAll('.wo-attr').forEach(cb=>cb.checked=false); document.getElementById('wo-source-type').value='一般派工'; window.toggleSourceDetails(); window.toggleSchoolInput();
       
       const evData = {};
       if(id) {
         const wo = window.workOrders.find(w=>w.docId===id);
         if(wo) {
+          document.getElementById('wo-seq-no').value = wo.seqNo || '';
           document.getElementById('wo-dept').value = wo.dept||'交工科'; document.getElementById('wo-batch').value = wo.batch||''; document.getElementById('wo-district').value = wo.district||'桃園區'; document.getElementById('wo-serial').value = wo.serial||'';
+          const standardId = `${deptMap[wo.dept||'交工科']}${wo.batch||'01'}-${distMap[wo.district||'桃園區']||(wo.district||'桃')[0]}${wo.serial||'01'}`;
+          if (wo.id && wo.id !== standardId) {
+            document.getElementById('wo-custom-id').value = wo.id;
+          }
           
           ['recvDate','dispatchDate','expectedDate','dispatcher','source','sourceDetail','village','location','content','docUrl','photoUrl','asbuiltUrl','actualDate','status','dispatchAmount','completeAmount','year','vendor'].forEach(k=>{
             const el = document.getElementById(`wo-${k.replace(/[A-Z]/g, l=>'-'+l.toLowerCase())}`);
             if(el) el.value = wo[k] || '';
           });
+          document.getElementById('wo-source-type').value = wo.source || '一般派工';
+          document.getElementById('wo-year-select').value = wo.year || (window.sysYears[0]?.name || '');
           document.getElementById('wo-school-name').value = wo.schoolName || '';
           
           window.toggleSourceDetails();
@@ -683,9 +884,23 @@
           window.toggleSchoolInput(); if(wo.evalData) Object.assign(evData, wo.evalData);
         }
       } else {
+        document.getElementById('wo-seq-no').value = window.getNextSeqNo();
+        document.getElementById('wo-dept').value = '交工科';
+        document.getElementById('wo-batch').value = '01';
         document.getElementById('wo-status').value = '辦理中';
-        if(window.currentUser.role==='施工廠商') { document.getElementById('wo-vendor').value=window.currentUser.username; document.getElementById('wo-year-select').value=window.currentUser.year||''; document.getElementById('wo-district').value=window.sysZones.find(z=>z.name===window.currentUser.zone)?.districts[0]||'桃園區'; }
-        else { document.getElementById('wo-vendor').value='待指派'; }
+        if(window.currentUser.role==='施工廠商') {
+          document.getElementById('wo-vendor').value=window.currentUser.username;
+          document.getElementById('wo-year-select').value=window.currentUser.year||'';
+          document.getElementById('wo-district').value=window.sysZones.find(z=>z.name===window.currentUser.zone)?.districts[0]||'桃園區';
+        } else {
+          document.getElementById('wo-district').value='桃園區';
+          document.getElementById('wo-vendor').value='待指派';
+        }
+        document.getElementById('wo-serial').value = window.getNextVendorSerial(
+          document.getElementById('wo-dept').value,
+          document.getElementById('wo-batch').value,
+          document.getElementById('wo-district').value
+        );
       }
       
       const groupedEval = {}; window.evalCategories.forEach(c => groupedEval[c.name] = []); groupedEval['未分類'] = [];
@@ -722,27 +937,42 @@
 
     window.saveWorkOrder = async () => {
       const id = document.getElementById('wo-doc-id').value, dpt = document.getElementById('wo-dept').value, bat = document.getElementById('wo-batch').value, dst = document.getElementById('wo-district').value, ser = document.getElementById('wo-serial').value;
-      if(!bat || !ser || !document.getElementById('wo-location').value) return window.customAlert('請填寫完整編號與地點！', 'error');
+      const customId = document.getElementById('wo-custom-id').value.trim();
+      const seqNo = document.getElementById('wo-seq-no').value.trim() || window.getNextSeqNo();
+      if((!bat || !ser) && !customId) return window.customAlert('請填寫完整編號！', 'error');
+      if(!document.getElementById('wo-location').value) return window.customAlert('請填寫派工地點！', 'error');
       
-      let vendor = document.getElementById('wo-vendor').value;
-      if (!id && window.currentUser.role !== '施工廠商') {
-        const z = window.sysZones.find(x => x.districts && x.districts.includes(dst)); const zName = z ? z.name : '';
-        const vu = window.users.find(u => u.role === '施工廠商' && u.year === document.getElementById('wo-year-select').value && u.zone === zName);
-        vendor = vu ? vu.username : '無對應廠商';
-      }
+      const finalWoId = customId || `${deptMap[dpt]}${bat}-${distMap[dst]||dst[0]}${ser}`;
 
-      const evData = {}; document.querySelectorAll('.wo-eval-field').forEach(el => { if(el.value) evData[el.dataset.id] = el.value; });
-      const data = {
-        id:`${deptMap[dpt]}${bat}-${distMap[dst]||dst[0]}${ser}`, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, vendor,
-        recvDate:document.getElementById('wo-recv-date').value, dispatchDate:document.getElementById('wo-dispatch-date').value, expectedDate:document.getElementById('wo-expected-date').value,
-        dispatcher:document.getElementById('wo-dispatcher').value, source:document.getElementById('wo-source-type').value, sourceDetail:document.getElementById('wo-source-detail').value,
-        village:document.getElementById('wo-village').value, location:document.getElementById('wo-location').value, content:document.getElementById('wo-content').value,
-        attributes:Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb=>cb.value), schoolName:document.getElementById('wo-school-name').value,
-        docUrl:document.getElementById('wo-doc-url').value, photoUrl:document.getElementById('wo-photo-url').value, asbuiltUrl:document.getElementById('wo-asbuilt-url').value,
-        actualDate:document.getElementById('wo-actual-date').value, status:document.getElementById('wo-status').value, dispatchAmount:document.getElementById('wo-dispatch-amount').value,
-        completeAmount:document.getElementById('wo-complete-amount').value, evalData: evData, updatedAt: Date.now()
+      // 檢查是否與既有其他派工單編號重複
+      const dupExisting = window.workOrders.find(w => w.id === finalWoId && w.docId !== id);
+      const executeSave = async () => {
+        let vendor = document.getElementById('wo-vendor').value;
+        if (!id && window.currentUser.role !== '施工廠商') {
+          const z = window.sysZones.find(x => x.districts && x.districts.includes(dst)); const zName = z ? z.name : '';
+          const vu = window.users.find(u => u.role === '施工廠商' && u.year === document.getElementById('wo-year-select').value && u.zone === zName);
+          vendor = vu ? vu.username : '無對應廠商';
+        }
+
+        const evData = {}; document.querySelectorAll('.wo-eval-field').forEach(el => { if(el.value) evData[el.dataset.id] = el.value; });
+        const data = {
+          seqNo, id: finalWoId, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, vendor,
+          recvDate:document.getElementById('wo-recv-date').value, dispatchDate:document.getElementById('wo-dispatch-date').value, expectedDate:document.getElementById('wo-expected-date').value,
+          dispatcher:document.getElementById('wo-dispatcher').value, source:document.getElementById('wo-source-type').value, sourceDetail:document.getElementById('wo-source-detail').value,
+          village:document.getElementById('wo-village').value, location:document.getElementById('wo-location').value, content:document.getElementById('wo-content').value,
+          attributes:Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb=>cb.value), schoolName:document.getElementById('wo-school-name').value,
+          docUrl:document.getElementById('wo-doc-url').value, photoUrl:document.getElementById('wo-photo-url').value, asbuiltUrl:document.getElementById('wo-asbuilt-url').value,
+          actualDate:document.getElementById('wo-actual-date').value, status:document.getElementById('wo-status').value, dispatchAmount:document.getElementById('wo-dispatch-amount').value,
+          completeAmount:document.getElementById('wo-complete-amount').value, evalData: evData, updatedAt: Date.now()
+        };
+        try { if(id) await updateDoc(doc(db,"workOrders",id), data); else await addDoc(collection(db,"workOrders"), data); document.getElementById('wo-modal').classList.add('hidden'); } catch(e){ window.customAlert('儲存失敗', 'error'); }
       };
-      try { if(id) await updateDoc(doc(db,"workOrders",id), data); else await addDoc(collection(db,"workOrders"), data); document.getElementById('wo-modal').classList.add('hidden'); } catch(e){ window.customAlert('儲存失敗', 'error'); }
+
+      if (dupExisting) {
+        window.customConfirm(`⚠️ 系統偵測到重複派工單編號：【${finalWoId}】\n原案件地點：${dupExisting.location || '無'}\n\n確定仍要儲存此筆派工單嗎？`, executeSave);
+      } else {
+        await executeSave();
+      }
     };
     window.deleteWo = (id) => window.customConfirm('確定刪除此派工單？', async () => { try{ await deleteDoc(doc(db,"workOrders",id)); } catch(e){window.customAlert('刪除失敗','error');} });
 
@@ -884,15 +1114,613 @@
     window.exportToExcel = () => {
       if(window.currentExportData.length === 0) return window.customAlert('沒有資料可匯出', 'error');
       const ws = XLSX.utils.json_to_sheet(window.currentExportData.map(w => ({
-        '派工單編號': w.id, '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '廠商流水號': w.serial, '負責廠商': w.vendor,
+        '流水號': w.seqNo || '', '派工單編號': w.id, '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '廠商流水號': w.serial, '負責廠商': w.vendor,
         '狀態': w.status, '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
-        '案件來源': w.source, '來源詳細(服務處/說明)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
+        '派工人員': w.dispatcher || '', '案件來源': w.source, '來源詳細(服務處/說明)': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
         '屬性': (w.attributes||[]).join(', '), '學校名稱': w.schoolName || '', '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
-        '派工單連結': w.docUrl, '照片連結': w.photoUrl, '竣工圖連結': w.asbuiltUrl
+        '派工單雲端網址': w.docUrl || '', '完工照片網址': w.photoUrl || '', '竣工圖雲端網址': w.asbuiltUrl || ''
       })));
       const wb = XLSX.utils.book_new(); 
       XLSX.utils.book_append_sheet(wb, ws, "派工單篩選結果"); 
       XLSX.writeFile(wb, `派工系統匯出_${Date.now()}.xlsx`);
+    };
+
+    // ================= 智慧辨識匯入 (截圖 OCR / Excel / CSV) 與重複派工檢核系統 =================
+    window.smartImportRows = [];
+    const revDeptMap = { '工': '交工科', '停': '停管科', '公': '公運科', '安': '交安科', '規': '運規科' };
+    const revDistMap = { '桃':'桃園區','竹':'蘆竹區','龜':'龜山區','德':'八德區','中':'中壢區','園':'大園區','溪':'大溪區','復':'復興區','新':'新屋區','龍':'龍潭區','平':'平鎮區','楊':'楊梅區','觀':'觀音區' };
+
+    window.openSmartImportModal = () => {
+      window.updateDropdowns();
+      const defYr = document.getElementById('import-default-year');
+      if (defYr && window.currentUser?.year) defYr.value = window.currentUser.year;
+      const defZn = document.getElementById('import-default-zone');
+      if (defZn && window.currentUser?.zone) defZn.value = window.currentUser.zone;
+      document.getElementById('smart-import-modal').classList.remove('hidden');
+    };
+
+    window.closeSmartImportModal = () => {
+      document.getElementById('smart-import-modal').classList.add('hidden');
+    };
+
+    // 當切換匯入年度或匯入分區時，同步更新預覽清單中的年度與對應廠商
+    window.onImportDefaultScopeChange = () => {
+      const defYear = document.getElementById('import-default-year')?.value || '';
+      const defZone = document.getElementById('import-default-zone')?.value || '';
+      if (!window.smartImportRows || window.smartImportRows.length === 0) return;
+      window.smartImportRows.forEach(row => {
+        if (defYear) row.year = defYear;
+        row.zone = defZone;
+        row.vendor = resolveVendorForImport(row.year, row.district, '', defZone);
+      });
+      window.renderSmartImportPreview();
+    };
+
+    // 支援在匯入視窗開啟時直接 Ctrl+V 貼上截圖
+    window.addEventListener('paste', (e) => {
+      const modal = document.getElementById('smart-import-modal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const files = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const f = items[i].getAsFile();
+          if (f) files.push(f);
+        }
+      }
+      if (files.length > 0) {
+        e.preventDefault();
+        window.processSmartFiles(files);
+      }
+    });
+
+    window.handleSmartFileDrop = (e) => {
+      e.preventDefault();
+      document.getElementById('smart-drop-zone').classList.remove('bg-indigo-50');
+      if (e.dataTransfer?.files?.length) {
+        window.processSmartFiles(Array.from(e.dataTransfer.files));
+      }
+    };
+
+    window.handleSmartFileSelect = (e) => {
+      if (e.target?.files?.length) {
+        window.processSmartFiles(Array.from(e.target.files));
+        e.target.value = '';
+      }
+    };
+
+    window.downloadImportTemplate = () => {
+      const sample = [{
+        '流水號': window.getNextSeqNo(0),
+        '派工單編號': '工01-桃01',
+        '年度': document.getElementById('import-default-year')?.value || '115',
+        '派工科室': '交工科',
+        '派別': '01',
+        '行政區': '桃園區',
+        '廠商流水號': '01',
+        '收單日期': new Date().toISOString().split('T')[0],
+        '派工日期': new Date().toISOString().split('T')[0],
+        '實際完工日': '',
+        '派工人員': '王小明',
+        '案件來源': '一般派工',
+        '來源詳細(服務處/說明)': '',
+        '里辦公處': '中正里',
+        '派工地點': '桃園區縣府路1號前',
+        '內容說明': '標線磨損補繪及增設標線型人行道',
+        '派工金額': 25000,
+        '竣工金額': 0,
+        '派工單雲端網址': '',
+        '完工照片網址': '',
+        '竣工圖雲端網址': '',
+        '狀態': '辦理中'
+      }];
+      const ws = XLSX.utils.json_to_sheet(sample);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "派工匯入範本");
+      XLSX.writeFile(wb, "派工單智慧匯入範本.xlsx");
+    };
+
+    // 正規化日期字串 (處理民國年 114/05/01、Excel 序列值或一般 YYYY/MM/DD)
+    function normalizeDateStr(val) {
+      if (!val && val !== 0) return '';
+      if (typeof val === 'number' && val > 20000 && val < 90000) {
+        const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+        return d.toISOString().split('T')[0];
+      }
+      let s = String(val).trim().replace(/[年月.]/g, '-').replace(/日/g, '').replace(/\//g, '-');
+      const rocMatch = s.match(/^(\d{2,3})-(\d{1,2})-(\d{1,2})$/);
+      if (rocMatch) {
+        let yr = parseInt(rocMatch[1], 10);
+        if (yr < 1911) yr += 1911;
+        return `${yr}-${String(rocMatch[2]).padStart(2, '0')}-${String(rocMatch[3]).padStart(2, '0')}`;
+      }
+      const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (isoMatch) {
+        return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, '0')}-${String(isoMatch[3]).padStart(2, '0')}`;
+      }
+      return '';
+    }
+    // 根據年度、分區與行政區自動配對負責廠商
+    function resolveVendorForImport(year, district, explicitVendor, explicitZone = '') {
+      if (explicitVendor && explicitVendor !== '待指派' && explicitVendor !== '無對應廠商') return explicitVendor;
+      if (window.currentUser?.role === '施工廠商') return window.currentUser.username;
+      const zoneByDist = window.sysZones.find(z => z.districts && z.districts.includes(district));
+      const zName = explicitZone || (zoneByDist ? zoneByDist.name : '');
+      const vu = window.users.find(u => u.role === '施工廠商' && u.year === String(year) && u.zone === zName);
+      return vu ? vu.username : (explicitVendor || '無對應廠商');
+    }
+
+    // 智慧正規化單筆辨識資料 (自動拆解編號、推算行政區與預計完工日)
+    function normalizeRecognizedItem(raw, indexOffset) {
+      const defYear = document.getElementById('import-default-year')?.value || (window.sysYears[0]?.name || '115');
+      const defZone = document.getElementById('import-default-zone')?.value || (window.sysZones[0]?.name || '');
+      const defZoneObj = window.sysZones.find(z => z.name === defZone);
+      const zoneDistricts = (defZoneObj && Array.isArray(defZoneObj.districts) && defZoneObj.districts.length > 0) ? defZoneObj.districts : defaultDistricts;
+
+      let id = String(raw.id || raw['派工單編號'] || raw['編號'] || raw['單號'] || '').trim();
+      let dept = String(raw.dept || raw['派工科室'] || raw['科室'] || '').trim();
+      let batch = String(raw.batch || raw['派別'] || '').trim();
+      let district = String(raw.district || raw['行政區'] || raw['區別'] || '').trim();
+      let serial = String(raw.serial || raw['廠商流水號'] || raw['廠商編號'] || '').trim();
+      let location = String(raw.location || raw['派工地點'] || raw['地點'] || raw['位置'] || raw['工程地點'] || '').trim();
+
+      // 若有派工單編號 (如 工01-桃05)，自動反向解析科室、派別、行政區、廠商流水號
+      const idMatch = id.match(/^([工停公安規])(\d+)-([\u4e00-\u9fa5])(\d+)$/);
+      if (idMatch) {
+        if (!dept) dept = revDeptMap[idMatch[1]] || '交工科';
+        if (!batch) batch = idMatch[2];
+        if (!district) district = revDistMap[idMatch[3]] || '';
+        if (!serial) serial = idMatch[4];
+      }
+
+      // 若行政區空白，嘗試從派工地點自動偵測桃園市13行政區；若仍無則以所選分區之第一行政區為預設
+      if (!district && location) {
+        const foundDist = defaultDistricts.find(d => location.includes(d) || location.includes(d.replace('區', '')));
+        if (foundDist) district = foundDist;
+      }
+      if (district && !district.endsWith('區') && defaultDistricts.includes(district + '區')) {
+        district = district + '區';
+      }
+      if (!defaultDistricts.includes(district)) district = zoneDistricts[0] || '桃園區';
+      if (!dept || !deptMap[dept]) dept = '交工科';
+      if (!batch) batch = '01';
+      if (!serial) serial = window.getNextVendorSerial(dept, batch, district);
+
+      if (!id) {
+        id = `${deptMap[dept] || '工'}${batch}-${distMap[district] || district[0]}${serial}`;
+      }
+
+      const recvDate = normalizeDateStr(raw.recvDate || raw['收單日期'] || raw['收單日']) || new Date().toISOString().split('T')[0];
+      const dispatchDate = normalizeDateStr(raw.dispatchDate || raw['派工日期'] || raw['派工日']) || recvDate;
+      let expectedDate = normalizeDateStr(raw.expectedDate || raw['預計完工日'] || raw['預計完工日期'] || raw['限期完工']);
+      if (!expectedDate && recvDate) {
+        const d = new Date(recvDate);
+        if (!isNaN(d.getTime())) {
+          d.setDate(d.getDate() + 45);
+          expectedDate = d.toISOString().split('T')[0];
+        }
+      }
+      const actualDate = normalizeDateStr(raw.actualDate || raw['實際完工日'] || raw['實際完工日期'] || raw['完工日期'] || raw['完工日'] || raw['竣工日'] || raw['竣工日期']);
+
+      const year = String(raw.year || raw['年度'] || defYear).trim();
+      const dispatcher = String(raw.dispatcher || raw['派工人員'] || raw['承辦人'] || raw['派工人'] || raw['交辦人'] || '').trim();
+      const source = String(raw.source || raw['案件來源'] || raw['來源'] || '一般派工').trim();
+      const sourceDetail = String(raw.sourceDetail || raw['來源詳細(服務處/說明)'] || raw['服務處'] || '').trim();
+      const village = String(raw.village || raw['里辦公處'] || raw['里別'] || '').trim();
+      const content = String(raw.content || raw['內容說明'] || raw['派工內容'] || raw['改善內容'] || raw['工程內容'] || '').trim();
+      const dispatchAmount = parseFloat(String(raw.dispatchAmount ?? raw['派工金額'] ?? raw['概估金額'] ?? 0).replace(/,/g, '')) || 0;
+      const completeAmount = parseFloat(String(raw.completeAmount ?? raw['竣工金額'] ?? raw['結算金額'] ?? 0).replace(/,/g, '')) || 0;
+      const docUrl = String(raw.docUrl || raw['派工單雲端網址'] || raw['派工單連結'] || raw['派工單網址'] || '').trim();
+      const photoUrl = String(raw.photoUrl || raw['完工照片網址'] || raw['照片連結'] || raw['照片網址'] || raw['施工照片網址'] || '').trim();
+      const asbuiltUrl = String(raw.asbuiltUrl || raw['竣工圖雲端網址'] || raw['竣工圖連結'] || raw['竣工圖網址'] || '').trim();
+      const status = (actualDate || (raw.status || raw['狀態']) === '已完工') ? '已完工' : '辦理中';
+      const vendor = resolveVendorForImport(year, district, String(raw.vendor || raw['負責廠商'] || raw['施工廠商'] || '').trim(), defZone);
+      const seqNo = String(raw.seqNo || raw['流水號'] || '').trim() || window.getNextSeqNo(window.smartImportRows.length + indexOffset);
+
+      return {
+        selected: true,
+        dupAction: document.getElementById('import-dup-default-action')?.value || 'skip',
+        seqNo, id, year, zone: defZone, dept, batch, district, serial,
+        recvDate, dispatchDate, expectedDate, actualDate,
+        dispatcher, source, sourceDetail, village, location, content,
+        dispatchAmount, completeAmount, docUrl, photoUrl, asbuiltUrl, status, vendor
+      };
+    }
+
+    // 呼叫 Gemini API 進行派工單截圖文字與表格結構化辨識
+    async function recognizeImageWithGemini(file) {
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const prompt = `你是一位專業的桃園市政府交通局派工單資料辨識助理。請仔細辨識這張截圖中的所有派工案件資訊（可能是表格清單、單張派工單或通訊軟體派工訊息），並將每一筆派工案件擷取為結構化陣列。
+請注意：
+1. 若截圖中有「派工單編號」（例如：工01-桃01、停02-中12 等），請完整填入 id。
+2. 若地點包含行政區（如桃園區、中壢區、平鎮區、八德區、龜山區、蘆竹區、大園區、大溪區、龍潭區、楊梅區、新屋區、觀音區、復興區），請填入 district。
+3. 日期請統一轉為 YYYY-MM-DD 格式（若為民國年如 115/03/12 請加 1911 轉為 2026-03-12）。
+4. 案件來源請歸類為：一般派工、市政信箱、立法委員、議員及其他民代、里長、A1、A2、緊急派工、其他。
+5. 若截圖中有「實際完工日」、「完工日期」或「竣工日」，請填入 actualDate（轉為 YYYY-MM-DD 格式），且只要有實際完工日，status 請設為「已完工」。
+6. 若截圖中有「派工人員」或「承辦人」，請填入 dispatcher；若有「派工單雲端網址/連結」、「完工照片網址/連結」、「竣工圖雲端網址/連結」，請分別填入 docUrl、photoUrl、asbuiltUrl。`;
+
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: file.type || "image/png", data: base64Data } }
+          ]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                seqNo: { type: "STRING" },
+                id: { type: "STRING" },
+                dept: { type: "STRING" },
+                batch: { type: "STRING" },
+                district: { type: "STRING" },
+                serial: { type: "STRING" },
+                recvDate: { type: "STRING" },
+                dispatchDate: { type: "STRING" },
+                expectedDate: { type: "STRING" },
+                actualDate: { type: "STRING" },
+                dispatcher: { type: "STRING" },
+                source: { type: "STRING" },
+                sourceDetail: { type: "STRING" },
+                village: { type: "STRING" },
+                location: { type: "STRING" },
+                content: { type: "STRING" },
+                dispatchAmount: { type: "NUMBER" },
+                completeAmount: { type: "NUMBER" },
+                docUrl: { type: "STRING" },
+                photoUrl: { type: "STRING" },
+                asbuiltUrl: { type: "STRING" },
+                status: { type: "STRING" }
+              }
+            }
+          }
+        }
+      };
+
+      let delay = 1000;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const result = await res.json();
+          const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (jsonText) return JSON.parse(jsonText);
+          return [];
+        }
+        await new Promise(r => setTimeout(r, delay));
+        delay *= 2;
+      }
+      throw new Error('截圖智慧辨識服務無回應');
+    }
+
+    // 解析 Excel / CSV 檔案 (自動智慧對應表頭)
+    async function parseExcelFile(file) {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const extracted = [];
+
+      workbook.SheetNames.forEach(sheetName => {
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        rows.forEach(r => {
+          const vals = Object.values(r).map(v => String(v).trim()).filter(Boolean);
+          if (vals.length === 0) return;
+          extracted.push(r);
+        });
+      });
+      return extracted;
+    }
+
+    window.processSmartFiles = async (files) => {
+      const idleEl = document.getElementById('smart-upload-idle');
+      const loadEl = document.getElementById('smart-upload-loading');
+      const loadTxt = document.getElementById('smart-loading-text');
+      idleEl.classList.add('hidden');
+      loadEl.classList.remove('hidden');
+
+      let addedCount = 0;
+      try {
+        for (const file of files) {
+          const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp)$/i.test(file.name);
+          loadTxt.innerText = isImage
+            ? `正在透過 AI 視覺辨識截圖「${file.name || '剪貼簿圖片'}」中的派工單文字...`
+            : `正在解析報表檔案「${file.name}」並比對重複派工...`;
+
+          const rawItems = isImage ? await recognizeImageWithGemini(file) : await parseExcelFile(file);
+          rawItems.forEach((raw, idx) => {
+            const norm = normalizeRecognizedItem(raw, idx);
+            if (norm.location || norm.content || norm.id) {
+              window.smartImportRows.push(norm);
+              addedCount++;
+            }
+          });
+        }
+        window.recheckSmartImportDuplicates();
+        window.renderSmartImportPreview();
+        if (addedCount === 0) {
+          window.customAlert('未能從檔案中辨識出有效的派工資料，請確認檔案內容是否清晰。', 'error');
+        }
+      } catch (err) {
+        window.customAlert(`檔案辨識發生錯誤：${err.message || '請檢查檔案格式'}`, 'error');
+      } finally {
+        idleEl.classList.remove('hidden');
+        loadEl.classList.add('hidden');
+      }
+    };
+
+    // 重新比對所有預覽列是否與「系統既有派工單編號」或「同批次內編號」重複
+    window.recheckSmartImportDuplicates = () => {
+      const seenInBatch = {};
+      const defaultDupAction = document.getElementById('import-dup-default-action')?.value || 'skip';
+
+      window.smartImportRows.forEach((row, idx) => {
+        const cleanId = String(row.id || '').trim();
+        const existingWo = window.workOrders.find(w => String(w.id || '').trim() === cleanId);
+        const batchDupIndex = seenInBatch[cleanId];
+        seenInBatch[cleanId] = idx;
+
+        const wasDup = row.isDuplicate;
+        row.isDuplicate = Boolean(existingWo || batchDupIndex !== undefined);
+        row.existingDocId = existingWo ? existingWo.docId : null;
+        row.dupReason = existingWo
+          ? `與系統既有案件重複 (地點: ${existingWo.location || '無'})`
+          : (batchDupIndex !== undefined ? `與本批第 ${batchDupIndex + 1} 列編號重複` : '');
+
+        if (row.isDuplicate && !wasDup) {
+          row.dupAction = defaultDupAction;
+          row.selected = defaultDupAction !== 'skip';
+        } else if (!row.isDuplicate && wasDup) {
+          row.selected = true;
+        }
+      });
+    };
+
+    window.applyBatchDupAction = (action) => {
+      window.smartImportRows.forEach(row => {
+        if (row.isDuplicate) {
+          row.dupAction = action;
+          row.selected = (action !== 'skip');
+        }
+      });
+      window.renderSmartImportPreview();
+    };
+
+    window.updateImportRowField = (idx, field, val) => {
+      const row = window.smartImportRows[idx];
+      if (!row) return;
+      row[field] = val;
+      if (['dept', 'batch', 'district', 'serial'].includes(field)) {
+        row.id = `${deptMap[row.dept] || '工'}${row.batch}-${distMap[row.district] || row.district[0]}${row.serial}`;
+        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone);
+      }
+      if (field === 'year') {
+        row.vendor = resolveVendorForImport(row.year, row.district, '', row.zone);
+      }
+      if (field === 'actualDate') {
+        row.status = val ? '已完工' : '辦理中';
+      }
+      if (field === 'dupAction') {
+        row.selected = (val !== 'skip');
+      }
+      window.recheckSmartImportDuplicates();
+      window.renderSmartImportPreview();
+    };
+
+    window.removeImportRow = (idx) => {
+      window.smartImportRows.splice(idx, 1);
+      window.recheckSmartImportDuplicates();
+      window.renderSmartImportPreview();
+    };
+
+    window.clearSmartImportPreview = () => {
+      window.smartImportRows = [];
+      window.renderSmartImportPreview();
+    };
+
+    window.addBlankImportRow = () => {
+      window.smartImportRows.push(normalizeRecognizedItem({ location: '請輸入派工地點' }, 0));
+      window.recheckSmartImportDuplicates();
+      window.renderSmartImportPreview();
+    };
+
+    window.toggleAllImportRows = (checked) => {
+      window.smartImportRows.forEach(r => {
+        r.selected = checked;
+        if (r.isDuplicate && checked && r.dupAction === 'skip') {
+          r.dupAction = 'overwrite';
+        }
+      });
+      window.renderSmartImportPreview();
+    };
+
+    window.renderSmartImportPreview = () => {
+      const sec = document.getElementById('smart-preview-section');
+      const tbody = document.getElementById('smart-preview-tbody');
+      if (window.smartImportRows.length === 0) {
+        sec.classList.add('hidden');
+        tbody.innerHTML = '';
+        return;
+      }
+      sec.classList.remove('hidden');
+
+      let dupCount = 0;
+      let normalCount = 0;
+      window.smartImportRows.forEach(r => { if (r.isDuplicate) dupCount++; else normalCount++; });
+
+      document.getElementById('import-count-total').innerText = window.smartImportRows.length;
+      document.getElementById('import-count-normal').innerText = normalCount;
+      document.getElementById('import-count-dup').innerText = dupCount;
+      document.getElementById('import-dup-badge').classList.toggle('hidden', dupCount === 0);
+
+      tbody.innerHTML = window.smartImportRows.map((row, idx) => {
+        // 重複派工案件以醒目紅色底色標示
+        const rowClass = row.isDuplicate
+          ? 'bg-rose-100/90 hover:bg-rose-200/80 border-l-4 border-rose-600 transition-colors'
+          : 'bg-white hover:bg-slate-50 transition-colors';
+
+        const statusBadge = row.isDuplicate
+          ? `<div class="space-y-1">
+               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-black bg-rose-600 text-white shadow-sm">
+                 <i class="fas fa-triangle-exclamation mr-1"></i>重複派工
+               </span>
+               <div class="text-[11px] text-rose-800 font-semibold max-w-[180px] truncate" title="${row.dupReason}">${row.dupReason}</div>
+               <select onchange="window.updateImportRowField(${idx}, 'dupAction', this.value)" class="w-full border border-rose-400 rounded px-1.5 py-1 text-xs font-bold bg-white text-rose-800">
+                 <option value="skip" ${row.dupAction === 'skip' ? 'selected' : ''}>略過不匯入</option>
+                 <option value="overwrite" ${row.dupAction === 'overwrite' ? 'selected' : ''}>確認覆蓋原案件</option>
+                 <option value="force" ${row.dupAction === 'force' ? 'selected' : ''}>確認強制新增</option>
+               </select>
+             </div>`
+          : `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-800">
+               <i class="fas fa-check-circle mr-1"></i>可正常匯入
+             </span>`;
+
+        const distOptions = defaultDistricts.map(d => `<option value="${d}" ${row.district === d ? 'selected' : ''}>${d}</option>`).join('');
+
+        return `
+          <tr class="${rowClass}">
+            <td class="p-2.5 text-center">
+              <input type="checkbox" ${row.selected ? 'checked' : ''} onchange="window.updateImportRowField(${idx}, 'selected', this.checked)" class="w-4 h-4 accent-indigo-600">
+            </td>
+            <td class="p-2.5">${statusBadge}</td>
+            <td class="p-2.5">
+              <input type="text" value="${row.seqNo || ''}" onchange="window.updateImportRowField(${idx}, 'seqNo', this.value)" class="w-16 border rounded px-1.5 py-1 font-mono font-bold text-indigo-700 bg-white">
+            </td>
+            <td class="p-2.5">
+              <input type="text" value="${row.id || ''}" onchange="window.updateImportRowField(${idx}, 'id', this.value)" class="w-28 border ${row.isDuplicate ? 'border-rose-500 bg-rose-50 text-rose-900' : 'border-slate-300 bg-white text-indigo-800'} rounded px-2 py-1 font-bold">
+            </td>
+            <td class="p-2.5">
+              <input type="text" value="${row.year || ''}" onchange="window.updateImportRowField(${idx}, 'year', this.value)" class="w-14 border rounded px-1.5 py-1 bg-white">
+            </td>
+            <td class="p-2.5 space-x-1">
+              <select onchange="window.updateImportRowField(${idx}, 'district', this.value)" class="border rounded px-1.5 py-1 bg-white font-semibold">${distOptions}</select>
+              <input type="text" value="${row.batch || ''}" onchange="window.updateImportRowField(${idx}, 'batch', this.value)" class="w-10 border rounded px-1 py-1 bg-white text-center" title="派別">
+              <input type="text" value="${row.serial || ''}" onchange="window.updateImportRowField(${idx}, 'serial', this.value)" class="w-10 border rounded px-1 py-1 bg-white text-center" title="廠商編號">
+            </td>
+            <td class="p-2.5 space-y-1">
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-slate-500 w-6">收單</span><input type="date" value="${row.recvDate || ''}" onchange="window.updateImportRowField(${idx}, 'recvDate', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-white text-xs"></div>
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-indigo-500 w-6">預計</span><input type="date" value="${row.expectedDate || ''}" onchange="window.updateImportRowField(${idx}, 'expectedDate', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-indigo-50 text-xs"></div>
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-emerald-700 font-bold w-6">完工</span><input type="date" value="${row.actualDate || ''}" onchange="window.updateImportRowField(${idx}, 'actualDate', this.value)" class="w-32 border border-emerald-300 rounded px-1.5 py-0.5 bg-emerald-50 text-emerald-800 font-semibold text-xs" title="填入實際完工日將自動改為已完工"></div>
+            </td>
+            <td class="p-2.5 space-y-1">
+              <input type="text" value="${row.dispatcher || ''}" onchange="window.updateImportRowField(${idx}, 'dispatcher', this.value)" class="block w-28 border rounded px-1.5 py-1 bg-white font-semibold text-indigo-700" placeholder="派工人員">
+              <input type="text" value="${row.source || ''}" onchange="window.updateImportRowField(${idx}, 'source', this.value)" class="block w-28 border rounded px-1.5 py-0.5 bg-white text-slate-600" placeholder="案件來源">
+            </td>
+            <td class="p-2.5 space-y-1">
+              <input type="text" value="${row.location || ''}" onchange="window.updateImportRowField(${idx}, 'location', this.value)" class="block w-44 border rounded px-2 py-1 bg-white font-semibold" placeholder="派工地點">
+              <input type="text" value="${row.village || ''}" onchange="window.updateImportRowField(${idx}, 'village', this.value)" class="block w-44 border rounded px-2 py-0.5 bg-white text-slate-500" placeholder="里辦公處(選填)">
+            </td>
+            <td class="p-2.5">
+              <input type="text" value="${row.content || ''}" onchange="window.updateImportRowField(${idx}, 'content', this.value)" class="w-48 border rounded px-2 py-1 bg-white" placeholder="派工內容說明">
+            </td>
+            <td class="p-2.5 space-y-1">
+              <input type="number" value="${row.dispatchAmount || 0}" onchange="window.updateImportRowField(${idx}, 'dispatchAmount', parseFloat(this.value)||0)" class="block w-24 border rounded px-1.5 py-0.5 bg-white" placeholder="派工金額">
+              <input type="number" value="${row.completeAmount || 0}" onchange="window.updateImportRowField(${idx}, 'completeAmount', parseFloat(this.value)||0)" class="block w-24 border rounded px-1.5 py-0.5 bg-emerald-50" placeholder="竣工金額">
+            </td>
+            <td class="p-2.5 space-y-1">
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-indigo-600 font-bold w-4" title="派工單雲端網址">單</span><input type="text" value="${row.docUrl || ''}" onchange="window.updateImportRowField(${idx}, 'docUrl', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-white text-xs" placeholder="派工單網址"></div>
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-amber-600 font-bold w-4" title="完工照片網址">照</span><input type="text" value="${row.photoUrl || ''}" onchange="window.updateImportRowField(${idx}, 'photoUrl', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-white text-xs" placeholder="完工照片網址"></div>
+              <div class="flex items-center space-x-1"><span class="text-[10px] text-emerald-600 font-bold w-4" title="竣工圖雲端網址">圖</span><input type="text" value="${row.asbuiltUrl || ''}" onchange="window.updateImportRowField(${idx}, 'asbuiltUrl', this.value)" class="w-32 border rounded px-1.5 py-0.5 bg-white text-xs" placeholder="竣工圖網址"></div>
+            </td>
+            <td class="p-2.5 space-y-1">
+              <div class="font-bold text-indigo-700">${row.vendor || '無對應廠商'}</div>
+              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-bold text-white ${row.status === '已完工' ? 'bg-emerald-500' : 'bg-indigo-500'}">${row.status}</span>
+            </td>
+            <td class="p-2.5 text-center">
+              <button onclick="window.removeImportRow(${idx})" class="text-rose-400 hover:text-rose-600 p-1"><i class="fas fa-times-circle text-base"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.confirmSmartImport = () => {
+      const selectedRows = window.smartImportRows.filter(r => r.selected && (!r.isDuplicate || r.dupAction !== 'skip'));
+      if (selectedRows.length === 0) {
+        return window.customAlert('請至少勾選一筆要匯入的案件（若為紅底重複案件，請將處理方式改為「確認覆蓋」或「確認強制新增」）。', 'error');
+      }
+
+      const selectedDups = selectedRows.filter(r => r.isDuplicate);
+      const executeBatchWrite = async () => {
+        const btn = document.getElementById('btn-confirm-smart-import');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>正在寫入各區總表...';
+        try {
+          for (const r of selectedRows) {
+            const payload = {
+              seqNo: r.seqNo || window.getNextSeqNo(),
+              id: r.id,
+              dept: r.dept || '交工科',
+              batch: r.batch || '01',
+              district: r.district || '桃園區',
+              serial: r.serial || '01',
+              year: r.year || '115',
+              vendor: r.vendor || '無對應廠商',
+              recvDate: r.recvDate || '',
+              dispatchDate: r.dispatchDate || '',
+              expectedDate: r.expectedDate || '',
+              dispatcher: r.dispatcher || window.currentUser?.username || '',
+              source: r.source || '一般派工',
+              sourceDetail: r.sourceDetail || '',
+              village: r.village || '',
+              location: r.location || '',
+              content: r.content || '',
+              attributes: [],
+              schoolName: '',
+              docUrl: r.docUrl || '',
+              photoUrl: r.photoUrl || '',
+              asbuiltUrl: r.asbuiltUrl || '',
+              actualDate: r.actualDate || (r.status === '已完工' ? (r.recvDate || '') : ''),
+              status: r.actualDate ? '已完工' : (r.status || '辦理中'),
+              dispatchAmount: r.dispatchAmount || 0,
+              completeAmount: r.completeAmount || 0,
+              evalData: {},
+              updatedAt: Date.now()
+            };
+
+            if (r.isDuplicate && r.dupAction === 'overwrite' && r.existingDocId) {
+              await updateDoc(doc(db, "workOrders", r.existingDocId), payload);
+            } else {
+              await addDoc(collection(db, "workOrders"), payload);
+            }
+          }
+          window.smartImportRows = [];
+          window.renderSmartImportPreview();
+          window.closeSmartImportModal();
+          window.customAlert(`成功匯入 ${selectedRows.length} 筆派工單至各區總表！`);
+        } catch (err) {
+          window.customAlert('批次匯入過程發生錯誤，請稍後再試。', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-double mr-1"></i>確認匯入各區總表';
+        }
+      };
+
+      if (selectedDups.length > 0) {
+        const dupListStr = selectedDups.slice(0, 5).map(d => `• ${d.id} (${d.location || '無地點'}) [${d.dupAction === 'overwrite' ? '覆蓋原案件' : '強制新增'}]`).join('\n');
+        window.customConfirm(
+          `⚠️ 重複派工確認：\n您勾選的匯入清單中包含 ${selectedDups.length} 筆【重複派工】案件（紅底標示）：\n${dupListStr}${selectedDups.length > 5 ? '\n...等' : ''}\n\n是否確認依您選擇的方式匯入總表？`,
+          executeBatchWrite
+        );
+      } else {
+        executeBatchWrite();
+      }
     };
   </script>
 </body>
