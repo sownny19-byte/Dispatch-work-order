@@ -420,8 +420,8 @@
   </div>
 
   <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in"><h2 class="text-xl font-bold mb-4">新增年度</h2><input type="text" id="sys-year-input" placeholder="例如: 113" class="w-full border p-2 mb-4 rounded-lg outline-none"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-year-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysYear()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
-  <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4">新增分區設定</h2><input type="hidden" id="sys-zone-id"><input type="text" id="sys-zone-name" placeholder="分區名稱" class="w-full border p-2 mb-3 rounded-lg"><div class="grid grid-cols-3 gap-2 text-sm bg-slate-50 p-3 rounded-lg border mb-4" id="zone-district-cbs"><label><input type="checkbox" value="桃園區" class="mr-1">桃園區</label><label><input type="checkbox" value="龜山區" class="mr-1">龜山區</label><label><input type="checkbox" value="八德區" class="mr-1">八德區</label><label><input type="checkbox" value="蘆竹區" class="mr-1">蘆竹區</label><label><input type="checkbox" value="大園區" class="mr-1">大園區</label><label><input type="checkbox" value="中壢區" class="mr-1">中壢區</label><label><input type="checkbox" value="平鎮區" class="mr-1">平鎮區</label><label><input type="checkbox" value="楊梅區" class="mr-1">楊梅區</label><label><input type="checkbox" value="龍潭區" class="mr-1">龍潭區</label><label><input type="checkbox" value="大溪區" class="mr-1">大溪區</label><label><input type="checkbox" value="復興區" class="mr-1">復興區</label><label><input type="checkbox" value="觀音區" class="mr-1">觀音區</label><label><input type="checkbox" value="新屋區" class="mr-1">新屋區</label></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysZone()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
-  <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4">新增帳號</h2><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><input type="text" id="user-password" placeholder="密碼" class="w-full border p-2 mb-3 rounded-lg"><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
+  <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="sys-zone-modal-title">新增分區設定</h2><input type="hidden" id="sys-zone-id"><label class="block text-xs font-semibold text-slate-600 mb-1">分區名稱</label><input type="text" id="sys-zone-name" placeholder="分區名稱" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">包含行政區</label><div class="grid grid-cols-3 gap-2 text-sm bg-slate-50 p-3 rounded-lg border mb-4" id="zone-district-cbs"><label><input type="checkbox" value="桃園區" class="mr-1">桃園區</label><label><input type="checkbox" value="龜山區" class="mr-1">龜山區</label><label><input type="checkbox" value="八德區" class="mr-1">八德區</label><label><input type="checkbox" value="蘆竹區" class="mr-1">蘆竹區</label><label><input type="checkbox" value="大園區" class="mr-1">大園區</label><label><input type="checkbox" value="中壢區" class="mr-1">中壢區</label><label><input type="checkbox" value="平鎮區" class="mr-1">平鎮區</label><label><input type="checkbox" value="楊梅區" class="mr-1">楊梅區</label><label><input type="checkbox" value="龍潭區" class="mr-1">龍潭區</label><label><input type="checkbox" value="大溪區" class="mr-1">大溪區</label><label><input type="checkbox" value="復興區" class="mr-1">復興區</label><label><input type="checkbox" value="觀音區" class="mr-1">觀音區</label><label><input type="checkbox" value="新屋區" class="mr-1">新屋區</label></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysZone()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
+  <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="user-modal-title">新增帳號</h2><input type="hidden" id="user-doc-id"><label class="block text-xs font-semibold text-slate-600 mb-1">帳號 / 姓名</label><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">密碼</label><input type="text" id="user-password" placeholder="密碼" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">權限角色</label><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><label class="block text-xs font-semibold text-amber-800 mb-1">所屬年度</label><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><label class="block text-xs font-semibold text-amber-800 mb-1">所屬分區</label><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="budget-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="budget-modal-title">擴充預算額度</h2><input type="hidden" id="budget-zone-id"><label class="block text-xs font-bold text-slate-600 mb-1">原始契約金額</label><input type="number" id="budget-contract" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-bold text-indigo-600 mb-1">增購金額</label><input type="number" id="budget-ext1" class="w-full border p-2 mb-3 bg-indigo-50 rounded-lg"><label class="block text-xs font-bold text-emerald-600 mb-1">後續擴充金額</label><input type="number" id="budget-ext2" class="w-full border p-2 mb-4 bg-emerald-50 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('budget-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveBudget()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in border"><h2 class="text-xl font-bold mb-4 text-indigo-800">編輯考評項目</h2><input type="hidden" id="eval-item-id"><label class="block text-sm font-semibold mb-1">分類標籤</label><select id="eval-item-category" class="w-full border p-2 mb-3 rounded-lg"></select><label class="block text-sm font-semibold mb-1">項目名稱</label><input type="text" id="eval-item-name" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-sm font-semibold mb-1">單位</label><input type="text" id="eval-item-unit" class="w-full border p-2 mb-4 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('eval-item-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveEvalItem()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-category-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-amber-800">考評分類管理</h2><button onclick="document.getElementById('eval-category-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500"><i class="fas fa-times text-xl"></i></button></div><div class="flex space-x-2 mb-4"><input type="text" id="eval-category-name" placeholder="新分類名稱" class="w-full border p-2 rounded-lg"><button onclick="window.saveEvalCategory()" class="bg-amber-500 text-white px-4 py-2 rounded-lg">新增</button></div><div id="eval-category-list" class="space-y-2 max-h-48 overflow-y-auto bg-slate-50 p-2 rounded-lg border"></div></div></div>
@@ -604,6 +604,23 @@
       onSnapshot(collection(db, "sysZones"), snap => { window.sysZones = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysZones(); });
       onSnapshot(collection(db, "workOrders"), snap => {
         const rawList = snap.docs.map(d=>({docId:d.id, ...d.data()}));
+        rawList.forEach(item => {
+          if (item.evalData && typeof item.evalData === 'object') {
+            let hasNegative = false;
+            const cleanedEval = { ...item.evalData };
+            Object.keys(cleanedEval).forEach(k => {
+              const num = parseFloat(String(cleanedEval[k]).replace(/,/g, '').trim());
+              if (!isNaN(num) && num < 0) {
+                cleanedEval[k] = 0;
+                hasNegative = true;
+              }
+            });
+            if (hasNegative) {
+              item.evalData = cleanedEval;
+              updateDoc(doc(db, "workOrders", item.docId), { evalData: cleanedEval }).catch(() => {});
+            }
+          }
+        });
         const sortedForSeq = [...rawList].sort((a, b) => {
           const dA = a.recvDate ? new Date(a.recvDate).getTime() : 0;
           const dB = b.recvDate ? new Date(b.recvDate).getTime() : 0;
@@ -1089,7 +1106,11 @@
       for(const [catName, items] of Object.entries(groupedEval)) {
         if(items.length===0) continue;
         evalHtml += `<div class="mb-4"><div class="text-xs font-bold text-indigo-700 mb-2 bg-indigo-50 border border-indigo-100 inline-block px-2 py-1 rounded shadow-sm">${catName}</div><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">`;
-        evalHtml += items.map(i => `<div class="bg-slate-50 p-2 rounded border border-slate-100"><label class="block text-xs font-semibold text-emerald-800 mb-1">${i.name} (${i.unit})</label><input type="number" class="w-full border border-slate-300 rounded p-1.5 text-sm bg-white focus:ring-emerald-500 outline-none wo-eval-field" data-id="${i.docId}" value="${evData[i.docId]!==undefined?evData[i.docId]:''}" placeholder="數量"></div>`).join('');
+        evalHtml += items.map(i => {
+          const rawVal = evData[i.docId];
+          const cleanVal = (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') ? Math.max(0, parseFloat(String(rawVal).replace(/,/g, '')) || 0) : '';
+          return `<div class="bg-slate-50 p-2 rounded border border-slate-100"><label class="block text-xs font-semibold text-emerald-800 mb-1">${i.name} (${i.unit})</label><input type="number" min="0" step="any" oninput="if(parseFloat(this.value) < 0) this.value = 0;" class="w-full border border-slate-300 rounded p-1.5 text-sm bg-white focus:ring-emerald-500 outline-none wo-eval-field" data-id="${i.docId}" value="${cleanVal}" placeholder="數量 (最小0)"></div>`;
+        }).join('');
         evalHtml += `</div></div>`;
       }
       document.getElementById('wo-eval-inputs-container').innerHTML = evalHtml || '<div class="text-sm text-slate-500">無考評項目</div>';
@@ -1166,7 +1187,13 @@
         const attrs = Array.from(document.querySelectorAll('.wo-attr:checked')).map(cb=>cb.value);
         if (isCrossZone && !attrs.includes('跨區支援')) attrs.push('跨區支援');
 
-        const evData = {}; document.querySelectorAll('.wo-eval-field').forEach(el => { if(el.value) evData[el.dataset.id] = el.value; });
+        const evData = {};
+        document.querySelectorAll('.wo-eval-field').forEach(el => {
+          if (el.value !== '' && el.value !== null) {
+            const val = Math.max(0, parseFloat(el.value) || 0);
+            evData[el.dataset.id] = val;
+          }
+        });
         const data = {
           seqNo, id: finalWoId, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, zone: zoneName, crossZone: isCrossZone, vendor,
           recvDate:document.getElementById('wo-recv-date').value, dispatchDate:document.getElementById('wo-dispatch-date').value, expectedDate:document.getElementById('wo-expected-date').value,
@@ -1237,20 +1264,59 @@
     window.saveEvalCategory = async () => { const n=document.getElementById('eval-category-name').value.trim(); if(!n) return; try{await addDoc(collection(db,"evalCategories"),{name:n, timestamp:Date.now()}); document.getElementById('eval-category-name').value='';} catch(e){} };
     window.deleteEvalCategory = (id) => window.customConfirm('確定刪除此分類？', async () => { try{await deleteDoc(doc(db,"evalCategories",id));} catch(e){} });
 
+    window.parseEvalPositiveNum = (val) => {
+      if (val === undefined || val === null || val === '') return 0;
+      const n = parseFloat(String(val).replace(/,/g, '').trim());
+      if (isNaN(n) || n < 0) return 0;
+      return n;
+    };
+
+    window.getFilteredEvalWorkOrders = (yr, dst) => {
+      let wos = window.workOrders.filter(w => String(w.status || '').trim() === '已完工' && w.evalData && typeof w.evalData === 'object');
+      if (yr) wos = wos.filter(w => String(w.year || '').trim() === String(yr).trim());
+      if (dst && dst.startsWith('[區] ')) {
+        const zName = dst.replace('[區] ', '');
+        const z = window.sysZones.find(x => x.name === zName);
+        if (z) {
+          wos = wos.filter(w => w.zone ? w.zone === z.name : (z.districts || []).includes(w.district));
+        }
+      } else if (dst) {
+        wos = wos.filter(w => String(w.district || '').trim() === String(dst).trim());
+      }
+      return wos;
+    };
+
     window.renderEvalDashboard = () => {
       if(!window.currentUser) return;
       const yr = document.getElementById('eval-stat-year').value, dst = document.getElementById('eval-stat-district').value;
-      let wos = window.workOrders.filter(w => w.status==='已完工' && w.evalData);
-      if(yr) wos = wos.filter(w => w.year===yr);
-      if(dst && dst.startsWith('[區] ')) { const z=window.sysZones.find(x=>x.name===dst.replace('[區] ','')); if(z) wos=wos.filter(w=>z.districts.includes(w.district)); }
-      else if(dst) wos = wos.filter(w => w.district===dst);
-      const sums = {}; window.evalItems.forEach(i => sums[i.docId]=0); wos.forEach(w => { Object.keys(w.evalData).forEach(k => { if(sums[k]!==undefined) sums[k] += (parseFloat(w.evalData[k])||0); }); });
-      const grouped = {}; window.evalCategories.forEach(c => grouped[c.name]=[]); grouped['未分類']=[]; window.evalItems.forEach(i => { const c = i.category && grouped[i.category] ? i.category : '未分類'; grouped[c].push(i); });
+      const wos = window.getFilteredEvalWorkOrders(yr, dst);
+      const sums = {};
+      const counts = {};
+      window.evalItems.forEach(i => { sums[i.docId] = 0; counts[i.docId] = 0; });
+      wos.forEach(w => {
+        Object.keys(w.evalData).forEach(k => {
+          if (sums[k] !== undefined) {
+            const val = window.parseEvalPositiveNum(w.evalData[k]);
+            if (val > 0) {
+              sums[k] = Math.round((sums[k] + val) * 1000) / 1000;
+              counts[k]++;
+            }
+          }
+        });
+      });
+      const grouped = {};
+      window.evalCategories.forEach(c => { if (c.name) grouped[c.name.trim()] = []; });
+      grouped['未分類'] = [];
+      window.evalItems.forEach(i => {
+        const catKey = i.category ? i.category.trim() : '';
+        const c = (catKey && grouped[catKey]) ? catKey : '未分類';
+        grouped[c].push(i);
+      });
       let html = '';
       for(const [cat, items] of Object.entries(grouped)) {
         if(items.length===0) continue;
         html += `<div class="mb-4"><h4 class="font-bold text-slate-700 mb-2 border-b border-indigo-200 inline-block pb-1"><i class="fas fa-tag text-indigo-500 mr-2 text-sm"></i>${cat}</h4><div class="grid grid-cols-2 md:grid-cols-5 gap-4">`;
-        html += items.map(i => `<div class="bg-white border p-3 rounded-xl text-center shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-pointer group" onclick="window.openEvalDetail('${i.docId}', '${yr}', '${dst}')"><div class="text-slate-600 font-bold text-sm mb-1 group-hover:text-emerald-700 transition-colors">${i.name}</div><div class="text-2xl font-black text-emerald-600 group-hover:scale-110 transition-transform">${sums[i.docId].toLocaleString()}</div><div class="text-xs text-slate-400 mt-1">單位: ${i.unit}</div></div>`).join(''); 
+        html += items.map(i => `<div class="bg-white border p-3 rounded-xl text-center shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-pointer group" onclick="window.openEvalDetail('${i.docId}', '${yr}', '${dst}')"><div class="text-slate-600 font-bold text-sm mb-1 group-hover:text-emerald-700 transition-colors">${i.name}</div><div class="text-2xl font-black text-emerald-600 group-hover:scale-110 transition-transform">${sums[i.docId].toLocaleString()}</div><div class="text-xs text-slate-400 mt-1">單位: ${i.unit} (${counts[i.docId]}件)</div></div>`).join(''); 
         html += `</div></div>`;
       }
       document.getElementById('eval-dashboard-results').innerHTML = html || '<div class="text-slate-500 text-sm">暫無已完工的考評數據</div>';
@@ -1264,16 +1330,10 @@
       if(!item) return;
       window.currentEvalDetailName = item.name;
       
-      let wos = window.workOrders.filter(w => w.status === '已完工' && w.evalData && w.evalData[itemId] && parseFloat(w.evalData[itemId]) > 0);
-      if(yr) wos = wos.filter(w => w.year === yr);
-      if(dst && dst.startsWith('[區] ')) { 
-        const z = window.sysZones.find(x => x.name === dst.replace('[區] ', '')); 
-        if(z) wos = wos.filter(w => z.districts.includes(w.district)); 
-      }
-      else if(dst) wos = wos.filter(w => w.district === dst);
+      const wos = window.getFilteredEvalWorkOrders(yr, dst).filter(w => window.parseEvalPositiveNum(w.evalData[itemId]) > 0);
 
       window.currentEvalDetailData = wos.map(w => ({
-         id: w.id || '尚未編號', docId: w.docId, district: w.district, location: w.location, vendor: w.vendor, actualDate: w.actualDate, value: parseFloat(w.evalData[itemId])
+         id: w.id || '尚未編號', docId: w.docId, district: w.district, location: w.location, vendor: w.vendor, actualDate: w.actualDate, value: window.parseEvalPositiveNum(w.evalData[itemId])
       })).sort((a,b) => new Date(b.actualDate||0) - new Date(a.actualDate||0));
 
       document.getElementById('eval-detail-title').innerHTML = `<i class="fas fa-list-alt mr-2 text-emerald-600"></i>考評明細：${item.name}`;
@@ -1281,7 +1341,7 @@
       const tbody = document.getElementById('eval-detail-body');
       let total = 0;
       tbody.innerHTML = window.currentEvalDetailData.map(d => {
-        total += d.value;
+        total = Math.round((total + d.value) * 1000) / 1000;
         return `<tr class="hover:bg-slate-200 cursor-pointer transition-colors" onclick="window.openWoModal('${d.docId}', true)" title="點擊檢視派工單詳細內容"><td class="p-3 font-bold text-indigo-700">${d.id}</td><td class="p-3">${d.district||'-'}</td><td class="p-3 truncate max-w-xs" title="${d.location}">${d.location}</td><td class="p-3 text-slate-600">${d.vendor||'-'}</td><td class="p-3 text-sm">${d.actualDate||'-'}</td><td class="p-3 text-right font-bold text-emerald-600 text-lg">${d.value}</td></tr>`;
       }).join('');
       
@@ -1289,7 +1349,7 @@
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500"><i class="fas fa-folder-open text-3xl mb-2 text-slate-300 block"></i>無相關派工單明細</td></tr>`;
       }
 
-      document.getElementById('eval-detail-total').innerText = `共包含 ${window.currentEvalDetailData.length} 件派工單 / 數量總計: ${total} ${item.unit}`;
+      document.getElementById('eval-detail-total').innerText = `共包含 ${window.currentEvalDetailData.length} 件派工單 / 數量總計: ${total.toLocaleString()} ${item.unit}`;
       document.getElementById('eval-detail-modal').classList.remove('hidden');
     };
 
@@ -1298,18 +1358,106 @@
     window.saveSysYear = async () => { const v=document.getElementById('sys-year-input').value.trim(); if(!v) return window.customAlert('不可空白','error'); try{await addDoc(collection(db,"sysYears"), {name:v, timestamp:Date.now()}); document.getElementById('sys-year-modal').classList.add('hidden');} catch(e){} };
     window.deleteSysYear = (id) => window.customConfirm('確定刪除此年度？', async () => { try{await deleteDoc(doc(db,"sysYears",id));} catch(e){} });
 
-    window.renderSysZones = () => { document.getElementById('sys-zone-body').innerHTML = [...window.sysZones].sort((a,b)=>((a.name||'').localeCompare(b.name||''))).map(z => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold text-indigo-700">${z.name||'無名稱'}</td><td class="p-3 text-sm text-slate-600 max-w-[200px] truncate">${(z.districts||[]).join(', ')}</td><td class="p-3 text-center"><button onclick="window.deleteSysZone('${z.docId}')" class="text-rose-400 hover:text-rose-600"><i class="fas fa-trash"></i></button></td></tr>`).join(''); };
-    window.openSysZoneModal = () => { document.getElementById('sys-zone-id').value=''; document.getElementById('sys-zone-name').value=''; document.querySelectorAll('#zone-district-cbs input').forEach(cb=>cb.checked=false); document.getElementById('sys-zone-modal').classList.remove('hidden'); };
-    window.saveSysZone = async () => { const id=document.getElementById('sys-zone-id').value, n=document.getElementById('sys-zone-name').value.trim(), dists=Array.from(document.querySelectorAll('#zone-district-cbs input:checked')).map(cb=>cb.value); if(!n || dists.length<2) return window.customAlert('請填寫名稱且至少勾選2個行政區','error'); const data={name:n, districts:dists, timestamp:Date.now()}; try{ if(id) await updateDoc(doc(db,"sysZones",id),data); else await addDoc(collection(db,"sysZones"),data); document.getElementById('sys-zone-modal').classList.add('hidden'); } catch(e){} };
+    window.renderSysZones = () => { document.getElementById('sys-zone-body').innerHTML = [...window.sysZones].sort((a,b)=>((a.name||'').localeCompare(b.name||''))).map(z => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold text-indigo-700">${z.name||'無名稱'}</td><td class="p-3 text-sm text-slate-600 max-w-[200px] truncate" title="${(z.districts||[]).join(', ')}">${(z.districts||[]).join(', ')}</td><td class="p-3 text-center whitespace-nowrap"><button onclick="window.openSysZoneModal('${z.docId}')" class="text-indigo-500 hover:text-indigo-700 px-2 py-1" title="編輯分區"><i class="fas fa-edit"></i></button> <button onclick="window.deleteSysZone('${z.docId}')" class="text-rose-400 hover:text-rose-600 px-2 py-1" title="刪除分區"><i class="fas fa-trash"></i></button></td></tr>`).join(''); };
+    window.openSysZoneModal = (id = null) => {
+      document.getElementById('sys-zone-id').value = id || '';
+      const titleEl = document.getElementById('sys-zone-modal-title');
+      if (id) {
+        const z = window.sysZones.find(x => x.docId === id);
+        if (titleEl) titleEl.innerText = '編輯分區設定';
+        document.getElementById('sys-zone-name').value = z ? (z.name || '') : '';
+        const dists = (z && Array.isArray(z.districts)) ? z.districts : [];
+        document.querySelectorAll('#zone-district-cbs input').forEach(cb => { cb.checked = dists.includes(cb.value); });
+      } else {
+        if (titleEl) titleEl.innerText = '新增分區設定';
+        document.getElementById('sys-zone-name').value = '';
+        document.querySelectorAll('#zone-district-cbs input').forEach(cb => cb.checked = false);
+      }
+      document.getElementById('sys-zone-modal').classList.remove('hidden');
+    };
+    window.saveSysZone = async () => {
+      const id = document.getElementById('sys-zone-id').value;
+      const n = document.getElementById('sys-zone-name').value.trim();
+      const dists = Array.from(document.querySelectorAll('#zone-district-cbs input:checked')).map(cb=>cb.value);
+      if(!n || dists.length<1) return window.customAlert('請填寫分區名稱且至少勾選1個行政區','error');
+      try {
+        if(id) {
+          const oldZone = window.sysZones.find(x => x.docId === id);
+          const oldName = oldZone ? oldZone.name : '';
+          await updateDoc(doc(db,"sysZones",id), {name:n, districts:dists});
+          if (oldName && oldName !== n) {
+            for (const u of window.users.filter(u => u.zone === oldName)) {
+              await updateDoc(doc(db, "users", u.docId), { zone: n });
+            }
+            for (const w of window.workOrders.filter(w => w.zone === oldName)) {
+              await updateDoc(doc(db, "workOrders", w.docId), { zone: n });
+            }
+          }
+        } else {
+          await addDoc(collection(db,"sysZones"), {name:n, districts:dists, timestamp:Date.now()});
+        }
+        document.getElementById('sys-zone-modal').classList.add('hidden');
+      } catch(e){ window.customAlert('儲存分區失敗','error'); }
+    };
     window.deleteSysZone = (id) => window.customConfirm('確定刪除此分區？', async () => { try{await deleteDoc(doc(db,"sysZones",id));} catch(e){} });
     
     window.openBudgetModal = (id) => { const z=window.sysZones.find(x=>x.docId===id); if(!z) return; document.getElementById('budget-zone-id').value=id; document.getElementById('budget-modal-title').innerText = `額度設定: ${z.name||'無名稱'}`; document.getElementById('budget-contract').value=z.contract||''; document.getElementById('budget-ext1').value=z.ext1||''; document.getElementById('budget-ext2').value=z.ext2||''; document.getElementById('budget-modal').classList.remove('hidden'); };
     window.saveBudget = async () => { const id=document.getElementById('budget-zone-id').value; try{ await updateDoc(doc(db,"sysZones",id), {contract:document.getElementById('budget-contract').value||0, ext1:document.getElementById('budget-ext1').value||0, ext2:document.getElementById('budget-ext2').value||0}); document.getElementById('budget-modal').classList.add('hidden'); } catch(e){} };
 
-    window.renderUsers = () => { document.getElementById('user-table-body').innerHTML = window.users.map(u => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${u.username}</td><td class="p-3 font-mono text-xs text-slate-500">***</td><td class="p-3"><span class="px-2 py-1 rounded text-xs ${u.role==='系統管理員'?'bg-indigo-100 text-indigo-700':u.role==='施工廠商'?'bg-emerald-100 text-emerald-700':'bg-slate-200'}">${u.role}</span></td><td class="p-3 text-sm">${u.role==='施工廠商'?`${u.year} - ${u.zone}`:'-'}</td><td class="p-3 text-center"><button onclick="window.deleteUser('${u.docId}')" class="text-rose-400 hover:text-rose-600"><i class="fas fa-trash"></i></button></td></tr>`).join(''); };
-    window.openUserModal = () => { ['user-username','user-password'].forEach(id=>document.getElementById(id).value=''); document.getElementById('user-role').value='機關/監造'; window.toggleUserVendorFields(); document.getElementById('user-modal').classList.remove('hidden'); };
+    window.renderUsers = () => { document.getElementById('user-table-body').innerHTML = window.users.map(u => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${u.username}</td><td class="p-3 font-mono text-xs text-slate-500">***</td><td class="p-3"><span class="px-2 py-1 rounded text-xs ${u.role==='系統管理員'?'bg-indigo-100 text-indigo-700':u.role==='施工廠商'?'bg-emerald-100 text-emerald-700':'bg-slate-200'}">${u.role}</span></td><td class="p-3 text-sm">${u.role==='施工廠商'?`${u.year||''} - ${u.zone||''}`:'-'}</td><td class="p-3 text-center whitespace-nowrap"><button onclick="window.openUserModal('${u.docId}')" class="text-indigo-500 hover:text-indigo-700 px-2 py-1" title="編輯帳號"><i class="fas fa-edit"></i></button> <button onclick="window.deleteUser('${u.docId}')" class="text-rose-400 hover:text-rose-600 px-2 py-1" title="刪除帳號"><i class="fas fa-trash"></i></button></td></tr>`).join(''); };
+    window.openUserModal = (id = null) => {
+      window.updateDropdowns();
+      document.getElementById('user-doc-id').value = id || '';
+      const titleEl = document.getElementById('user-modal-title');
+      if (id) {
+        const u = window.users.find(x => x.docId === id);
+        if (titleEl) titleEl.innerText = '編輯帳號';
+        document.getElementById('user-username').value = u ? (u.username || '') : '';
+        document.getElementById('user-password').value = u ? (u.password || '') : '';
+        document.getElementById('user-role').value = u ? (u.role || '機關/監造') : '機關/監造';
+        window.toggleUserVendorFields();
+        if (u && u.role === '施工廠商') {
+          if (u.year) document.getElementById('user-year').value = u.year;
+          if (u.zone) document.getElementById('user-zone').value = u.zone;
+        }
+      } else {
+        if (titleEl) titleEl.innerText = '新增帳號';
+        ['user-username','user-password'].forEach(fid=>document.getElementById(fid).value='');
+        document.getElementById('user-role').value='機關/監造';
+        window.toggleUserVendorFields();
+      }
+      document.getElementById('user-modal').classList.remove('hidden');
+    };
     window.toggleUserVendorFields = () => { document.getElementById('user-vendor-fields').classList.toggle('hidden', document.getElementById('user-role').value!=='施工廠商'); };
-    window.saveUser = async () => { const u=document.getElementById('user-username').value, p=document.getElementById('user-password').value, r=document.getElementById('user-role').value; if(!u||!p) return window.customAlert('帳號密碼不可空白','error'); try{ await addDoc(collection(db,"users"),{username:u, password:p, role:r, year:document.getElementById('user-year').value, zone:document.getElementById('user-zone').value}); document.getElementById('user-modal').classList.add('hidden'); } catch(e){} };
+    window.saveUser = async () => {
+      const id = document.getElementById('user-doc-id').value;
+      const u = document.getElementById('user-username').value.trim();
+      const p = document.getElementById('user-password').value.trim();
+      const r = document.getElementById('user-role').value;
+      const yr = r === '施工廠商' ? document.getElementById('user-year').value : '';
+      const zn = r === '施工廠商' ? document.getElementById('user-zone').value : '';
+      if(!u||!p) return window.customAlert('帳號密碼不可空白','error');
+      try {
+        if (id) {
+          const oldUser = window.users.find(x => x.docId === id);
+          const oldUsername = oldUser ? oldUser.username : '';
+          await updateDoc(doc(db,"users",id), {username:u, password:p, role:r, year:yr, zone:zn});
+          if (oldUsername && oldUsername !== u) {
+            for (const w of window.workOrders.filter(w => w.vendor === oldUsername)) {
+              await updateDoc(doc(db, "workOrders", w.docId), { vendor: u });
+            }
+          }
+          if (window.currentUser && window.currentUser.docId === id) {
+            window.currentUser = { ...window.currentUser, username: u, password: p, role: r, year: yr, zone: zn };
+            document.getElementById('sidebar-user-name').innerText = u;
+            document.getElementById('sidebar-user-role').innerText = r;
+          }
+        } else {
+          await addDoc(collection(db,"users"), {username:u, password:p, role:r, year:yr, zone:zn});
+        }
+        document.getElementById('user-modal').classList.add('hidden');
+      } catch(e){ window.customAlert('儲存帳號失敗','error'); }
+    };
     window.deleteUser = (id) => window.customConfirm('確定刪除帳號？', async () => { try{await deleteDoc(doc(db,"users",id));} catch(e){} });
 
     window.exportEvalDetailExcel = () => {
