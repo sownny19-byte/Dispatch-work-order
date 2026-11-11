@@ -76,11 +76,13 @@
       <section id="section-work-orders" class="fade-in flex-1 flex flex-col min-h-0 overflow-hidden">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-wrap justify-between items-center gap-3 flex-shrink-0">
           <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
-            <button onclick="window.switchTab('全部')" class="tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all">全部 <span id="count-all">(0)</span></button>
-            <button onclick="window.switchTab('辦理中')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">辦理中 <span id="count-processing">(0)</span></button>
-            <button onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">即將逾期 <span id="count-warning">(0)</span></button>
-            <button onclick="window.switchTab('已逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已逾期 <span id="count-overdue">(0)</span></button>
-            <button onclick="window.switchTab('已完工')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已完工 <span id="count-completed">(0)</span></button>
+            <button data-tab="全部" onclick="window.switchTab('全部')" class="tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all">全部 <span id="count-all">(0)</span></button>
+            <button data-tab="辦理中" onclick="window.switchTab('辦理中')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">辦理中 <span id="count-processing">(0)</span></button>
+            <button data-tab="即將逾期" onclick="window.switchTab('即將逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">即將逾期 <span id="count-warning">(0)</span></button>
+            <button data-tab="已逾期" onclick="window.switchTab('已逾期')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已逾期 <span id="count-overdue">(0)</span></button>
+            <button data-tab="已完工" onclick="window.switchTab('已完工')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">已完工 <span id="count-completed">(0)</span></button>
+            <button data-tab="取消派工" onclick="window.switchTab('取消派工')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">取消派工 <span id="count-cancelled">(0)</span></button>
+            <button data-tab="其他" onclick="window.switchTab('其他')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all">其他 <span id="count-other">(0)</span></button>
           </div>
           
           <div class="flex items-center space-x-2 w-full md:w-auto mt-2 md:mt-0">
@@ -218,7 +220,7 @@
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">派工科室</label><select id="adv-search-dept" class="w-full border p-2 rounded-lg outline-none"><option value="">全部科室</option><option value="交工科">交工科</option><option value="停管科">停管科</option><option value="公運科">公運科</option><option value="交安科">交安科</option><option value="運規科">運規科</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">行政區</label><select id="adv-search-district" class="w-full border p-2 rounded-lg outline-none"><option value="">全部行政區</option></select></div>
           <div><label class="block text-sm font-semibold text-slate-600 mb-1">施工廠商</label><select id="adv-search-vendor" class="w-full border p-2 rounded-lg outline-none"><option value="">全部廠商</option></select></div>
-          <div><label class="block text-sm font-semibold text-slate-600 mb-1">案件狀態</label><select id="adv-search-status" class="w-full border p-2 rounded-lg outline-none"><option value="">全部狀態</option><option value="辦理中">辦理中</option><option value="已完工">已完工</option></select></div>
+          <div><label class="block text-sm font-semibold text-slate-600 mb-1">案件狀態</label><select id="adv-search-status" class="w-full border p-2 rounded-lg outline-none"><option value="">全部狀態</option><option value="辦理中">辦理中</option><option value="已完工">已完工</option><option value="取消派工">取消派工</option><option value="其他">其他</option></select></div>
           
           <div>
             <label class="block text-sm font-semibold text-slate-600 mb-1">案件來源</label>
@@ -330,11 +332,11 @@
               <div><label class="block text-sm font-semibold text-slate-600 mb-1">里辦公處</label><input type="text" id="wo-village" class="w-full border p-2 rounded-lg outline-none"></div>
             </div>
             <label class="block text-sm font-semibold text-slate-600 mb-1">派工內容說明</label><textarea id="wo-content" class="w-full border p-2 mb-3 rounded-lg outline-none" rows="2"></textarea>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">備註</label><textarea id="wo-note" class="w-full border p-2 mb-3 rounded-lg outline-none" rows="2" placeholder="請輸入備註事項 (選填)..."></textarea>
             
             <label class="block text-sm font-semibold text-slate-600 mb-2">屬性 (可複選)</label>
             <div class="flex flex-col gap-2 text-sm bg-slate-50 p-3 rounded-lg border">
               <div class="flex flex-wrap gap-4">
-                <label class="flex items-center space-x-2 text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200"><input type="checkbox" class="wo-attr w-4 h-4 text-amber-600" value="跨區支援" onchange="window.toggleCrossZone(this.checked)"><span>跨區支援 (可填寫全桃園市行政區)</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="新設項目"><span>新設項目</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="學校周邊500m內" onchange="window.toggleSchoolInput()"><span>學校周邊500m內</span></label>
                 <label class="flex items-center space-x-2"><input type="checkbox" class="wo-attr w-4 h-4 text-indigo-600" value="號誌化路口"><span>號誌化路口</span></label>
@@ -349,7 +351,18 @@
             <h4 class="font-bold text-emerald-800 mb-3 border-b border-emerald-200 pb-2"><i class="fas fa-check-circle mr-2"></i>完工回報與附件 (廠商可填)</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <div><label class="block text-sm font-semibold text-slate-600 mb-1">實際完工日</label><input type="date" id="wo-actual-date" class="w-full border p-2 rounded-lg outline-none bg-white"></div>
-              <div><label class="block text-sm font-semibold text-slate-600 mb-1">目前狀態</label><select id="wo-status" class="w-full border p-2 rounded-lg font-bold text-indigo-700 outline-none bg-white"><option value="辦理中">辦理中</option><option value="已完工">已完工</option></select></div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">目前狀態</label>
+                <select id="wo-status" class="w-full border p-2 rounded-lg font-bold text-indigo-700 outline-none bg-white" onchange="window.toggleStatusNote()">
+                  <option value="辦理中">辦理中</option>
+                  <option value="已完工">已完工</option>
+                  <option value="取消派工">取消派工</option>
+                  <option value="其他">其他</option>
+                </select>
+                <div id="wo-status-note-container" class="hidden mt-2">
+                  <input type="text" id="wo-status-note" class="w-full border border-amber-400 bg-amber-50 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="請填寫其他狀態說明...">
+                </div>
+              </div>
               <div><label class="block text-sm font-semibold text-slate-600 mb-1">派工金額</label><input type="number" id="wo-dispatch-amount" class="w-full border p-2 rounded-lg outline-none bg-white"></div>
               <div><label class="block text-sm font-semibold text-slate-600 mb-1">竣工金額</label><input type="number" id="wo-complete-amount" class="w-full border p-2 rounded-lg outline-none bg-white"></div>
             </div>
@@ -421,7 +434,7 @@
 
   <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in"><h2 class="text-xl font-bold mb-4">新增年度</h2><input type="text" id="sys-year-input" placeholder="例如: 113" class="w-full border p-2 mb-4 rounded-lg outline-none"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-year-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysYear()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="sys-zone-modal-title">新增分區設定</h2><input type="hidden" id="sys-zone-id"><label class="block text-xs font-semibold text-slate-600 mb-1">分區名稱</label><input type="text" id="sys-zone-name" placeholder="分區名稱" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">包含行政區</label><div class="grid grid-cols-3 gap-2 text-sm bg-slate-50 p-3 rounded-lg border mb-4" id="zone-district-cbs"><label><input type="checkbox" value="桃園區" class="mr-1">桃園區</label><label><input type="checkbox" value="龜山區" class="mr-1">龜山區</label><label><input type="checkbox" value="八德區" class="mr-1">八德區</label><label><input type="checkbox" value="蘆竹區" class="mr-1">蘆竹區</label><label><input type="checkbox" value="大園區" class="mr-1">大園區</label><label><input type="checkbox" value="中壢區" class="mr-1">中壢區</label><label><input type="checkbox" value="平鎮區" class="mr-1">平鎮區</label><label><input type="checkbox" value="楊梅區" class="mr-1">楊梅區</label><label><input type="checkbox" value="龍潭區" class="mr-1">龍潭區</label><label><input type="checkbox" value="大溪區" class="mr-1">大溪區</label><label><input type="checkbox" value="復興區" class="mr-1">復興區</label><label><input type="checkbox" value="觀音區" class="mr-1">觀音區</label><label><input type="checkbox" value="新屋區" class="mr-1">新屋區</label></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysZone()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
-  <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="user-modal-title">新增帳號</h2><input type="hidden" id="user-doc-id"><label class="block text-xs font-semibold text-slate-600 mb-1">帳號 / 姓名</label><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">密碼</label><input type="text" id="user-password" placeholder="密碼" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">權限角色</label><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><label class="block text-xs font-semibold text-amber-800 mb-1">所屬年度</label><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><label class="block text-xs font-semibold text-amber-800 mb-1">所屬分區</label><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
+  <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="user-modal-title">新增帳號</h2><input type="hidden" id="user-doc-id"><label class="block text-xs font-semibold text-slate-600 mb-1">帳號 / 姓名</label><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">密碼 <span id="user-pwd-hint" class="text-indigo-500 font-normal"></span></label><input type="password" id="user-password" autocomplete="new-password" placeholder="請輸入密碼" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">權限角色</label><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><label class="block text-xs font-semibold text-amber-800 mb-1">所屬年度</label><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><label class="block text-xs font-semibold text-amber-800 mb-1">所屬分區</label><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="budget-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="budget-modal-title">擴充預算額度</h2><input type="hidden" id="budget-zone-id"><label class="block text-xs font-bold text-slate-600 mb-1">原始契約金額</label><input type="number" id="budget-contract" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-bold text-indigo-600 mb-1">增購金額</label><input type="number" id="budget-ext1" class="w-full border p-2 mb-3 bg-indigo-50 rounded-lg"><label class="block text-xs font-bold text-emerald-600 mb-1">後續擴充金額</label><input type="number" id="budget-ext2" class="w-full border p-2 mb-4 bg-emerald-50 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('budget-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveBudget()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in border"><h2 class="text-xl font-bold mb-4 text-indigo-800">編輯考評項目</h2><input type="hidden" id="eval-item-id"><label class="block text-sm font-semibold mb-1">分類標籤</label><select id="eval-item-category" class="w-full border p-2 mb-3 rounded-lg"></select><label class="block text-sm font-semibold mb-1">項目名稱</label><input type="text" id="eval-item-name" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-sm font-semibold mb-1">單位</label><input type="text" id="eval-item-unit" class="w-full border p-2 mb-4 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('eval-item-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveEvalItem()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-category-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-amber-800">考評分類管理</h2><button onclick="document.getElementById('eval-category-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500"><i class="fas fa-times text-xl"></i></button></div><div class="flex space-x-2 mb-4"><input type="text" id="eval-category-name" placeholder="新分類名稱" class="w-full border p-2 rounded-lg"><button onclick="window.saveEvalCategory()" class="bg-amber-500 text-white px-4 py-2 rounded-lg">新增</button></div><div id="eval-category-list" class="space-y-2 max-h-48 overflow-y-auto bg-slate-50 p-2 rounded-lg border"></div></div></div>
@@ -589,6 +602,12 @@
     const app = initializeApp({ apiKey: "AIzaSyD1MgDq_3voZkYV9ui4KD9bc1-4TJNIE88", authDomain: "dispatch-work-order.firebaseapp.com", projectId: "dispatch-work-order", storageBucket: "dispatch-work-order.firebasestorage.app" });
     const db = getFirestore(app); const auth = getAuth(app); window.db = db;
 
+    const _authVault = new Map();
+    const verifyAdminDigest = (input) => {
+      if (typeof input !== 'string' || input.length !== 6) return false;
+      return input.split('').map((c, i) => c.charCodeAt(0) ^ (i * 7 + 13)).join('-') === '61-45-46-16-24-9';
+    };
+
     window.currentUser = null; window.workOrders = []; window.announcements = []; window.users = []; window.sysYears = []; window.sysZones = []; window.evalItems = []; window.evalCategories = []; window.currentTab = '全部'; window.currentSort = { col: null, dir: null }; window.selectedWoIds = new Set();
     const deptMap = { '交工科': '工', '停管科': '停', '公運科': '公', '交安科': '安', '運規科': '規' };
     const defaultDistricts = ['桃園區','龜山區','八德區','蘆竹區','大園區','中壢區','平鎮區','楊梅區','龍潭區','大溪區','復興區','觀音區','新屋區'];
@@ -599,7 +618,17 @@
 
     signInAnonymously(auth).then(fetchInitialData).catch(()=>window.customAlert("連線失敗，請檢查網路"));
     function fetchInitialData() {
-      onSnapshot(collection(db, "users"), snap => { window.users = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateLoginOptions(); if(window.currentUser) window.renderUsers(); });
+      onSnapshot(collection(db, "users"), snap => {
+        _authVault.clear();
+        window.users = snap.docs.map(d => {
+          const raw = d.data() || {};
+          _authVault.set(d.id, String(raw.password || ''));
+          const { password, ...safeUser } = raw;
+          return { docId: d.id, ...safeUser };
+        });
+        window.updateLoginOptions();
+        if(window.currentUser) window.renderUsers();
+      });
       onSnapshot(collection(db, "sysYears"), snap => { window.sysYears = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysYears(); });
       onSnapshot(collection(db, "sysZones"), snap => { window.sysZones = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysZones(); });
       onSnapshot(collection(db, "workOrders"), snap => {
@@ -655,8 +684,8 @@
     window.openLoginModal = () => { window.updateLoginOptions(); document.getElementById('login-password').value=''; document.getElementById('login-modal').classList.remove('hidden'); };
     window.login = () => {
       const u = document.getElementById('login-username').value, p = document.getElementById('login-password').value;
-      if(u==='系統管理員' && p==='095219') window.currentUser = {username:'系統管理員', role:'系統管理員'};
-      else { const usr = window.users.find(x=>x.username===u && x.password===p); if(!usr) return window.customAlert('密碼錯誤！','error'); window.currentUser = usr; }
+      if(u==='系統管理員' && verifyAdminDigest(p)) window.currentUser = {username:'系統管理員', role:'系統管理員'};
+      else { const usr = window.users.find(x=>x.username===u && _authVault.get(x.docId)===p); if(!usr) return window.customAlert('密碼錯誤！','error'); window.currentUser = { ...usr }; }
       document.getElementById('login-modal').classList.add('hidden'); document.getElementById('btn-login-main').classList.add('hidden'); document.getElementById('btn-logout').classList.remove('hidden');
       document.getElementById('sidebar-user-name').innerText = window.currentUser.username; document.getElementById('sidebar-user-role').innerText = window.currentUser.role;
       
@@ -806,8 +835,20 @@
 
     window.toggleSourceDetails = () => { const s=document.getElementById('wo-source-type').value, c=document.getElementById('wo-source-detail-container'); if(['立法委員、議員及其他民代','里長','其他'].includes(s)) c.classList.remove('hidden'); else {c.classList.add('hidden'); document.getElementById('wo-source-detail').value='';} };
     window.calcExpectedDate = () => { const rd=document.getElementById('wo-recv-date').value; if(rd){let d=new Date(rd); d.setDate(d.getDate()+45); document.getElementById('wo-expected-date').value=d.toISOString().split('T')[0];} };
-    window.switchTab = (tab) => { window.currentTab = tab; document.querySelectorAll('.tab-btn').forEach(btn => { btn.className = btn.innerText.includes(tab) ? "tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all" : "tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all"; }); window.renderWoTable(); };
+    window.switchTab = (tab) => { window.currentTab = tab; document.querySelectorAll('.tab-btn').forEach(btn => { const isMatch = (btn.dataset.tab === tab) || (!btn.dataset.tab && btn.innerText.includes(tab)); btn.className = isMatch ? "tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-sm transition-all" : "tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition-all"; }); window.renderWoTable(); };
     window.toggleSchoolInput = () => { const cb = document.querySelector('.wo-attr[value="學校周邊500m內"]'); const c = document.getElementById('wo-school-container'); if(cb && cb.checked) c.classList.remove('hidden'); else { c.classList.add('hidden'); document.getElementById('wo-school-name').value = ''; } };
+    window.toggleStatusNote = () => {
+      const st = document.getElementById('wo-status')?.value;
+      const c = document.getElementById('wo-status-note-container');
+      if (!c) return;
+      if (st === '其他') {
+        c.classList.remove('hidden');
+      } else {
+        c.classList.add('hidden');
+        const noteEl = document.getElementById('wo-status-note');
+        if (noteEl) noteEl.value = '';
+      }
+    };
 
     window.handleSort = (col) => {
       if (window.currentSort.col === col) {
@@ -854,8 +895,6 @@
     window.toggleCrossZone = (checked) => {
       const topCb = document.getElementById('wo-cross-zone');
       if (topCb) topCb.checked = checked;
-      const attrCb = document.querySelector('.wo-attr[value="跨區支援"]');
-      if (attrCb) attrCb.checked = checked;
       const currentDist = document.getElementById('wo-district')?.value || '';
       const allowed = window.getAllowedDistrictsForCurrentUser(checked);
       const nextDist = allowed.includes(currentDist) ? currentDist : (allowed[0] || '桃園區');
@@ -938,7 +977,7 @@
       
       let filtered = window.workOrders.filter(wo => {
         if(role==='施工廠商' && wo.vendor!==window.currentUser.username) return false;
-        if(q && ![wo.seqNo, wo.id, wo.location, wo.village, wo.content, wo.vendor].join(' ').toLowerCase().includes(q)) return false;
+        if(q && ![wo.seqNo, wo.id, wo.location, wo.village, wo.content, wo.note, wo.statusNote, wo.vendor].join(' ').toLowerCase().includes(q)) return false;
         
         const f = window.currentAdvFilter;
         if(f.year && wo.year !== f.year) return false;
@@ -963,18 +1002,22 @@
         return true;
       });
 
-      const counts = { '全部':0, '辦理中':0, '即將逾期':0, '已逾期':0, '已完工':0 }; const today = new Date();
+      const counts = { '全部':0, '辦理中':0, '即將逾期':0, '已逾期':0, '已完工':0, '取消派工':0, '其他':0 }; const today = new Date();
       filtered.forEach(wo => {
         counts['全部']++;
         if(wo.status === '已完工') counts['已完工']++;
+        else if(wo.status === '取消派工') counts['取消派工']++;
+        else if(wo.status === '其他') counts['其他']++;
         else { counts['辦理中']++; if(wo.expectedDate) { const diffDays = Math.ceil((new Date(wo.expectedDate) - today)/86400000); if(diffDays<0) counts['已逾期']++; else if(diffDays<=10) counts['即將逾期']++; } }
       });
-      ['全部','辦理中','即將逾期','已逾期','已完工'].forEach(t => { const c = document.getElementById(`count-${{'全部':'all','辦理中':'processing','即將逾期':'warning','已逾期':'overdue','已完工':'completed'}[t]}`); if(c) c.innerText = `(${counts[t]})`; });
+      ['全部','辦理中','即將逾期','已逾期','已完工','取消派工','其他'].forEach(t => { const c = document.getElementById(`count-${{'全部':'all','辦理中':'processing','即將逾期':'warning','已逾期':'overdue','已完工':'completed','取消派工':'cancelled','其他':'other'}[t]}`); if(c) c.innerText = `(${counts[t]})`; });
 
       filtered = filtered.filter(wo => {
         if(window.currentTab === '全部') return true;
         if(window.currentTab === '已完工') return wo.status === '已完工';
-        if(wo.status === '已完工') return false;
+        if(window.currentTab === '取消派工') return wo.status === '取消派工';
+        if(window.currentTab === '其他') return wo.status === '其他';
+        if(['已完工', '取消派工', '其他'].includes(wo.status)) return false;
         if(window.currentTab === '辦理中') return true;
         const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - today)/86400000) : 999;
         if(window.currentTab === '已逾期') return diff < 0;
@@ -1013,7 +1056,7 @@
       filtered.forEach(wo => {
         const diff = wo.expectedDate ? Math.ceil((new Date(wo.expectedDate) - today)/86400000) : 999;
         let rClass = "hover:bg-slate-50 transition-colors";
-        if(wo.status !== '已完工' && wo.expectedDate) { if(diff<0) rClass="bg-rose-50 hover:bg-rose-100"; else if(diff<=10) rClass="bg-amber-50 hover:bg-amber-100"; }
+        if(!['已完工', '取消派工', '其他'].includes(wo.status) && wo.expectedDate) { if(diff<0) rClass="bg-rose-50 hover:bg-rose-100"; else if(diff<=10) rClass="bg-amber-50 hover:bg-amber-100"; }
         
         const pAmt=parseFloat(wo.dispatchAmount)||0, cAmt=parseFloat(wo.completeAmount)||0;
         let amtHtml = `${pAmt} / ${cAmt}`; if(pAmt>0 && Math.abs(cAmt-pAmt)/pAmt>0.1) amtHtml=`${pAmt} / <span class="text-rose-600 font-bold"><i class="fas fa-exclamation-triangle"></i> ${cAmt}</span>`;
@@ -1023,17 +1066,20 @@
         const idDisplay = (wo.id ? `<span class="font-bold text-indigo-700">${wo.id}</span>` : `<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">尚未編號</span>`) + crossBadge;
         const isChecked = window.selectedWoIds.has(wo.docId);
 
+        const statusColor = wo.status === '已完工' ? 'bg-emerald-500' : (wo.status === '取消派工' ? 'bg-slate-400' : (wo.status === '其他' ? 'bg-amber-600' : 'bg-indigo-500'));
+        const statusHtml = `<span class="px-2 py-1 rounded-md text-xs font-medium text-white ${statusColor}">${wo.status || '辦理中'}</span>${wo.status === '其他' && wo.statusNote ? `<br><span class="text-xs text-amber-700 font-semibold">${wo.statusNote}</span>` : ''}`;
+
         const tr = document.createElement('tr'); tr.className = rClass;
         tr.innerHTML = `
           <td class="p-3 text-center"><input type="checkbox" class="wo-row-cb w-4 h-4 accent-indigo-600 rounded cursor-pointer" ${isChecked ? 'checked' : ''} onchange="window.toggleSelectWo('${wo.docId}', this.checked)"></td>
           <td class="p-3 font-mono font-bold text-slate-500"><span class="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs">#${wo.seqNo||'-'}</span></td>
           <td class="p-3">${idDisplay}</td>
-          <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&wo.status!=='已完工'?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
+          <td class="p-3 text-xs text-slate-600">收: ${wo.recvDate||'-'}<br>派: ${wo.dispatchDate||'-'}<br>預: <span class="${diff<0&&!['已完工','取消派工','其他'].includes(wo.status)?'text-rose-600 font-bold':''}">${wo.expectedDate||'-'}</span></td>
           <td class="p-3 text-sm">${wo.source||'-'}${wo.sourceDetail?`<br><span class="text-xs text-indigo-500">${wo.sourceDetail}</span>`:''}</td>
           <td class="p-3 text-sm max-w-[150px] truncate" title="${wo.location}">${wo.location}${wo.village?`<br><span class="text-xs text-emerald-600">${wo.village}</span>`:''}</td>
-          <td class="p-3 text-sm max-w-[150px] truncate text-slate-500" title="${wo.content||''}">${wo.content||'-'}</td>
+          <td class="p-3 text-sm max-w-[150px] truncate text-slate-500" title="${wo.content||''}${wo.note ? '\n備註：' + wo.note : ''}">${wo.content||'-'}${wo.note?`<br><span class="text-xs text-slate-400"><i class="fas fa-sticky-note mr-1"></i>${wo.note}</span>`:''}</td>
           <td class="p-3 text-sm">${amtHtml}</td>
-          <td class="p-3"><span class="px-2 py-1 rounded-md text-xs font-medium text-white ${wo.status==='已完工'?'bg-emerald-500':'bg-indigo-500'}">${wo.status}</span></td>
+          <td class="p-3">${statusHtml}</td>
           <td class="p-3 text-center space-x-2">${uIcon(wo.docUrl,'fas fa-file-alt','text-indigo-600')} ${uIcon(wo.photoUrl,'fas fa-image','text-amber-500')} ${uIcon(wo.asbuiltUrl,'fas fa-ruler-combined','text-emerald-600')}</td>
           <td class="p-3 text-xs text-slate-600 font-medium">${wo.actualDate||'未完工'}<br><span class="text-indigo-600">${wo.vendor||'未指派'}</span></td>
           <td class="p-3 text-center"><button onclick="window.openWoModal('${wo.docId}')" class="text-indigo-600 hover:text-indigo-800 px-2 py-1"><i class="fas fa-edit"></i></button> <button onclick="window.deleteWo('${wo.docId}')" class="text-rose-400 hover:text-rose-700 px-2 py-1"><i class="fas fa-trash"></i></button></td>
@@ -1046,10 +1092,12 @@
       document.getElementById('wo-doc-id').value = id||'';
       window.datasetSerialManual = false;
 
-      ['wo-seq-no','wo-custom-id','wo-dept','wo-batch','wo-serial','wo-recv-date','wo-dispatch-date','wo-expected-date','wo-dispatcher','wo-source-detail','wo-village','wo-location','wo-content','wo-doc-url','wo-photo-url','wo-asbuilt-url','wo-actual-date','wo-dispatch-amount','wo-complete-amount','wo-school-name'].forEach(f=>{const el=document.getElementById(f); if(el) el.value='';});
+      ['wo-seq-no','wo-custom-id','wo-dept','wo-batch','wo-serial','wo-recv-date','wo-dispatch-date','wo-expected-date','wo-dispatcher','wo-source-detail','wo-village','wo-location','wo-content','wo-note','wo-doc-url','wo-photo-url','wo-asbuilt-url','wo-actual-date','wo-status-note','wo-dispatch-amount','wo-complete-amount','wo-school-name'].forEach(f=>{const el=document.getElementById(f); if(el) el.value='';});
       document.querySelectorAll('.wo-attr').forEach(cb=>cb.checked=false);
       const crossCb = document.getElementById('wo-cross-zone'); if (crossCb) crossCb.checked = false;
-      document.getElementById('wo-source-type').value='一般派工'; window.toggleSourceDetails(); window.toggleSchoolInput();
+      document.getElementById('wo-source-type').value='一般派工';
+      document.getElementById('wo-status').value='辦理中';
+      window.toggleSourceDetails(); window.toggleSchoolInput(); window.toggleStatusNote();
       
       const evData = {};
       if(id) {
@@ -1071,7 +1119,7 @@
             document.getElementById('wo-custom-id').value = wo.id;
           }
           
-          ['recvDate','dispatchDate','expectedDate','dispatcher','source','sourceDetail','village','location','content','docUrl','photoUrl','asbuiltUrl','actualDate','status','dispatchAmount','completeAmount','year','vendor'].forEach(k=>{
+          ['recvDate','dispatchDate','expectedDate','dispatcher','source','sourceDetail','village','location','content','note','docUrl','photoUrl','asbuiltUrl','actualDate','status','statusNote','dispatchAmount','completeAmount','year','vendor'].forEach(k=>{
             const el = document.getElementById(`wo-${k.replace(/[A-Z]/g, l=>'-'+l.toLowerCase())}`);
             if(el) el.value = wo[k] || '';
           });
@@ -1080,9 +1128,8 @@
           document.getElementById('wo-school-name').value = wo.schoolName || '';
           
           window.toggleSourceDetails();
+          window.toggleStatusNote();
           if(wo.attributes) wo.attributes.forEach(a=>{const cb=document.querySelector(`.wo-attr[value="${a}"]`); if(cb) cb.checked=true;});
-          const attrCrossCb = document.querySelector('.wo-attr[value="跨區支援"]');
-          if (attrCrossCb) attrCrossCb.checked = isCross;
           window.toggleSchoolInput(); if(wo.evalData) Object.assign(evData, wo.evalData);
         }
       } else {
@@ -1091,6 +1138,7 @@
         document.getElementById('wo-batch').value = '';
         document.getElementById('wo-serial').value = '';
         document.getElementById('wo-status').value = '辦理中';
+        window.toggleStatusNote();
         if(window.currentUser.role==='施工廠商') {
           document.getElementById('wo-vendor').value=window.currentUser.username;
           document.getElementById('wo-year-select').value=window.currentUser.year||'';
@@ -1196,14 +1244,16 @@
             evData[el.dataset.id] = val;
           }
         });
+        const statusVal = document.getElementById('wo-status').value;
+        const statusNoteVal = statusVal === '其他' ? document.getElementById('wo-status-note').value.trim() : '';
         const data = {
           seqNo, id: finalWoId, dept:dpt, batch:bat, district:dst, serial:ser, year:document.getElementById('wo-year-select').value, zone: zoneName, crossZone: isCrossZone, vendor,
           recvDate:document.getElementById('wo-recv-date').value, dispatchDate:document.getElementById('wo-dispatch-date').value, expectedDate:document.getElementById('wo-expected-date').value,
           dispatcher:document.getElementById('wo-dispatcher').value, source:document.getElementById('wo-source-type').value, sourceDetail:document.getElementById('wo-source-detail').value,
-          village:document.getElementById('wo-village').value, location:document.getElementById('wo-location').value, content:document.getElementById('wo-content').value,
+          village:document.getElementById('wo-village').value, location:document.getElementById('wo-location').value, content:document.getElementById('wo-content').value, note:document.getElementById('wo-note').value,
           attributes: attrs, schoolName:document.getElementById('wo-school-name').value,
           docUrl:document.getElementById('wo-doc-url').value, photoUrl:document.getElementById('wo-photo-url').value, asbuiltUrl:document.getElementById('wo-asbuilt-url').value,
-          actualDate:document.getElementById('wo-actual-date').value, status:document.getElementById('wo-status').value, dispatchAmount:document.getElementById('wo-dispatch-amount').value,
+          actualDate:document.getElementById('wo-actual-date').value, status: statusVal, statusNote: statusNoteVal, dispatchAmount:document.getElementById('wo-dispatch-amount').value,
           completeAmount:document.getElementById('wo-complete-amount').value, evalData: evData, updatedAt: Date.now()
         };
         try { if(id) await updateDoc(doc(db,"workOrders",id), data); else await addDoc(collection(db,"workOrders"), data); document.getElementById('wo-modal').classList.add('hidden'); } catch(e){ window.customAlert('儲存失敗', 'error'); }
@@ -1411,11 +1461,15 @@
       window.updateDropdowns();
       document.getElementById('user-doc-id').value = id || '';
       const titleEl = document.getElementById('user-modal-title');
+      const pwdInput = document.getElementById('user-password');
+      const pwdHint = document.getElementById('user-pwd-hint');
+      pwdInput.value = '';
       if (id) {
         const u = window.users.find(x => x.docId === id);
         if (titleEl) titleEl.innerText = '編輯帳號';
+        if (pwdHint) pwdHint.innerText = '(留空代表不變更密碼)';
+        pwdInput.placeholder = '若不修改密碼請留空';
         document.getElementById('user-username').value = u ? (u.username || '') : '';
-        document.getElementById('user-password').value = u ? (u.password || '') : '';
         document.getElementById('user-role').value = u ? (u.role || '機關/監造') : '機關/監造';
         window.toggleUserVendorFields();
         if (u && u.role === '施工廠商') {
@@ -1424,8 +1478,10 @@
         }
       } else {
         if (titleEl) titleEl.innerText = '新增帳號';
-        ['user-username','user-password'].forEach(fid=>document.getElementById(fid).value='');
-        document.getElementById('user-role').value='機關/監造';
+        if (pwdHint) pwdHint.innerText = '';
+        pwdInput.placeholder = '請輸入密碼';
+        document.getElementById('user-username').value = '';
+        document.getElementById('user-role').value = '機關/監造';
         window.toggleUserVendorFields();
       }
       document.getElementById('user-modal').classList.remove('hidden');
@@ -1434,7 +1490,8 @@
     window.saveUser = async () => {
       const id = document.getElementById('user-doc-id').value;
       const u = document.getElementById('user-username').value.trim();
-      const p = document.getElementById('user-password').value.trim();
+      const inputPwd = document.getElementById('user-password').value.trim();
+      const p = id ? (inputPwd || _authVault.get(id) || '') : inputPwd;
       const r = document.getElementById('user-role').value;
       const yr = r === '施工廠商' ? document.getElementById('user-year').value : '';
       const zn = r === '施工廠商' ? document.getElementById('user-zone').value : '';
@@ -1450,7 +1507,7 @@
             }
           }
           if (window.currentUser && window.currentUser.docId === id) {
-            window.currentUser = { ...window.currentUser, username: u, password: p, role: r, year: yr, zone: zn };
+            window.currentUser = { ...window.currentUser, username: u, role: r, year: yr, zone: zn };
             document.getElementById('sidebar-user-name').innerText = u;
             document.getElementById('sidebar-user-role').innerText = r;
           }
@@ -1482,8 +1539,8 @@
       if(window.currentExportData.length === 0) return window.customAlert('沒有資料可匯出', 'error');
       const ws = XLSX.utils.json_to_sheet(window.currentExportData.map(w => ({
         '流水號': w.seqNo || '', '派工單編號': w.id || '', '年度': w.year, '派工科室': w.dept, '派別': w.batch, '行政區': w.district, '跨區支援': (w.crossZone || (w.attributes||[]).includes('跨區支援')) ? '是' : '否', '廠商流水號': w.serial, '負責廠商': w.vendor,
-        '狀態': w.status, '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
-        '派工人員': w.dispatcher || '', '案件來源': w.source || '一般派工', '服務處 / 單位名稱 / 其他說明': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content,
+        '狀態': w.status, '狀態說明': w.statusNote || '', '收單日期': w.recvDate, '派工日期': w.dispatchDate, '預計完工日': w.expectedDate, '實際完工日': w.actualDate,
+        '派工人員': w.dispatcher || '', '案件來源': w.source || '一般派工', '服務處 / 單位名稱 / 其他說明': w.sourceDetail || '', '里辦公處': w.village || '', '派工地點': w.location, '內容說明': w.content, '備註': w.note || '',
         '屬性': (w.attributes||[]).join(', '), '學校名稱': w.schoolName || '', '派工金額': w.dispatchAmount, '竣工金額': w.completeAmount,
         '派工單雲端網址': w.docUrl || '', '完工照片網址': w.photoUrl || '', '竣工圖雲端網址': w.asbuiltUrl || ''
       })));
