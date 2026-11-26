@@ -45,6 +45,18 @@
     #em-modal input, #em-modal select, #em-modal textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 8px; font-size: 14px; background: #fff; }
     #em-modal input[type=color] { padding: 0; height: 34px; width: 48px; }
     #em-modal label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin: 8px 0 2px; }
+    /* 訪客唯讀模式：隱藏考評明細與改善成果地圖的所有編輯與匯入按鈕 */
+    body.guest-readonly #btn-eval-style-edit,
+    body.guest-readonly #eval-detail-body button[onclick*="startWoMapPick"],
+    body.guest-readonly #eval-detail-body button[onclick*="openWoMapEditor"],
+    body.guest-readonly #emap #em-add,
+    body.guest-readonly #emap #em-io,
+    body.guest-readonly #emap #em-layers button[data-s],
+    body.guest-readonly #emap #em-layers button[data-pick-wo],
+    body.guest-readonly #emap #em-layers button[data-edit-wo],
+    body.guest-readonly #emap #em-layers button[data-edit-f],
+    body.guest-readonly #emap #em-info #em-mv,
+    body.guest-readonly #emap #em-info #em-ed { display: none !important; }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
@@ -53,6 +65,7 @@
     System Designed by Sownny © 2026
   </div>
 
+  <!-- 左側導覽列 -->
   <aside id="sidebar" class="bg-slate-900 text-slate-100 w-64 flex-shrink-0 fixed inset-y-0 left-0 transform -translate-x-full transition-transform duration-300 z-50 md:relative md:translate-x-0 shadow-xl flex flex-col">
     <div class="p-4 flex justify-between items-center bg-slate-950 border-b border-slate-800">
       <h1 class="text-xl font-bold tracking-wider">交通局派工系統</h1>
@@ -68,10 +81,10 @@
     </div>
     
     <nav class="p-4 space-y-2 flex-1">
-      <button onclick="window.showSection('work-orders')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-list-alt w-6 text-indigo-400"></i> 派工單總表</button>
-      <button onclick="window.showSection('announcements')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-bullhorn w-6 text-indigo-400"></i> 公告與通報</button>
-      <button onclick="window.showSection('statistics')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-chart-pie w-6 text-indigo-400"></i> 契約執行統計</button>
-      <button onclick="window.showSection('eval-stats')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-road w-6 text-emerald-400"></i> 道路考評成果</button>
+      <button id="nav-work-orders" onclick="window.showSection('work-orders')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-list-alt w-6 text-indigo-400"></i> 派工單總表</button>
+      <button id="nav-announcements" onclick="window.showSection('announcements')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-bullhorn w-6 text-indigo-400"></i> 公告與通報</button>
+      <button id="nav-statistics" onclick="window.showSection('statistics')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-chart-pie w-6 text-indigo-400"></i> 契約執行統計</button>
+      <button id="nav-eval-stats" onclick="window.showSection('eval-stats')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center"><i class="fas fa-road w-6 text-emerald-400"></i> 道路考評成果</button>
       <button id="nav-settings" onclick="window.showSection('settings')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center hidden"><i class="fas fa-cog w-6 text-indigo-400"></i> 系統設定</button>
     </nav>
     
@@ -82,6 +95,7 @@
 
   <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
+  <!-- 主要內容區 -->
   <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
     <header class="bg-white shadow-sm p-4 flex justify-between items-center z-10 border-b border-slate-200">
       <div class="flex items-center">
@@ -97,6 +111,7 @@
 
     <div class="p-4 flex-1 flex flex-col overflow-y-auto min-h-0" id="main-content-area">
       
+      <!-- 派工單總表 -->
       <section id="section-work-orders" class="fade-in flex-1 flex flex-col min-h-0 overflow-hidden">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-wrap justify-between items-center gap-3 flex-shrink-0">
           <div class="flex space-x-2 overflow-x-auto w-full md:w-auto p-1" id="wo-tabs">
@@ -146,6 +161,7 @@
         </div>
       </section>
 
+      <!-- 公告與通報 -->
       <section id="section-announcements" class="hidden fade-in space-y-4">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex justify-between items-center">
           <h3 class="font-bold text-lg text-indigo-800"><i class="fas fa-bullhorn mr-2"></i>公告與施工通報區</h3>
@@ -163,6 +179,7 @@
         </div>
       </section>
 
+      <!-- 契約執行統計 -->
       <section id="section-statistics" class="hidden fade-in space-y-4">
         <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500">
           <h3 class="font-bold text-lg mb-4 text-slate-700">選擇契約統計條件</h3>
@@ -181,6 +198,7 @@
         <div id="stat-results" class="space-y-4"></div>
       </section>
 
+      <!-- 道路考評成果 -->
       <section id="section-eval-stats" class="hidden fade-in space-y-4">
         <div id="eval-filter-card" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
@@ -195,6 +213,7 @@
         </div>
       </section>
 
+      <!-- 系統設定 -->
       <section id="section-settings" class="hidden fade-in space-y-6">
         <div id="admin-only-settings-1" class="grid grid-cols-1 lg:grid-cols-2 gap-6 hidden">
           <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
@@ -223,17 +242,20 @@
     </div>
   </main>
 
+  <!-- 登入彈窗（含免密碼訪客帳戶） -->
   <div id="login-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity duration-300">
     <div class="glass-panel p-8 rounded-2xl shadow-2xl w-96 fade-in border border-white/40">
       <div class="text-center mb-6"><div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 mb-3 shadow-inner"><i class="fas fa-shield-alt text-3xl"></i></div><h2 class="text-2xl font-bold text-slate-800">系統登入</h2></div>
       <div class="space-y-4">
-        <div><label class="block text-sm font-semibold text-slate-700 mb-1">登入身分</label><div class="relative"><i class="fas fa-user-circle absolute left-3 top-3 text-slate-400 text-lg"></i><select id="login-username" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 appearance-none bg-white/80"><option value="系統管理員">系統管理員 (預設)</option></select><i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i></div></div>
-        <div><label class="block text-sm font-semibold text-slate-700 mb-1">密碼</label><div class="relative"><i class="fas fa-lock absolute left-3 top-3 text-slate-400 text-lg"></i><input type="password" id="login-password" placeholder="請輸入密碼" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 bg-white/80" onkeypress="if(event.key==='Enter') window.login()"></div></div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-1">登入身分</label><div class="relative"><i class="fas fa-user-circle absolute left-3 top-3 text-slate-400 text-lg"></i><select id="login-username" onchange="window.toggleLoginPasswordField()" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 appearance-none bg-white/80"><option value="系統管理員">系統管理員 (預設)</option><option value="訪客">訪客 (免密碼・僅檢視道路考評成果)</option></select><i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i></div></div>
+        <div id="login-password-container"><label class="block text-sm font-semibold text-slate-700 mb-1">密碼</label><div class="relative"><i class="fas fa-lock absolute left-3 top-3 text-slate-400 text-lg"></i><input type="password" id="login-password" placeholder="請輸入密碼" class="w-full border border-slate-300 rounded-xl pl-10 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 bg-white/80" onkeypress="if(event.key==='Enter') window.login()"></div></div>
+        <div id="login-guest-hint" class="hidden text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3 font-medium"><i class="fas fa-eye mr-1.5"></i>訪客免輸入密碼，進入後可檢視「道路考評成果」統計、案件明細與改善成果地圖（唯讀）。</div>
       </div>
       <div class="mt-8 space-y-3"><button onclick="window.login()" class="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl shadow-md">登入系統</button><button onclick="document.getElementById('login-modal').classList.add('hidden')" class="w-full bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl">取消</button></div>
     </div>
   </div>
 
+  <!-- 進階詳細搜尋彈窗 -->
   <div id="adv-search-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-2xl max-h-[95vh] overflow-y-auto flex flex-col fade-in border border-slate-200">
       <div class="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10"><h2 class="text-xl font-bold text-indigo-800"><i class="fas fa-filter mr-2"></i>進階詳細搜尋</h2><button onclick="document.getElementById('adv-search-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button></div>
@@ -282,6 +304,7 @@
     </div>
   </div>
 
+  <!-- 派工單新增／編輯／唯讀檢視彈窗 -->
   <div id="wo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[110] flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-5xl max-h-[90vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
       <div class="p-4 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-20"><h2 class="text-xl font-bold text-indigo-800" id="wo-modal-title">新增派工單</h2><button onclick="document.getElementById('wo-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button></div>
@@ -411,12 +434,13 @@
     </div>
   </div>
 
+  <!-- 考評項目明細彈窗 -->
   <div id="eval-detail-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-5xl max-h-[90vh] flex flex-col fade-in border border-slate-200">
       <div class="p-4 border-b bg-slate-50 flex flex-wrap justify-between items-center gap-2 sticky top-0">
         <h2 class="text-xl font-bold text-emerald-800" id="eval-detail-title"><i class="fas fa-list-alt mr-2"></i>考評項目明細</h2>
         <div class="flex items-center gap-2">
-          <button onclick="window.openCurrentEvalStyleEditor()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fas fa-palette mr-1"></i>類別地圖樣式</button>
+          <button id="btn-eval-style-edit" onclick="window.openCurrentEvalStyleEditor()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fas fa-palette mr-1"></i>類別地圖樣式</button>
           <button onclick="window.openCurrentEvalOnMap()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fas fa-map-location-dot mr-1"></i>在地圖檢視</button>
           <button onclick="document.getElementById('eval-detail-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl ml-1"><i class="fas fa-times"></i></button>
         </div>
@@ -444,6 +468,7 @@
     </div>
   </div>
 
+  <!-- 施工通報與公告彈窗 -->
   <div id="report-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-lg flex flex-col fade-in">
       <div class="p-4 border-b bg-emerald-50 flex justify-between rounded-t-xl"><h2 class="text-xl font-bold text-emerald-800"><i class="fas fa-hard-hat mr-2"></i>發布今日施工通報</h2><button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 text-2xl"><i class="fas fa-times"></i></button></div>
@@ -461,6 +486,7 @@
     <div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4 text-amber-800"><i class="fas fa-bullhorn mr-2"></i>發布系統公告</h2><select id="announcement-target" class="w-full border p-2 mb-3 rounded-lg outline-none"><option value="全部">通知所有人 (全部)</option></select><textarea id="announcement-content" rows="4" class="w-full border p-2 mb-4 rounded-lg outline-none" placeholder="請輸入公告內容..."></textarea><div class="flex justify-end space-x-3"><button onclick="document.getElementById('general-announcement-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveGeneralAnnouncement()" class="bg-amber-600 text-white px-4 py-2 rounded-lg font-bold">發布公告</button></div></div>
   </div>
 
+  <!-- 系統設定各項彈窗 -->
   <div id="sys-year-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in"><h2 class="text-xl font-bold mb-4">新增年度</h2><input type="text" id="sys-year-input" placeholder="例如: 113" class="w-full border p-2 mb-4 rounded-lg outline-none"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-year-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysYear()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="sys-zone-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="sys-zone-modal-title">新增分區設定</h2><input type="hidden" id="sys-zone-id"><label class="block text-xs font-semibold text-slate-600 mb-1">分區名稱</label><input type="text" id="sys-zone-name" placeholder="分區名稱" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">包含行政區</label><div class="grid grid-cols-3 gap-2 text-sm bg-slate-50 p-3 rounded-lg border mb-4" id="zone-district-cbs"><label><input type="checkbox" value="桃園區" class="mr-1">桃園區</label><label><input type="checkbox" value="龜山區" class="mr-1">龜山區</label><label><input type="checkbox" value="八德區" class="mr-1">八德區</label><label><input type="checkbox" value="蘆竹區" class="mr-1">蘆竹區</label><label><input type="checkbox" value="大園區" class="mr-1">大園區</label><label><input type="checkbox" value="中壢區" class="mr-1">中壢區</label><label><input type="checkbox" value="平鎮區" class="mr-1">平鎮區</label><label><input type="checkbox" value="楊梅區" class="mr-1">楊梅區</label><label><input type="checkbox" value="龍潭區" class="mr-1">龍潭區</label><label><input type="checkbox" value="大溪區" class="mr-1">大溪區</label><label><input type="checkbox" value="復興區" class="mr-1">復興區</label><label><input type="checkbox" value="觀音區" class="mr-1">觀音區</label><label><input type="checkbox" value="新屋區" class="mr-1">新屋區</label></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('sys-zone-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveSysZone()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in"><h2 class="text-xl font-bold mb-4" id="user-modal-title">新增帳號</h2><input type="hidden" id="user-doc-id"><label class="block text-xs font-semibold text-slate-600 mb-1">帳號 / 姓名</label><input type="text" id="user-username" placeholder="帳號/姓名" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">密碼 <span id="user-pwd-hint" class="text-indigo-500 font-normal"></span></label><input type="password" id="user-password" autocomplete="new-password" placeholder="請輸入密碼" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-xs font-semibold text-slate-600 mb-1">權限角色</label><select id="user-role" class="w-full border p-2 mb-3 rounded-lg" onchange="window.toggleUserVendorFields()"><option value="機關/監造">機關/監造</option><option value="施工廠商">施工廠商</option><option value="系統管理員">系統管理員</option></select><div id="user-vendor-fields" class="bg-amber-50 p-4 rounded-lg mb-3 border hidden"><label class="block text-xs font-semibold text-amber-800 mb-1">所屬年度</label><select id="user-year" class="w-full border p-2 mb-2 rounded-lg"></select><label class="block text-xs font-semibold text-amber-800 mb-1">所屬分區</label><select id="user-zone" class="w-full border p-2 rounded-lg"></select></div><div class="flex justify-end space-x-3"><button onclick="document.getElementById('user-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveUser()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
@@ -468,6 +494,7 @@
   <div id="eval-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-80 fade-in border"><h2 class="text-xl font-bold mb-4 text-indigo-800">編輯考評項目</h2><input type="hidden" id="eval-item-id"><label class="block text-sm font-semibold mb-1">分類標籤</label><select id="eval-item-category" class="w-full border p-2 mb-3 rounded-lg"></select><label class="block text-sm font-semibold mb-1">項目名稱</label><input type="text" id="eval-item-name" class="w-full border p-2 mb-3 rounded-lg"><label class="block text-sm font-semibold mb-1">單位</label><input type="text" id="eval-item-unit" class="w-full border p-2 mb-4 rounded-lg"><div class="flex justify-end space-x-3"><button onclick="document.getElementById('eval-item-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded-lg">取消</button><button onclick="window.saveEvalItem()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">儲存</button></div></div></div>
   <div id="eval-category-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center hidden"><div class="bg-white p-6 rounded-xl shadow-2xl w-96 fade-in border"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-amber-800">考評分類管理</h2><button onclick="document.getElementById('eval-category-modal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500"><i class="fas fa-times text-xl"></i></button></div><div class="flex space-x-2 mb-4"><input type="text" id="eval-category-name" placeholder="新分類名稱" class="w-full border p-2 rounded-lg"><button onclick="window.saveEvalCategory()" class="bg-amber-500 text-white px-4 py-2 rounded-lg">新增</button></div><div id="eval-category-list" class="space-y-2 max-h-48 overflow-y-auto bg-slate-50 p-2 rounded-lg border"></div></div></div>
 
+  <!-- 智慧辨識與批次匯入彈窗 -->
   <div id="smart-import-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm z-[120] flex items-center justify-center hidden">
     <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-6xl max-h-[92vh] flex flex-col fade-in border border-slate-200 overflow-hidden">
       <div class="p-4 border-b bg-slate-900 text-white flex justify-between items-center sticky top-0 z-20">
@@ -592,6 +619,7 @@
     </div>
   </div>
 
+  <!-- 自訂提示與確認對話框 -->
   <div id="custom-alert" class="fixed inset-0 z-[200] flex items-center justify-center hidden bg-slate-900/60 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl p-6 w-80 text-center fade-in border border-slate-100">
       <div id="custom-alert-icon" class="text-4xl mb-3"></div><h3 id="custom-alert-msg" class="text-lg font-bold text-slate-800 mb-5 whitespace-pre-wrap"></h3>
@@ -605,10 +633,10 @@
     </div>
   </div>
 
-  <!-- 獨立功能模組（上傳至 GitHub Pages 後，本機與 Gemini Canvas 皆可直接預覽） -->
-  <script src="https://sownny19-byte.github.io/Dispatch-work-order/stats-settings.js?v=1"></script>
-  <script src="https://sownny19-byte.github.io/Dispatch-work-order/smart-import.js?v=1"></script>
-  <script src="https://sownny19-byte.github.io/Dispatch-work-order/eval-map.js?v=1"></script>
+  <!-- 獨立功能模組（指定 UTF-8 編碼，上傳至 GitHub Pages 後，本機與 Gemini Canvas 皆可直接預覽） -->
+  <script charset="UTF-8" src="https://sownny19-byte.github.io/Dispatch-work-order/stats-settings.js?v=1"></script>
+  <script charset="UTF-8" src="https://sownny19-byte.github.io/Dispatch-work-order/smart-import.js?v=1"></script>
+  <script charset="UTF-8" src="https://sownny19-byte.github.io/Dispatch-work-order/eval-map.js?v=1"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -759,6 +787,7 @@
       console.info("💡 目前為【公版離線預覽模式】(apiKey 為空)，不會消耗 Firebase 雲端讀取額度。");
       Promise.resolve().then(fetchInitialData);
     }
+
     function fetchInitialData() {
       onSnapshot(collection(db, "users"), snap => {
         _authVault.clear();
@@ -769,10 +798,10 @@
           return { docId: d.id, ...safeUser };
         });
         window.updateLoginOptions();
-        if(window.currentUser) window.renderUsers();
+        if(window.currentUser) window.renderUsers?.();
       });
-      onSnapshot(collection(db, "sysYears"), snap => { window.sysYears = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysYears(); });
-      onSnapshot(collection(db, "sysZones"), snap => { window.sysZones = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysZones(); });
+      onSnapshot(collection(db, "sysYears"), snap => { window.sysYears = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysYears?.(); });
+      onSnapshot(collection(db, "sysZones"), snap => { window.sysZones = snap.docs.map(d=>({docId:d.id, ...d.data()})); window.updateDropdowns(); if(window.currentUser) window.renderSysZones?.(); });
       onSnapshot(collection(db, "workOrders"), snap => {
         const rawList = snap.docs.map(d=>({docId:d.id, ...d.data()}));
         rawList.forEach(item => {
@@ -804,49 +833,71 @@
           }
         });
         window.workOrders = rawList;
-        if(window.currentUser) { window.renderWoTable(); window.renderStatistics(); window.renderEvalDashboard(); }
+        if(window.currentUser) { window.renderWoTable(); window.renderStatistics?.(); window.renderEvalDashboard?.(); }
       });
-      onSnapshot(collection(db, "announcements"), snap => { window.announcements = snap.docs.map(d=>({docId:d.id, ...d.data()})); if(window.currentUser) window.renderAnnouncements(); });
+      onSnapshot(collection(db, "announcements"), snap => { window.announcements = snap.docs.map(d=>({docId:d.id, ...d.data()})); if(window.currentUser) window.renderAnnouncements?.(); });
       onSnapshot(collection(db, "evalCategories"), snap => {
         window.evalCategories = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
         if (window.evalCategories.length === 0) { ['行人', '車道', '機車', '學校周邊', '減速設施', '停車格'].forEach(c => addDoc(collection(db, "evalCategories"), { name: c, timestamp: Date.now() })); }
-        if (window.currentUser) window.renderEvalCategories();
+        if (window.currentUser) window.renderEvalCategories?.();
       });
       onSnapshot(collection(db, "evalItems"), snap => {
         window.evalItems = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
         if (window.evalItems.length === 0) { addDoc(collection(db, "evalItems"), { name: '標線型人行道', unit: 'm', category: '行人', timestamp: Date.now() }); addDoc(collection(db, "evalItems"), { name: '行人庇護設施', unit: '處', category: '行人', timestamp: Date.now() }); }
-        if (window.currentUser) { window.renderEvalAdmin(); window.renderEvalDashboard(); }
+        if (window.currentUser) { window.renderEvalAdmin?.(); window.renderEvalDashboard?.(); }
       });
     }
 
+    // 登入身分選項與訪客免密碼切換
     window.updateLoginOptions = () => {
       const s = document.getElementById('login-username'); if(!s) return;
-      s.innerHTML = `<option value="系統管理員">系統管理員 (預設)</option>` + window.users.map(u=>`<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+      const prev = s.value;
+      s.innerHTML = `<option value="系統管理員">系統管理員 (預設)</option><option value="訪客">訪客 (免密碼・僅檢視道路考評成果)</option>` + window.users.map(u=>`<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+      if (prev && Array.from(s.options).some(o => o.value === prev)) s.value = prev;
+      window.toggleLoginPasswordField();
     };
-    window.openLoginModal = () => { window.updateLoginOptions(); document.getElementById('login-password').value=''; document.getElementById('login-modal').classList.remove('hidden'); };
+    window.toggleLoginPasswordField = () => {
+      const u = document.getElementById('login-username')?.value;
+      const isGuest = u === '訪客';
+      document.getElementById('login-password-container')?.classList.toggle('hidden', isGuest);
+      document.getElementById('login-guest-hint')?.classList.toggle('hidden', !isGuest);
+    };
+    window.openLoginModal = () => { window.updateLoginOptions(); document.getElementById('login-password').value=''; window.toggleLoginPasswordField(); document.getElementById('login-modal').classList.remove('hidden'); };
     window.login = () => {
       const u = document.getElementById('login-username').value, p = document.getElementById('login-password').value;
-      if(u==='系統管理員' && verifyAdminDigest(p)) window.currentUser = {username:'系統管理員', role:'系統管理員'};
+      if(u==='訪客') window.currentUser = {username:'訪客', role:'訪客'};
+      else if(u==='系統管理員' && verifyAdminDigest(p)) window.currentUser = {username:'系統管理員', role:'系統管理員'};
       else { const usr = window.users.find(x=>x.username===u && _authVault.get(x.docId)===p); if(!usr) return window.customAlert('密碼錯誤！','error'); window.currentUser = { ...usr }; }
       document.getElementById('login-modal').classList.add('hidden'); document.getElementById('btn-login-main').classList.add('hidden'); document.getElementById('btn-logout').classList.remove('hidden');
-      document.getElementById('sidebar-user-name').innerText = window.currentUser.username; document.getElementById('sidebar-user-role').innerText = window.currentUser.role;
+      document.getElementById('sidebar-user-name').innerText = window.currentUser.username; document.getElementById('sidebar-user-role').innerText = window.currentUser.role === '訪客' ? '訪客 (唯讀瀏覽)' : window.currentUser.role;
       
       const isAdmin = window.currentUser.role === '系統管理員';
       const isAgency = window.currentUser.role === '機關/監造';
+      const isGuest = window.currentUser.role === '訪客';
+      document.body.classList.toggle('guest-readonly', isGuest);
+
+      ['nav-work-orders', 'nav-announcements', 'nav-statistics'].forEach(id => document.getElementById(id)?.classList.toggle('hidden', isGuest));
       document.getElementById('nav-settings').classList.toggle('hidden', !(isAdmin || isAgency)); 
       
       const adminPanel1 = document.getElementById('admin-only-settings-1'), adminPanel2 = document.getElementById('admin-only-settings-2');
       if (adminPanel1) adminPanel1.classList.toggle('hidden', !isAdmin);
       if (adminPanel2) adminPanel2.classList.toggle('hidden', !isAdmin);
 
-      document.getElementById('btn-export').classList.remove('hidden');
-      document.getElementById('btn-add-wo').style.display = window.currentUser.role==='機關/監造' ? 'none' : 'flex';
-      document.getElementById('btn-import-wo').classList.remove('hidden');
-      window.showSection('work-orders'); window.updateDropdowns(); window.renderWoTable(); window.renderAnnouncements(); window.renderStatistics(); window.renderSysYears(); window.renderSysZones(); window.renderUsers(); window.renderEvalAdmin(); window.renderEvalDashboard();
+      document.getElementById('btn-export').classList.toggle('hidden', isGuest);
+      document.getElementById('btn-add-wo').style.display = (isAgency || isGuest) ? 'none' : 'flex';
+      document.getElementById('btn-import-wo').classList.toggle('hidden', isGuest);
+      window.updateDropdowns();
+      if (isGuest) {
+        window.showSection('eval-stats');
+        window.renderEvalDashboard?.();
+      } else {
+        window.showSection('work-orders'); window.renderWoTable(); window.renderAnnouncements?.(); window.renderStatistics?.(); window.renderSysYears?.(); window.renderSysZones?.(); window.renderUsers?.(); window.renderEvalAdmin?.(); window.renderEvalDashboard?.();
+      }
     };
     window.logout = () => { window.currentUser = null; location.reload(); };
     window.showSection = (sec) => {
       if(!window.currentUser) return window.customAlert("請先登入");
+      if(window.currentUser.role === '訪客' && sec !== 'eval-stats') sec = 'eval-stats';
       ['work-orders','announcements','statistics','eval-stats','settings'].forEach(s => document.getElementById(`section-${s}`)?.classList.add('hidden'));
       document.getElementById(`section-${sec}`)?.classList.remove('hidden'); 
       document.getElementById('page-title').innerText = {'work-orders':'派工單總表', 'announcements':'公告與通報', 'statistics':'契約執行統計', 'eval-stats':'道路考評成果', 'settings':'系統設定'}[sec];
@@ -1097,6 +1148,7 @@
     };
 
     window.batchDeleteSelectedWo = () => {
+      if (window.currentUser?.role === '訪客') return window.customAlert('訪客權限僅供檢視，無法刪除資料', 'error');
       const ids = Array.from(window.selectedWoIds);
       if (ids.length === 0) return window.customAlert('請先勾選要刪除的派工單！', 'error');
       window.customConfirm(`確定要一次刪除所勾選的 ${ids.length} 筆派工單嗎？\n此操作執行後無法復原！`, async () => {
@@ -1231,6 +1283,7 @@
     };
 
     window.openWoModal = (id = null, isReadonly = false) => {
+      if (window.currentUser?.role === '訪客') isReadonly = true;
       document.getElementById('wo-doc-id').value = id||'';
       window.datasetSerialManual = false;
 
@@ -1329,6 +1382,7 @@
     };
 
     window.saveWorkOrder = async () => {
+      if (window.currentUser?.role === '訪客') return window.customAlert('訪客權限僅供檢視，無法儲存或修改資料', 'error');
       const id = document.getElementById('wo-doc-id').value;
       const dpt = document.getElementById('wo-dept').value || '交工科';
       let bat = document.getElementById('wo-batch').value.trim();
@@ -1407,7 +1461,10 @@
         await executeSave();
       }
     };
-    window.deleteWo = (id) => window.customConfirm('確定刪除此派工單？', async () => { try{ await deleteDoc(doc(db,"workOrders",id)); } catch(e){window.customAlert('刪除失敗','error');} });
+    window.deleteWo = (id) => {
+      if (window.currentUser?.role === '訪客') return window.customAlert('訪客權限僅供檢視，無法刪除資料', 'error');
+      window.customConfirm('確定刪除此派工單？', async () => { try{ await deleteDoc(doc(db,"workOrders",id)); } catch(e){window.customAlert('刪除失敗','error');} });
+    };
 
 
     // =========================================================================
@@ -1422,6 +1479,39 @@
     window.initStatsSettings?.(__moduleCtx);
     window.initSmartImport?.(__moduleCtx);
     window.initEvalMap?.(__moduleCtx);
+
+    // 訪客唯讀防護：攔截外部地圖與考評樣式的編輯函式，確保訪客僅能檢視與定位
+    (() => {
+      const isGuest = () => window.currentUser?.role === '訪客';
+      const origStyleBtn = window.openCurrentEvalStyleEditor;
+      window.openCurrentEvalStyleEditor = (...args) => {
+        if (isGuest()) return window.customAlert('訪客權限僅供檢視，無法編輯類別地圖樣式', 'error');
+        return origStyleBtn?.(...args);
+      };
+      if (window.evalMap) {
+        ['openStyleEditor', 'openWoMapEditor', 'startWoMapPick'].forEach(fn => {
+          const orig = window.evalMap[fn];
+          if (typeof orig === 'function') {
+            window.evalMap[fn] = (...args) => {
+              if (isGuest()) return window.customAlert('訪客權限僅供檢視，無法編輯改善成果地圖', 'error');
+              return orig(...args);
+            };
+          }
+        });
+        const origFocusWo = window.evalMap.focusWoOnMap;
+        if (typeof origFocusWo === 'function') {
+          window.evalMap.focusWoOnMap = (itemId, woDocId) => {
+            if (isGuest()) {
+              const feat = window.evalMap.getFeatureForWo?.(itemId, woDocId);
+              if (!feat || !feat.g || !feat.g.trim()) {
+                return window.customAlert('此案件尚未標註地圖位置', 'info');
+              }
+            }
+            return origFocusWo(itemId, woDocId);
+          };
+        }
+      }
+    })();
 
   </script>
 </body>
